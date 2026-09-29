@@ -17,6 +17,9 @@ Per-item results of the **231 public JevBench items** (easy 48, original 72, har
 `<model>/results.jsonl` one line per item: `task_id`, `family`, `split`, `predicted`, `probs` (label -> probability),
 `correct`, `valid`, `status`, `latency_s`, ... The items themselves (state, question, expected answer) are in
 [`data/jevbench-public/`](../../data/jevbench-public/README.md) (MIT, copied from JevBench); `task_id` is their `id`.
+`<model>/raw/<sha256 of the task id>.json` the exact request sent (`model`, `state`, `questions`), the server's full
+response (`answers` with the probabilities, `usage`, ...) and the HTTP status; the sha256 of the file's bytes is
+`raw_sha256` in `results.jsonl`. In Python: `hashlib.sha256(task_id.encode()).hexdigest() + ".json"`.
 `<model>/summary.json` the harness summary (accuracy, Brier, ECE bins, per-family, latency).
 `<model>/manifest.json` run metadata (adapter, dataset hash, times).
 

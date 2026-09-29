@@ -14,9 +14,6 @@ runs/**/*.tmp
 runs/_shots/
 runs/*.log
 
-# JevBench raw request/response dumps (one file per item and model, repeating the item text that is in
-# data/jevbench-public/): not committed; each model's results.jsonl keeps its answers.
-runs/jevbench-public-*/*/raw/
 !runs/jevbench-public-*/*/results.jsonl
 
 # machine-specific
