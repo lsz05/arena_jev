@@ -1,0 +1,7 @@
+name = "kev-0.8b"
+port = 8101
+cwd = "src/kev"
+command = ["venvs/kev/bin/python", "-m", "kev.serve", "--run", "jaredpalmer/kev-0.8b", "--port", "8101"]
+
+[env]
+PYTORCH_CUDA_ALLOC_CONF = "expandable_segments:True"  # variable-length inputs fragment the default allocator

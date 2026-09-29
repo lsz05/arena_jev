@@ -1,0 +1,41 @@
+# JevEmbed server config for jevembed-0.6b: the model repo's own jevembed.yaml (HIT-TMG/JevEmbed-Qwen3-Embedding-0.6B
+# @e4a71aa) with three serving changes: absolute model path, extra request-name aliases (the server requires the request
+# "model" to be a registered name), and overflow_policy error instead of truncate (no silent truncation: inputs over the
+# model's configured 1,024-token limit get HTTP 422). Prompts and scoring are unchanged.
+model_id: jevembed-qwen3-embedding-0.6b
+backend: sentence_transformers
+model_name_or_path: ${HF_HUB_CACHE}/models--HIT-TMG--JevEmbed-Qwen3-Embedding-0.6B/snapshots/e4a71aacd9b47ae6106fe57b7bf1c39992dc7ab1
+aliases:
+- JevEmbed-Qwen3-Embedding-0.6B
+- HIT-TMG/JevEmbed-Qwen3-Embedding-0.6B
+- jevembed-0.6b
+- local
+revision: null
+trust_remote_code: false
+local_files_only: true
+device: auto
+dtype: auto
+batch_size: 16
+pooling: model_default
+normalize_embeddings: true
+expected_dimension: 1024
+max_input_tokens: 1024
+overflow_policy: error
+attention_implementation: sdpa
+prompts:
+  query_template: 'Instruct: {instruction}
+
+    Query: {text}'
+  document_template: '{text}'
+  similarity_instruction: Retrieve semantically similar text.
+scoring:
+  choice_temperature: 0.1
+  score_temperature: 0.1
+  noul_with_criteria:
+    slope: 10.0
+    intercept: 0.0
+  noul_without_criteria:
+    slope: 10.0
+    intercept: 0.0
+  confidence: normalized_entropy
+  calibration_status: uncalibrated

@@ -1,0 +1,5 @@
+name = "openthai-0.8b"
+port = 8104
+command = ["venvs/openthai/bin/uvicorn", "openthai_systemone.server:app", "--host", "127.0.0.1", "--port", "8104"]
+[env]
+OPENTHAI_SYSTEMONE_MODEL = "iapp/OpenThai-SystemOne"

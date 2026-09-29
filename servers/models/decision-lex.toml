@@ -1,0 +1,13 @@
+name = "decision-lex"
+port = 8132
+command = ["venvs/c-decision/bin/python", "adapters/serve.py", "decision_lex", "--port", "8132"]
+tokenizer = "llm-semantic-router/Vela-1.0-Encoder-307M"
+max_input_tokens = 950
+max_options = 255
+notes = "Authors' runtime (decision_inference.SystemOne + decision_runtime.load_native) from HF llm-semantic-router/decision-1.0-lex@ee8e74d912fc (last revision bundling code; weights identical to main 6c5e3d48), servers/src/decision-lex; ROCm-only device guard bypassed for CUDA, FP32, TF32 off; hard limit 1024 complete packed tokens (overhead = options + 5), over-long -> 422, no truncation; tokenizer files identical to Vela-1.0-Encoder-307M; ~2.3 GB fp32"
+
+[env]
+HF_HUB_OFFLINE = "1"
+TRANSFORMERS_OFFLINE = "1"
+TOKENIZERS_PARALLELISM = "false"
+PYTHONDONTWRITEBYTECODE = "1"

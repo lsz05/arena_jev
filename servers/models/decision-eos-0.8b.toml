@@ -1,0 +1,9 @@
+name = "decision-eos-0.8b"
+port = 8122
+command = ["venvs/b-llm2jev/bin/python", "adapters/serve.py", "decision_eos", "--port", "8122", "--device", "cuda"]
+tokenizer = "llm-semantic-router/Decision-1.0-Eos-0.8B"
+max_input_tokens = 15500
+max_options = 255
+notes = "authors' native package decision/ (DecisionModel.decide) from HF llm-semantic-router/Decision-1.0-Eos-0.8B@3c2d632 (latest 363c4a5 is weights-only, same weight hashes); servers/adapters/decision_eos.py; BF16 backbone + FP32 head, T=1.0389; 16384-token complete-input limit enforced by the package (422, no truncation), ~12 tokens overhead per option; choice 2..255 options, score 2..10 levels, native noul/score"
+[env]
+HF_HUB_OFFLINE = "1"

@@ -1,0 +1,8 @@
+name = "jevembed-0.6b"
+port = 8126
+command = ["venvs/b-jevembed/bin/python", "-m", "jevembed", "--config", "models/jevembed-0.6b.yaml", "--serve", "--host", "127.0.0.1", "--port", "8126"]
+tokenizer = "HIT-TMG/JevEmbed-Qwen3-Embedding-0.6B"
+max_input_tokens = 1000
+notes = "authors' JevEmbed server (github HITsz-TMG/JevEmbed@25cb86f, python -m jevembed --serve, /v1/systemone) with the model repo's jevembed.yaml (HF HIT-TMG/JevEmbed-Qwen3-Embedding-0.6B@e4a71aa) -> servers/models/jevembed-0.6b.yaml; bi-encoder: query = instructions + state, each option embedded separately; 1024-token limit per embedded text (instructions+state; each option), authors' config truncates, ours returns 422 instead; request 'model' must be a registered alias (jevembed-0.6b, local, JevEmbed-Qwen3-Embedding-0.6B); transformers 4.51.0 + sentence-transformers 5.3.0 as tested; no option cap (4096 embedding inputs per request)"
+[env]
+HF_HUB_OFFLINE = "1"

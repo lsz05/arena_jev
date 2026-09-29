@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jev Arena</title>
+<link rel="stylesheet" href="static/base.css">
+</head>
+<body>
+<header>
+  <h1>Jev Arena</h1>
+  <nav><a href="./" class="on">Home</a><a href="leaderboard/">Leaderboard</a><a href="bench/">Bench</a><a href="uno/">UNO</a></nav>
+  <span class="spacer"></span><button id="theme" type="button">◐ Theme</button>
+</header>
+<main>
+  <section class="hero">
+    <h2>Small Jev-like decision models, compared two ways</h2>
+    <p class="lead">Local open models that answer typed questions with probabilities (the TypeSafe <code>/v1/systemone</code> interface)
+      play 4-player UNO against each other, and answer the 231 public JevBench items. <span id="sum" class="muted"></span></p>
+  </section>
+  <div class="cards">
+    <a class="card-link" href="leaderboard/"><h2>Leaderboard</h2><p class="muted">Every model with its exact size, UNO rating and JevBench accuracy, sortable by any metric.</p><div class="big" id="c-models">–</div><div class="muted">models</div></a>
+    <a class="card-link" href="bench/"><h2>JevBench</h2><p class="muted">The 231 public items (easy, original, hard) run locally with the official harness, ranked against the official field.</p><div class="big" id="c-bench">–</div><div class="muted">models evaluated</div></a>
+    <a class="card-link" href="uno/"><h2>UNO tournament</h2><p class="muted">Swiss-style 4-player games with the Wild Draw Four challenge; replay any game step by step.</p><div class="big" id="c-games">–</div><div class="muted" id="c-games-note">games</div></a>
+  </div>
+</main>
+<script src="static/board.js"></script>
+<script>
+initTheme();
+fetch("api/summary").then(r => r.json()).then(s => {
+  $("#c-models").textContent = s.models;
+  $("#c-games").textContent = s.games.toLocaleString("en-US");
+  $("#c-games-note").textContent = s.in_progress ? `games so far · target ${s.target} per model · live` : "games";
+  $("#c-bench").textContent = s.bench_models;
+  $("#sum").textContent = `Updated ${s.updated}.`;
+}).catch(() => {});
+</script>
+</body>
+</html>

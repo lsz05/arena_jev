@@ -1,0 +1,6 @@
+name = "tiny-jev-0.6b"
+port = 8114
+command = ["venvs/a-rsi/bin/python", "adapters/serve.py", "tiny_jev", "--port", "8114", "--device", "cuda"]
+tokenizer = "lostargon/Tiny-Jev"
+max_input_tokens = 3700
+notes = "adapter servers/adapters/tiny_jev.py: HF lostargon/Tiny-Jev@62449fb via AutoModel trust_remote_code (modeling_tiny_jev.py), native model.choice/noul/score; bf16 as shipped; Qwen3-0.6B + marker head; noul ignores criteria (authors' API); 4096-token per-question prompt (wrapper adds ~25 + ~6/option) enforced as HTTP 422 instead of the authors' silent head+tail state truncation; no option cap"

@@ -1,0 +1,13 @@
+name = "julia-1"
+port = 8133
+command = ["venvs/c-julia/bin/python", "adapters/serve.py", "julia_1", "--port", "8133"]
+tokenizer = "jhu-clsp/mmBERT-small"
+max_input_tokens = 8000
+max_option_tokens = 44   # longest option description sent as is (our count); longer ones are shortened (render.compact_option)
+max_options = 20
+notes = "Authors' julia package (HF SupersonicLabs/Julia-1@a85b127321d5, servers/src/julia-1, pip -e, transformers 5.0.0): load_model(strict_encoding=True, max_length=8192, head_length=512) as in the card + named-question predict(); CUDA BF16 autocast (package default); strict limits: 2-20 options, each option <=48 tokens, instructions+options <=512 tokens, packed total <=8192 (over -> 422, never truncated); options are described by their text only (keys are not model input)"
+
+[env]
+HF_HUB_OFFLINE = "1"
+TRANSFORMERS_OFFLINE = "1"
+TOKENIZERS_PARALLELISM = "false"

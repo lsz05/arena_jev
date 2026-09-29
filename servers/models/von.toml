@@ -1,0 +1,7 @@
+name = "von"
+port = 8145
+cwd = "src/von"
+command = ["venvs/d-von/bin/python", "adapters/von_guarded.py", "--port", "8145"]
+tokenizer = "wfzyx/von"
+max_input_tokens = 7900
+notes = "authors' `von serve` (pip von-sdk==1.2.3 = github wfzyx/von@fb6e7a9 src/von), Von 1.2 option-marker ModernBERT-large, fp32, independent_options; weights HF wfzyx/von@5df8185 via symlink servers/src/von/checkpoints/von-1.2; wrapper servers/adapters/von_guarded.py only adds a 422 for packed input > 8192 tokens; its temperature map (marker_calibration.json) was fitted on the 231 JevBench public items (probabilities in-sample, argmax unaffected); noul uses its own true/false framing; unlimited options (all packed in one 8192-token sequence)"

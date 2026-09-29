@@ -1,0 +1,32 @@
+# The four smallest local Jev-like models (all Qwen3.5-0.8B based) at one table.
+# Start the servers first: servers/start.sh
+[run]
+name = "local4"
+format = "table"
+num_players = 4
+deals = 250          # x 4 seat rotations = 1000 games
+seed = 0
+workers = 12
+template = "B"
+history_rounds = 5
+policy = "argmax"
+
+[[players]]
+name = "kev-0.8b"
+base_url = "http://127.0.0.1:8101"
+model = "kev-latest"
+
+[[players]]
+name = "decider-0.8b"
+base_url = "http://127.0.0.1:8102"
+model = "decider-0.8b"
+
+[[players]]
+name = "jev-style-0.8b"
+base_url = "http://127.0.0.1:8103"
+model = "jev-style-0.8b-decision-v3"
+
+[[players]]
+name = "openthai-0.8b"
+base_url = "http://127.0.0.1:8104"
+model = "openthai-systemone"

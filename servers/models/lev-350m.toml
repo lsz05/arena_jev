@@ -1,0 +1,8 @@
+name = "lev-350m"
+port = 8144
+cwd = "src/lev"
+command = ["venvs/d-lev/bin/python", "adapters/lev_strict.py", "--run", "${HF_HUB_CACHE}/models--franckverrot--lev-350m/snapshots/ab08ad8b8f346994d983152917e114224f6adac7", "--port", "8144"]
+tokenizer = "LiquidAI/LFM2.5-350M"
+max_input_tokens = 8000
+max_options = 255
+notes = "authors' lev.serve (github franckverrot/lev@c48a945) on HF franckverrot/lev-350m@ab08ad8 (LoRA r16 unmerged + pointer head on LiquidAI/LFM2.5-350M@9e6c6cc), fp32, SDPA, temperature 1.516 from calibration.json; wrapper servers/adapters/lev_strict.py only sets the authors' strict=True so over-long states get 422 (limits 8192 state / 8192 packed); torch 2.13 instead of the locked 2.8 (aarch64/GB10); up to 255 options"

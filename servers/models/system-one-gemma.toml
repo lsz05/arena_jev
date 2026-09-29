@@ -1,0 +1,6 @@
+name = "system-one-gemma"
+port = 8143
+command = ["venvs/d-peft/bin/python", "adapters/serve.py", "system_one_gemma", "--port", "8143", "--device", "cuda"]
+tokenizer = "google/gemma-3-270m"
+max_input_tokens = 8000
+notes = "github akash-kamat/system-one-gemma@cc75aa8 (servers/src/system-one-gemma): authors' infer.load_trained_model + infer.score (one sequence per option, last-token scalar, T=2.35 from metrics.json as in app.py), fp32, gemma-3-270m + unmerged LoRA; adapter servers/adapters/system_one_gemma.py. Authors truncate the state at 256 (app.py) / 384 (infer.py) tokens; here no truncation (max_len = 32768 window, 422 beyond); choice option text = description else humanized key; noul = options yes/no (criteria descriptions unused); score = levels as options"

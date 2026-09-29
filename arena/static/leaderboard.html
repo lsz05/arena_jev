@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leaderboard · Jev Arena</title>
+<link rel="stylesheet" href="../static/base.css">
+</head>
+<body>
+<header>
+  <h1>Jev Arena</h1>
+  <nav><a href="../">Home</a><a href="./" class="on">Leaderboard</a><a href="../bench/">Bench</a><a href="../uno/">UNO</a></nav>
+  <span class="spacer"></span><button id="theme" type="button">◐ Theme</button>
+</header>
+<main>
+  <section class="hero">
+    <h2>Leaderboard <span class="live" id="live" hidden>live</span></h2>
+    <p class="lead" id="meta">loading…</p>
+    <div class="chips" id="chips"></div>
+    <div class="scroll-x"><table class="sortable" id="board"></table></div>
+    <div class="note">Size: parameters loaded for inference, exact (hover for the count and its source). TrueSkill: conservative rating μ − 3σ
+      from 4-player games (winner first, the others by points left). Pts won: the winner takes the sum of the other hands, everyone else 0.
+      Pts left: points still in hand at the end (lower is better). Memory: average history rounds kept (up to 5; fewer only when the model's
+      input limit is too small). Bluff: share of its Wild Draw Fours played while holding the current color. Challenge ✓: share of its
+      challenge decisions that matched the truth. JevBench: accuracy on the 231 public items (Hard: the 111 hard ones). ⚠: a caveat on this model's result (hover to read it).</div>
+  </section>
+  <section>
+    <h2>Does JevBench accuracy predict UNO strength?</h2>
+    <p class="lead" id="corr"></p>
+    <div id="scatter"></div>
+  </section>
+</main>
+<div class="tooltip" id="tip"></div>
+<script src="../static/board.js"></script>
+<script>
+initTheme();
+const COLS = [
+  {key: "display", label: "Model", cell: modelCell},
+  {key: "params", label: "Size", num: true, rank: true, dir: 1, cell: sizeCell},
+  {key: "games", label: "Games", num: true, rank: true, cell: r => `${r.games}` + (TARGET ? `<span class="gbar" title="${r.games} / ${TARGET}"><span style="width:${Math.min(100, 100 * r.games / TARGET).toFixed(1)}%"></span></span>` : "")},
+  {key: "ts_score", label: "TrueSkill", num: true, rank: true, title: "μ − 3σ", cell: r => fmt(r.ts_score, v => `${v.toFixed(1)}<small>μ ${r.ts_mu.toFixed(1)} ± ${r.ts_sigma.toFixed(1)}</small>`)},
+  {key: "win_rate", label: "Win rate", num: true, rank: true, cell: r => fmt(r.win_rate, v => `${pct(v)}<small>${pct(r.win_rate_ci95[0])}–${pct(r.win_rate_ci95[1])}</small>`)},
+  {key: "avg_points_won", label: "Pts won", num: true, rank: true, cell: r => fmt(r.avg_points_won, v => v.toFixed(1))},
+  {key: "avg_points_left", label: "Pts left", num: true, rank: true, dir: 1, cell: r => fmt(r.avg_points_left, v => v.toFixed(1))},
+  {key: "memory_rounds", label: "Memory", num: true, rank: true, cell: r => fmt(r.memory_rounds, v => `${v.toFixed(2)}<small>${r.max_input_tokens ? "limit " + r.max_input_tokens.toLocaleString("en-US") + " tok" : "rounds"}</small>`)},
+  {key: "wd4_bluff", label: "Bluff", num: true, rank: true, dir: 1, cell: r => fmt(r.wd4_bluff, v => pct(v))},
+  {key: "challenge_right", label: "Challenge ✓", num: true, rank: true, cell: r => fmt(r.challenge_right, v => pct(v))},
+  {key: "jb_acc", label: "JevBench 231", num: true, rank: true, cell: r => fmt(r.jb_acc, v => pct(v))},
+  {key: "jb_hard", label: "Hard", num: true, rank: true, cell: r => fmt(r.jb_hard, v => pct(v))},
+  {key: "latency_ms", label: "Latency", num: true, rank: true, dir: 1, cell: r => fmt(r.latency_ms, v => Math.round(v) + " ms")},
+];
+let TARGET = null, table = null, timer = null;
+
+async function load() {
+  const b = await (await fetch("api/leaderboard")).json();
+  TARGET = b.target_games_per_model;
+  if (!table) {
+    const has = k => b.rows.some(r => r[k] != null);
+    table = SortTable({table: "#board", chips: "#chips", cols: COLS, sortKey: has("ts_score") ? "ts_score" : has("jb_acc") ? "jb_acc" : "params",
+                       sortDir: has("ts_score") || has("jb_acc") ? -1 : 1});
+  }
+  table.render(b.rows);
+  $("#meta").textContent = `${b.rows.length} models · ${b.games.toLocaleString("en-US")} UNO games` + (TARGET ? ` · target ${TARGET} games per model` : "") + ` · updated ${b.updated}`;
+  $("#live").hidden = !b.in_progress;
+  scatter(b.rows);
+  if (b.in_progress && !timer) timer = setInterval(load, 30000);
+  if (!b.in_progress && timer) { clearInterval(timer); timer = null; }
+}
+
+function spearman(xs, ys) {
+  const rank = a => { const idx = a.map((v, i) => [v, i]).sort((p, q) => p[0] - q[0]); const r = []; idx.forEach(([, i], k) => r[i] = k); return r; };
+  const rx = rank(xs), ry = rank(ys), n = xs.length;
+  const d2 = rx.reduce((s, v, i) => s + (v - ry[i]) ** 2, 0);
+  return 1 - 6 * d2 / (n * (n * n - 1));
+}
+
+function scatter(rows) {
+  const pts = rows.filter(r => r.jb_acc != null && r.ts_score != null && r.games > 0);
+  if (pts.length < 3) { $("#corr").textContent = "Appears once at least three models have both a JevBench result and UNO games."; $("#scatter").innerHTML = ""; return; }
+  const rho = spearman(pts.map(r => r.jb_acc), pts.map(r => r.ts_score));
+  $("#corr").textContent = `Each dot is a model: JevBench accuracy (x) against UNO TrueSkill (y). Spearman rank correlation ρ = ${rho.toFixed(2)} over ${pts.length} models (1 = same order, 0 = unrelated, −1 = reversed).`;
+  const W = 760, H = 380, L = 56, R = 20, T = 16, B = 44;
+  const xs = pts.map(r => r.jb_acc), ys = pts.map(r => r.ts_score);
+  const x0 = Math.floor(Math.min(...xs) * 20) / 20, x1 = Math.ceil(Math.max(...xs) * 20) / 20;
+  const y0 = Math.floor(Math.min(...ys)), y1 = Math.ceil(Math.max(...ys));
+  const X = v => L + (W - L - R) * (v - x0) / (x1 - x0 || 1), Y = v => H - B - (H - T - B) * (v - y0) / (y1 - y0 || 1);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="JevBench accuracy against UNO TrueSkill" style="width:100%;max-width:${W}px;height:auto">`;
+  for (let v = x0; v <= x1 + 1e-9; v += 0.05) s += `<line class="gridline" x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H - B}"/><text x="${X(v)}" y="${H - B + 16}" text-anchor="middle">${Math.round(v * 100)}%</text>`;
+  const ystep = Math.max(1, Math.ceil((y1 - y0) / 6));
+  for (let v = y0; v <= y1; v += ystep) s += `<line class="gridline" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 8}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`;
+  s += `<text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle">JevBench public accuracy</text>`;
+  s += `<text transform="translate(14 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle">UNO TrueSkill (μ − 3σ)</text>`;
+  const top = new Set(pts.slice().sort((a, b) => b.ts_score - a.ts_score).slice(0, 3).map(r => r.name));
+  pts.forEach((r, i) => {
+    s += `<g class="pt" data-i="${i}"><circle class="dot" cx="${X(r.jb_acc)}" cy="${Y(r.ts_score)}" r="6"/><circle cx="${X(r.jb_acc)}" cy="${Y(r.ts_score)}" r="14" fill="transparent"/>` +
+      (top.has(r.name) ? `<text class="value" x="${X(r.jb_acc) + 9}" y="${Y(r.ts_score) - 8}">${esc(r.display)}</text>` : "") + `</g>`;
+  });
+  $("#scatter").innerHTML = s + "</svg>";
+  $("#scatter").querySelectorAll(".pt").forEach(g => { const r = pts[+g.dataset.i];
+    Tip.bind(g, `<b>${esc(r.display)}</b><br>JevBench ${pct(r.jb_acc)} · TrueSkill ${r.ts_score.toFixed(1)}<br>${r.games} games · win rate ${pct(r.win_rate)}`); });
+}
+load().catch(e => { $("#meta").textContent = "Could not load the leaderboard: " + e.message; });
+</script>
+</body>
+</html>

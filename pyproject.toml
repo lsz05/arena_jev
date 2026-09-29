@@ -1,0 +1,12 @@
+[project]
+name = "arena-jev"
+version = "0.1.0"
+description = "Game arena for Jev-like decision models"
+requires-python = ">=3.11"
+dependencies = ["trueskill>=0.4.5", "tokenizers>=0.20"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

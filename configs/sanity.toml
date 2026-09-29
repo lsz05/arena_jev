@@ -1,0 +1,25 @@
+# Sanity check without any model: one heuristic player against three random players.
+# If the engine and scoring are right, the heuristic should win far more than 25%.
+[run]
+name = "sanity"
+format = "table"
+num_players = 4
+deals = 250          # x 4 seat rotations = 1000 games
+seed = 0
+workers = 1
+
+[[players]]
+name = "heuristic"
+type = "heuristic"
+
+[[players]]
+name = "random-1"
+type = "random"
+
+[[players]]
+name = "random-2"
+type = "random"
+
+[[players]]
+name = "random-3"
+type = "random"

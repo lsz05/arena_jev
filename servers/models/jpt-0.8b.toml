@@ -1,0 +1,10 @@
+name = "jpt-0.8b"
+port = 8121
+command = ["venvs/b-llm2jev/bin/llm2jev", "--model", "${HF_HUB_CACHE}/models--kirp--jpt-0.8b/snapshots/1431c0509bbc10772cd59964cc7af5835c8720d6", "--backend", "hf", "--temperature", "1.140", "--host", "127.0.0.1", "--port", "8121"]
+tokenizer = "kirp/jpt-0.8b"
+max_input_tokens = 31000
+max_options = 255
+notes = "llm2jev 0.6.1 (github tic-top/llm2jev@2b252d5) --backend hf (card's no-engine path), T=1.140 per card; weights kirp/jpt-0.8b@1431c05; loads full Qwen3.5 VL incl. vision tower; bf16; no length check in llm2jev hf backend (card runs SGLang at 32k context)"
+[env]
+PYTORCH_CUDA_ALLOC_CONF = "expandable_segments:True"  # variable-length inputs fragment the default allocator (memory grew to 8.6 GB)
+HF_HUB_OFFLINE = "1"

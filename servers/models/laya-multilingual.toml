@@ -1,0 +1,14 @@
+name = "laya-multilingual"
+port = 8136
+command = ["venvs/c-laya/bin/python", "adapters/serve.py", "laya_multilingual", "--port", "8136"]
+tokenizer = "jhu-clsp/mmBERT-base"
+max_input_tokens = 8000
+max_option_tokens = 38   # longest option description sent as is (our count); longer ones are shortened (render.compact_option)
+max_options = 5
+notes = "Authors' laya==0.3.21 (pip laya[serve]) Agent on HF convaiinnovations/laya-multilingual@e4e9ddf21a7b (servers/src/laya-multilingual): laya.load(dir) + Agent.predict(..., max_len=8192), the card's documented setting for long inputs (checkpoint default 1024 cuts silently); CUDA bf16 autocast (checkpoint amp_dtype). Not laya-serve: it routes English text to the English laya checkpoint and truncates at 1024. Limits: 8192 total, question+options <= 256 tokens, option <= 48 tokens; laya would cut silently, adapters/laya_guard.py refuses (422). ~4% of UNO template-B move requests have an option over 48 tokens (422). max_options=5 is practical (256-token head fits 5 template-B options), authors advise <= ~20 short options. Card: accuracy beyond ~4k tokens varies; ships uncalibrated (T=1)"
+
+[env]
+HF_HUB_OFFLINE = "1"
+TRANSFORMERS_OFFLINE = "1"
+TOKENIZERS_PARALLELISM = "false"
+USE_TF = "0"

@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UNO · Jev Arena</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #f4f3f0;
+  --surface-1: #fcfcfb;
+  --surface-2: #efeeea;
+  --border: #dcdad4;
+  --grid: #e6e4df;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #77756f;
+  --series-1: #2a78d6;
+  --series-1-muted: #b7d3f6;
+  --accent-ring: #2a78d6;
+  --flag: #b55a2c;
+  --good: #0ca30c;
+  --card-red: #d63a33;
+  --card-yellow: #f0bd00;
+  --card-green: #2e9a44;
+  --card-blue: #1f6fd1;
+  --card-wild: #26252a;
+  --card-ink-light: #ffffff;
+  --card-ink-dark: #1a1a19;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0: #121211;
+    --surface-1: #1a1a19;
+    --surface-2: #242422;
+    --border: #3a3a37;
+    --grid: #2e2e2b;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #9a998f;
+    --series-1: #3987e5;
+    --series-1-muted: #1c5cab;
+    --accent-ring: #6da7ec;
+    --flag: #ec835a;
+    --good: #0ca30c;
+    --card-red: #d8453e;
+    --card-yellow: #e8b400;
+    --card-green: #2f9a46;
+    --card-blue: #2a78d6;
+    --card-wild: #050505;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #121211;
+  --surface-1: #1a1a19;
+  --surface-2: #242422;
+  --border: #3a3a37;
+  --grid: #2e2e2b;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #9a998f;
+  --series-1: #3987e5;
+  --series-1-muted: #1c5cab;
+  --accent-ring: #6da7ec;
+  --flag: #ec835a;
+  --good: #0ca30c;
+  --card-red: #d8453e;
+  --card-yellow: #e8b400;
+  --card-green: #2f9a46;
+  --card-blue: #2a78d6;
+  --card-wild: #050505;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--surface-0); color: var(--text-primary);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+header { padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface-1);
+  display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+header h1 { font-size: 18px; margin: 0; }
+header .meta { color: var(--text-secondary); }
+.sitenav { display: flex; gap: 14px; }
+.sitenav a { color: var(--text-secondary); text-decoration: none; }
+.sitenav a.on { color: var(--text-primary); font-weight: 600; border-bottom: 2px solid var(--accent-ring); }
+header button { margin-left: auto; }
+main { max-width: 1320px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+section { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px; min-width: 0; }
+h2 { font-size: 15px; margin: 0 0 12px; }
+h3 { font-size: 13px; margin: 0 0 8px; color: var(--text-secondary); font-weight: 600; }
+button, select, input { font: inherit; color: var(--text-primary); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; }
+button { cursor: pointer; }
+button:hover { border-color: var(--text-muted); }
+.muted { color: var(--text-muted); }
+.secondary { color: var(--text-secondary); }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th { color: var(--text-secondary); font-weight: 600; font-size: 12px; }
+td.num, th.num { text-align: right; }
+.scroll-x { overflow-x: auto; }
+
+/* leaderboard */
+#leaderboard { border: 2px solid var(--accent-ring); }
+.lb-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.lb-head h2 { font-size: 20px; margin: 0; }
+.live { font-size: 12px; font-weight: 600; }
+.live::before { content: "● "; color: var(--good); }
+.lb-sort { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.chip { border-radius: 999px; padding: 3px 12px; font-size: 13px; }
+.chip.on { background: var(--series-1); border-color: var(--series-1); color: #fff; }
+.lb-table { font-size: 14px; }
+.lb-table th { cursor: pointer; user-select: none; }
+.lb-table th:hover { color: var(--text-primary); }
+.lb-table th.on, .lb-table td.on { background: var(--surface-2); }
+.lb-table td { padding: 8px; vertical-align: middle; }
+.lb-table tr.top td { font-weight: 600; }
+.lb-table td small { display: block; font-size: 11px; color: var(--text-muted); font-weight: 400; }
+.rk { display: inline-flex; width: 26px; height: 26px; border-radius: 50%; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; border: 1px solid var(--border); }
+.rk1 { background: var(--series-1); border-color: var(--series-1); color: #fff; }
+.rk2, .rk3 { background: var(--series-1-muted); border-color: var(--series-1-muted); color: var(--text-primary); }
+.mname { font-weight: 600; }
+.caveat { cursor: help; color: var(--text-secondary); font-weight: 400; }
+.mrepo { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+.mrepo a { color: inherit; text-decoration: none; }
+.mrepo a:hover { text-decoration: underline; }
+.gbar { display: block; height: 4px; background: var(--grid); border-radius: 2px; margin-top: 4px; min-width: 50px; }
+.gbar > span { display: block; height: 100%; background: var(--series-1); border-radius: 2px; }
+
+/* win-rate chart */
+.wr-chart { position: relative; }
+.wr-chart svg { display: block; width: 100%; max-width: 520px; height: auto; overflow: visible; }
+.wr-chart text { fill: var(--text-secondary); font-size: 12px; }
+.wr-chart .label { fill: var(--text-primary); font-size: 13px; }
+.wr-chart .value { fill: var(--text-primary); font-size: 12px; font-weight: 600; paint-order: stroke; stroke: var(--surface-1); stroke-width: 4px; stroke-linejoin: round; }
+.wr-chart .gridline { stroke: var(--grid); stroke-width: 1; }
+.wr-chart .ref { stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.wr-chart .ci { stroke: var(--series-1); stroke-width: 2; stroke-linecap: round; }
+.wr-chart .dot { fill: var(--series-1); stroke: var(--surface-1); stroke-width: 2; }
+.wr-chart .hit { fill: transparent; cursor: default; }
+.wr-chart .row:hover .dot { r: 7; }
+.tooltip { position: fixed; pointer-events: none; background: var(--surface-1); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 9px; font-size: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.15); display: none; z-index: 10; max-width: 320px; }
+.results-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.results-grid .chartbox { max-width: 640px; }
+.note { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+
+/* game list */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.game-list { max-height: 280px; overflow: auto; border: 1px solid var(--grid); border-radius: 6px; }
+.game-list tr { cursor: pointer; }
+.game-list tr:hover td { background: var(--surface-2); }
+.game-list tr.active td { background: var(--surface-2); }
+.game-list tr.active td:first-child { box-shadow: inset 3px 0 0 var(--accent-ring); }
+.game-list thead th { position: sticky; top: 0; background: var(--surface-1); }
+
+/* replay */
+.controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.controls input[type=range] { flex: 1 1 220px; min-width: 160px; padding: 0; }
+.controls .speed { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+.controls .speed input[type=range] { flex: 0 0 110px; min-width: 0; }
+.controls .speed output { min-width: 38px; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.stepinfo { font-variant-numeric: tabular-nums; color: var(--text-secondary); min-width: 150px; }
+.replay-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.table-view { display: grid; grid-template-columns: 1fr 1.1fr 1fr; grid-template-rows: auto auto auto; gap: 10px;
+  background: var(--surface-2); border-radius: 10px; padding: 12px; }
+.seat { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 8px; min-width: 0; }
+.seat.active { border-color: var(--accent-ring); box-shadow: 0 0 0 2px var(--accent-ring); }
+.seat .who { display: flex; justify-content: space-between; gap: 6px; align-items: baseline; margin-bottom: 6px; }
+.seat .name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seat .badge { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+.seat .tag { font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--accent-ring); color: var(--text-primary); }
+.seat-0 { grid-column: 2; grid-row: 3; }
+.seat-1 { grid-column: 1; grid-row: 2; }
+.seat-2 { grid-column: 2; grid-row: 1; }
+.seat-3 { grid-column: 3; grid-row: 2; }
+.center { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  text-align: center; padding: 8px; }
+.center .dir { font-size: 12px; color: var(--text-secondary); }
+.hand { display: flex; flex-wrap: wrap; gap: 3px; }
+.card { width: 26px; height: 38px; border-radius: 5px; display: inline-flex; flex-direction: column; align-items: center;
+  justify-content: center; font-weight: 700; font-size: 12px; line-height: 1; position: relative; color: var(--card-ink-light);
+  border: 1px solid rgba(0,0,0,.18); user-select: none; }
+.card small { position: absolute; top: 2px; left: 3px; font-size: 8px; font-weight: 600; opacity: .85; }
+.card.red { background: var(--card-red); }
+.card.yellow { background: var(--card-yellow); color: var(--card-ink-dark); }
+.card.green { background: var(--card-green); }
+.card.blue { background: var(--card-blue); }
+.card.wild { background: var(--card-wild); border-color: var(--text-muted);
+  background-image: conic-gradient(from 45deg, var(--card-red) 0 25%, var(--card-yellow) 0 50%, var(--card-green) 0 75%, var(--card-blue) 0);
+  background-size: 12px 12px; background-repeat: no-repeat; background-position: center 22px; }
+.card.big { width: 48px; height: 70px; font-size: 20px; border-radius: 8px; }
+.card.big small { font-size: 10px; top: 4px; left: 5px; }
+.card.big.wild { background-size: 18px 18px; background-position: center 44px; }
+.card.playable { outline: 2px solid var(--text-muted); outline-offset: 1px; }
+.card.chosen { outline: 3px solid var(--accent-ring); outline-offset: 2px; transform: translateY(-3px); }
+.colorname { font-size: 12px; font-weight: 600; }
+.spark { display: block; width: 100%; height: 26px; margin-top: 6px; cursor: pointer; }
+.spark polyline { fill: none; stroke: var(--text-secondary); stroke-width: 1.5; }
+.spark line { stroke: var(--accent-ring); stroke-width: 1.5; }
+
+.decision h3 .kind { font-weight: 400; color: var(--text-muted); }
+.question { margin-bottom: 12px; }
+.qhead { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.opt { display: grid; grid-template-columns: minmax(90px, 150px) 1fr 52px; gap: 8px; align-items: center; padding: 2px 0; }
+.opt .oname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.opt.chosen .oname { font-weight: 700; }
+.bar { height: 12px; background: var(--grid); border-radius: 0 4px 4px 0; position: relative; }
+.bar > span { position: absolute; left: 0; top: 0; bottom: 0; background: var(--series-1-muted); border-radius: 0 4px 4px 0; }
+.opt.chosen .bar > span { background: var(--series-1); }
+.opt .pv { text-align: right; font-variant-numeric: tabular-nums; font-size: 12px; }
+.opt .desc { grid-column: 1 / -1; font-size: 11px; color: var(--text-muted); margin: -1px 0 3px; }
+.flags { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 10px; }
+.flag { font-size: 11px; border: 1px solid var(--flag); color: var(--text-primary); border-radius: 999px; padding: 1px 8px; }
+.flag::before { content: "⚑ "; color: var(--flag); }
+.ok { font-size: 11px; border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; color: var(--text-secondary); }
+details { margin-top: 8px; }
+summary { cursor: pointer; color: var(--text-secondary); font-size: 12px; }
+pre { white-space: pre-wrap; word-break: break-word; background: var(--surface-2); padding: 8px; border-radius: 6px;
+  font-size: 11.5px; line-height: 1.4; max-height: 340px; overflow: auto; }
+.log { max-height: 220px; overflow: auto; font-size: 12px; border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; }
+.log div { padding: 1px 0; color: var(--text-secondary); }
+.log div.now { color: var(--text-primary); font-weight: 600; }
+.log .s { color: var(--text-muted); display: inline-block; min-width: 38px; font-variant-numeric: tabular-nums; }
+.empty { color: var(--text-muted); padding: 20px; text-align: center; }
+@media (max-width: 900px) {
+  .results-grid, .replay-grid { grid-template-columns: 1fr; }
+  main { padding: 8px; }
+  header { padding: 12px 16px; }
+}
+@media (max-width: 520px) {
+  .table-view { grid-template-columns: 1fr; }
+  .seat-0, .seat-1, .seat-2, .seat-3, .center { grid-column: 1; grid-row: auto; }
+}
+</style>
+<!--EMBED-->
+</head>
+<body>
+<header>
+  <h1>Jev Arena</h1>
+  <nav class="sitenav"><a href="../">Home</a><a href="../leaderboard/">Leaderboard</a><a href="../bench/">Bench</a><a href="./" class="on">UNO</a></nav>
+  <span class="meta" id="runmeta">loading…</span>
+  <button id="theme" type="button" title="Toggle light / dark">◐ Theme</button>
+</header>
+<main>
+  <section id="leaderboard">
+    <div class="lb-head">
+      <h2>Leaderboard</h2>
+      <span class="muted" id="lbmeta">loading…</span>
+      <span class="live" id="lblive" hidden>live</span>
+    </div>
+    <div class="lb-sort" id="lbsort"></div>
+    <div class="scroll-x"><table class="lb-table" id="lbtable"></table></div>
+    <div class="note">Size: parameters loaded for inference, exact to the parameter (hover a size for the count and where it comes from).
+      TrueSkill: conservative rating μ − 3σ from 4-player games (the winner ranks first, the others by points left).
+      Pts won: the winner takes the sum of the other hands, everyone else scores 0. Pts left: points still in hand at the end (lower is better).
+      JevBench: accuracy on the 231 public items (Hard: the 111 hard ones). Memory: average history rounds kept per request;
+      a model gets fewer rounds only when its own input limit cannot hold them. Models without a value for the chosen metric are listed last.</div>
+  </section>
+
+  <section id="results">
+    <h2>Results</h2>
+    <div class="results-grid">
+      <div class="chartbox">
+        <h3>Win rate with 95% confidence interval</h3>
+        <div class="wr-chart" id="wrchart"></div>
+        <div class="note" id="wrnote"></div>
+      </div>
+      <div class="scroll-x">
+        <h3>Per player</h3>
+        <table id="ptable"></table>
+        <div class="note">Flags are legal but usually weak moves: drawing while holding a playable card; playing a wild while a colored card fits; naming a color other than the one held most. Seats are rotated, so every player gets every starting hand once.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="games">
+    <h2>Games</h2>
+    <div class="filters">
+      <label>Winner <select id="fwinner"><option value="">any</option></select></label>
+      <label>Sort <select id="fsort">
+        <option value="id">deal</option><option value="turns-asc">fewest turns</option><option value="turns-desc">most turns</option>
+        <option value="score-desc">most winner's points</option></select></label>
+      <label>Deal <input id="fdeal" type="number" min="0" style="width:80px" placeholder="all"></label>
+      <span class="muted" id="gcount"></span>
+    </div>
+    <div class="game-list"><table id="glist"></table></div>
+  </section>
+
+  <section id="replay">
+    <h2 id="rtitle">Replay</h2>
+    <div id="rbody"><div class="empty">Pick a game above.</div></div>
+  </section>
+</main>
+<div class="tooltip" id="tip"></div>
+
+<script>
+const EMBED = window.ARENA_EMBED || null;
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pct = (x, d = 1) => (100 * x).toFixed(d) + "%";
+
+async function api(path) {
+  if (EMBED) {
+    if (path === "/api/run") return EMBED.run;
+    if (path === "/api/games") return EMBED.games;
+    if (path === "/api/leaderboard") return EMBED.leaderboard;
+    const id = path.replace("/api/game/", "");
+    if (EMBED.replays[id]) return EMBED.replays[id];
+    throw new Error("This exported file only includes replays for the first deals.");
+  }
+  const r = await fetch(path.replace(/^\//, ""));  // relative, so the page also works under a path prefix
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+// ---------- theme ----------
+$("#theme").onclick = () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("uno-theme", root.dataset.theme); } catch (e) {}
+};
+try { const t = localStorage.getItem("uno-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+
+// ---------- cards ----------
+const GLYPH = {skip: "⊘", reverse: "⇄", draw_two: "+2", wild: "W", wild_draw_four: "+4"};
+const LABEL = {skip: "Skip", reverse: "Reverse", draw_two: "Draw Two", wild: "Wild", wild_draw_four: "Wild Draw Four"};
+function parseCard(id) {
+  if (id === "wild" || id === "wild_draw_four") return {color: null, rank: id};
+  const i = id.indexOf("_");
+  return {color: id.slice(0, i), rank: id.slice(i + 1)};
+}
+const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+function cardLabel(id) {
+  const c = parseCard(id);
+  const r = LABEL[c.rank] || c.rank;
+  return c.color ? `${cap(c.color)} ${r}` : r;
+}
+function cardHTML(id, cls = "") {
+  const c = parseCard(id);
+  const glyph = GLYPH[c.rank] || c.rank;
+  const corner = c.color ? c.color[0].toUpperCase() : "";
+  return `<span class="card ${c.color || "wild"} ${cls}" title="${esc(cardLabel(id))}">${corner ? `<small>${corner}</small>` : ""}${esc(glyph)}</span>`;
+}
+
+// ---------- tooltip ----------
+const tip = $("#tip");
+function showTip(e, html) { tip.innerHTML = html; tip.style.display = "block"; moveTip(e); }
+function moveTip(e) {
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = e.clientX + pad, y = e.clientY + pad;
+  if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = e.clientY - h - pad;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip() { tip.style.display = "none"; }
+
+// ---------- results ----------
+let RUN = null, GAMES = [], current = null;
+
+function renderResults(run) {
+  const s = run.summary || {};
+  const players = Object.entries(s.players || {}).sort((a, b) => b[1].win_rate - a[1].win_rate);
+  const n = (run.run && run.run.num_players) || 4;
+  $("#runmeta").textContent = `${run.name} · ${s.games ?? "?"} games · ${n} players · template ${run.run.template ?? "B"} · history ${run.run.history_rounds ?? 1} round(s) · policy ${run.run.policy ?? "argmax"}`;
+
+  // dot + CI chart; one series, so a single color and no legend (the title names it)
+  const W = 460, rowH = 34, top = 8, left = 128, right = 56, H = top + rowH * players.length + 28;
+  const maxX = Math.min(1, Math.max(0.3, ...players.map(([, p]) => p.win_rate_ci95[1])) * 1.1);
+  const x = v => left + (W - left - right) * (v / maxX);
+  const step = maxX > 0.6 ? 0.2 : 0.1;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Win rate per player with 95% confidence intervals">`;
+  for (let t = 0; t <= maxX + 1e-9; t += step) {
+    svg += `<line class="gridline" x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${H - 22}"/><text x="${x(t)}" y="${H - 6}" text-anchor="middle">${Math.round(t * 100)}%</text>`;
+  }
+  const chance = 1 / n;
+  svg += `<line class="ref" x1="${x(chance)}" x2="${x(chance)}" y1="${top - 4}" y2="${H - 22}"/>`;
+  svg += `<text x="${x(chance) + 4}" y="${top + 2}" font-size="11">chance ${pct(chance, 0)}</text>`;
+  players.forEach(([name, p], i) => {
+    const cy = top + rowH * i + rowH / 2 + 6;
+    const [lo, hi] = p.win_rate_ci95;
+    svg += `<g class="row" data-i="${i}">
+      <rect class="hit" x="0" y="${cy - rowH / 2}" width="${W}" height="${rowH}"/>
+      <text class="label" x="${left - 10}" y="${cy + 4}" text-anchor="end">${esc(name)}</text>
+      <line class="ci" x1="${x(lo)}" x2="${x(hi)}" y1="${cy}" y2="${cy}"/>
+      <line class="ci" x1="${x(lo)}" x2="${x(lo)}" y1="${cy - 5}" y2="${cy + 5}"/>
+      <line class="ci" x1="${x(hi)}" x2="${x(hi)}" y1="${cy - 5}" y2="${cy + 5}"/>
+      <circle class="dot" cx="${x(p.win_rate)}" cy="${cy}" r="5"/>
+      <text class="value" x="${x(hi) + 6}" y="${cy + 4}">${pct(p.win_rate)}</text>
+    </g>`;
+  });
+  svg += "</svg>";
+  const chart = $("#wrchart");
+  chart.innerHTML = svg;
+  chart.querySelectorAll(".row").forEach(g => {
+    const [name, p] = players[+g.dataset.i];
+    const html = `<b>${esc(name)}</b><br>${p.wins} wins of ${p.seat_games} games: ${pct(p.win_rate)}<br>95% CI ${pct(p.win_rate_ci95[0])} – ${pct(p.win_rate_ci95[1])}`;
+    g.addEventListener("mouseenter", e => showTip(e, html));
+    g.addEventListener("mousemove", moveTip);
+    g.addEventListener("mouseleave", hideTip);
+  });
+  const seat = Object.entries(s.seat_win_rate || {}).map(([k, v]) => `${k} ${pct(v)}`).join(" · ");
+  $("#wrnote").textContent = `Dashed line: chance level with ${n} players. Wins by seat: ${seat}. Aborted games: ${s.aborted ?? 0}.`;
+
+  const flag = (p, k) => p.diagnostics && p.diagnostics[k] ? pct(p.diagnostics[k].rate) : "–";
+  let t = `<thead><tr><th>Player</th><th class="num">Games</th><th class="num">Wins</th><th class="num">Win rate</th><th class="num">95% CI</th>
+    <th class="num" title="Points scored per game: the winner takes the sum of the other hands, everyone else scores 0 (higher is better)">Avg pts won</th><th class="num" title="Points left in hand at the end of each game; 0 when winning (lower is better)">Avg pts left</th><th class="num">Drew w/ playable</th><th class="num">Wild w/ colored</th><th class="num">Color ≠ most held</th>
+    <th class="num">Fallback</th><th class="num">Latency</th><th class="num">Tokens</th></tr></thead><tbody>`;
+  for (const [name, p] of players) {
+    const mc = p.model_calls;
+    const colorFlag = p.diagnostics && p.diagnostics.color_is_most_held ? pct(1 - p.diagnostics.color_is_most_held.rate) : "–";
+    t += `<tr><td>${esc(name)}</td><td class="num">${p.seat_games}</td><td class="num">${p.wins}</td><td class="num">${pct(p.win_rate)}</td>
+      <td class="num">${pct(p.win_rate_ci95[0])}–${pct(p.win_rate_ci95[1])}</td><td class="num">${p.avg_points_won.toFixed(1)}</td><td class="num">${p.avg_points_left.toFixed(1)}</td>
+      <td class="num">${flag(p, "drew_with_playable")}</td><td class="num">${flag(p, "wild_with_colored")}</td><td class="num">${colorFlag}</td>
+      <td class="num">${mc ? pct(mc.fallback_rate) : "–"}</td><td class="num">${mc ? mc.avg_latency_ms.toFixed(0) + " ms" : "–"}</td>
+      <td class="num">${mc ? mc.avg_input_tokens.toFixed(0) : "–"}</td></tr>`;
+  }
+  $("#ptable").innerHTML = t + "</tbody>";
+}
+
+// ---------- leaderboard ----------
+const LB_METRICS = [
+  {key: "ts_score", label: "TrueSkill", dir: -1, title: "Conservative TrueSkill rating μ − 3σ"},
+  {key: "win_rate", label: "Win rate", dir: -1},
+  {key: "avg_points_won", label: "Pts won", dir: -1, title: "Average points scored per game (winner takes all)"},
+  {key: "avg_points_left", label: "Pts left", dir: 1, title: "Average points left in hand at the end (lower is better)"},
+  {key: "jb_acc", label: "JevBench 231", dir: -1, title: "Accuracy on the 231 public JevBench items"},
+  {key: "jb_hard", label: "Hard", dir: -1, title: "Accuracy on the 111 hard public JevBench items"},
+  {key: "memory_rounds", label: "Memory", dir: -1, title: "Average history rounds kept per request (up to the run's maximum; fewer only when the model's input limit is too small)"},
+  {key: "games", label: "Games", dir: -1},
+  {key: "params", label: "Size", dir: 1},
+  {key: "latency_ms", label: "Latency", dir: 1, title: "Average time per model call during the games"},
+];
+let LB = null, lbSort = null, lbTimer = null;
+
+async function loadLeaderboard() {
+  try { LB = await api("/api/leaderboard"); } catch (e) { $("#lbmeta").textContent = "leaderboard unavailable: " + e.message; return; }
+  if (!lbSort) {
+    const has = k => LB.rows.some(r => r[k] != null);
+    const key = ["ts_score", "jb_acc", "params"].find(has) || "params";
+    lbSort = {key, dir: LB_METRICS.find(m => m.key === key).dir};
+  }
+  renderLeaderboard();
+  if (LB.in_progress && !lbTimer && !EMBED) {
+    lbTimer = setInterval(loadLeaderboard, 30000);
+    liveTimer = setInterval(refreshLive, 60000);  // results and the game list follow the running tournament
+  }
+  if (!LB.in_progress && lbTimer) { clearInterval(lbTimer); clearInterval(liveTimer); lbTimer = liveTimer = null; }
+}
+
+let liveTimer = null;
+async function refreshLive() {
+  try {
+    RUN = await api("/api/run");
+    renderResults(RUN);
+    GAMES = await api("/api/games");
+    renderGameList();
+  } catch (e) { /* keep the last view; the next tick retries */ }
+}
+
+function renderLeaderboard() {
+  const rows = LB.rows.slice();
+  const {key, dir} = lbSort;
+  rows.sort((a, b) => {
+    const va = a[key], vb = b[key];
+    if (va == null || vb == null) return (va == null) - (vb == null) || a.display.localeCompare(b.display);
+    return (va - vb) * dir || a.display.localeCompare(b.display);
+  });
+  const target = LB.target_games_per_model;
+  $("#lbmeta").textContent = `${LB.rows.length} models · ${LB.games} games` + (target ? ` · target ${target} games per model` : "") + ` · updated ${LB.updated}`;
+  $("#lblive").hidden = !LB.in_progress;
+  $("#lbsort").innerHTML = `<span class="muted">Rank by</span>` + LB_METRICS.map(m =>
+    `<button class="chip ${m.key === key ? "on" : ""}" data-k="${m.key}" title="${esc(m.title || "")}">${m.label}${m.key === key ? (dir < 0 ? " ↓" : " ↑") : ""}</button>`).join("");
+  const on = k => k === key ? "on" : "";
+  const cols = [["#", null], ["Model", null], ["Size", "params"], ["Games", "games"], ["TrueSkill", "ts_score"], ["Win rate", "win_rate"],
+                ["Pts won", "avg_points_won"], ["Pts left", "avg_points_left"], ["JevBench 231", "jb_acc"], ["Hard", "jb_hard"], ["Memory", "memory_rounds"], ["Latency", "latency_ms"]];
+  let h = "<thead><tr>" + cols.map(([t, k], i) => `<th class="${i > 1 ? "num" : ""} ${on(k)}" ${k ? `data-k="${k}"` : ""}>${t}${k === key ? (dir < 0 ? " ↓" : " ↑") : ""}</th>`).join("") + "</tr></thead><tbody>";
+  const dash = `<span class="muted">–</span>`;
+  const f = (v, fn) => v == null ? dash : fn(v);
+  let rank = 0;
+  for (const r of rows) {
+    const has = r[key] != null;
+    if (has) rank += 1;
+    const rk = has ? `<span class="rk rk${rank <= 3 ? rank : ""}">${rank}</span>` : dash;
+    const size = r.params == null ? dash
+      : `<span title="${r.params.toLocaleString("en-US")} parameters · ${esc(r.params_source || "")}${r.params_measured ? " · counted at load time" : " · from the weight files"}">${(r.params / 1e6).toFixed(2)}M</span>`;
+    const repo = r.repo ? `<div class="mrepo"><a href="https://huggingface.co/${esc(r.repo)}" target="_blank" rel="noopener">${esc(r.repo)}</a></div>` : "";
+    const games = `${r.games}` + (target ? `<span class="gbar" title="${r.games} / ${target}"><span style="width:${Math.min(100, 100 * r.games / target).toFixed(1)}%"></span></span>` : "");
+    h += `<tr class="${has && rank <= 3 ? "top" : ""}">
+      <td>${rk}</td>
+      <td><div class="mname">${esc(r.display)}${r.caveat ? ` <span class="caveat" title="${esc(r.caveat)}">⚠</span>` : ""}</div>${repo}</td>
+      <td class="num ${on("params")}">${size}</td>
+      <td class="num ${on("games")}">${games}</td>
+      <td class="num ${on("ts_score")}">${f(r.ts_score, v => `${v.toFixed(1)}<small>μ ${r.ts_mu.toFixed(1)} ± ${r.ts_sigma.toFixed(1)}</small>`)}</td>
+      <td class="num ${on("win_rate")}">${f(r.win_rate, v => `${pct(v)}<small>${pct(r.win_rate_ci95[0])}–${pct(r.win_rate_ci95[1])}</small>`)}</td>
+      <td class="num ${on("avg_points_won")}">${f(r.avg_points_won, v => v.toFixed(1))}</td>
+      <td class="num ${on("avg_points_left")}">${f(r.avg_points_left, v => v.toFixed(1))}</td>
+      <td class="num ${on("jb_acc")}">${f(r.jb_acc, v => pct(v))}</td>
+      <td class="num ${on("jb_hard")}">${f(r.jb_hard, v => pct(v))}</td>
+      <td class="num ${on("memory_rounds")}">${f(r.memory_rounds, v => `${v.toFixed(2)}<small>${r.max_input_tokens ? `limit ${r.max_input_tokens.toLocaleString("en-US")} tok` : "rounds"}</small>`)}</td>
+      <td class="num ${on("latency_ms")}">${f(r.latency_ms, v => Math.round(v) + " ms")}</td>
+    </tr>`;
+  }
+  $("#lbtable").innerHTML = h + "</tbody>";
+  const pick = k => {
+    const m = LB_METRICS.find(x => x.key === k);
+    lbSort = lbSort.key === k ? {key: k, dir: -lbSort.dir} : {key: k, dir: m.dir};
+    renderLeaderboard();
+  };
+  $("#lbsort").querySelectorAll("button[data-k]").forEach(b => b.onclick = () => pick(b.dataset.k));
+  $("#lbtable").querySelectorAll("th[data-k]").forEach(th => th.onclick = () => pick(th.dataset.k));
+}
+
+// ---------- game list ----------
+function dealOf(id) { const m = /(?:^|-)[DT](\d+)/.exec(id); return m ? +m[1] : 0; }  // deal, or Swiss table
+function renderGameList() {
+  const w = $("#fwinner").value, sort = $("#fsort").value, deal = $("#fdeal").value;
+  let rows = GAMES.filter(g => (!w || g.winner === w) && (deal === "" || dealOf(g.game) === +deal));
+  const by = {
+    "id": (a, b) => dealOf(a.game) - dealOf(b.game) || a.rotation - b.rotation,
+    "turns-asc": (a, b) => a.turns - b.turns, "turns-desc": (a, b) => b.turns - a.turns,
+    "score-desc": (a, b) => b.score - a.score,
+  }[sort];
+  rows.sort(by);
+  $("#gcount").textContent = `${rows.length} games` + (EMBED ? ` · this file includes replays for deals 0–${Math.max(...Object.keys(EMBED.replays).map(dealOf))}` : "");
+  const shown = rows.slice(0, 400);
+  let h = `<thead><tr><th>Game</th><th class="num">Deal</th><th class="num">Rot.</th><th>Seats (P0 → P3)</th><th>Winner</th><th class="num">Turns</th><th class="num" title="Points the winner takes: the sum of the other hands. Everyone else scores 0.">Winner's pts</th><th title="Points left in each hand at the end, seat order P0 → P3 (the winner has 0)">Points left (P0 → P3)</th></tr></thead><tbody>`;
+  for (const g of shown) {
+    const has = !EMBED || EMBED.replays[g.game];
+    h += `<tr data-id="${esc(g.game)}" class="${current && current.meta.game === g.game ? "active" : ""}" ${has ? "" : 'style="opacity:.5"'}>
+      <td>${esc(g.game)}</td><td class="num">${dealOf(g.game)}</td><td class="num">${g.rotation ?? ""}</td>
+      <td class="secondary">${g.seats.map(esc).join(" · ")}</td><td>${g.winner ? esc(g.winner) + ` (P${g.winner_seat})` : "—"}</td>
+      <td class="num">${g.turns}</td><td class="num">${g.score}</td><td class="secondary">${(g.hand_points || []).join(" · ")}</td></tr>`;
+  }
+  if (rows.length > shown.length) h += `<tr><td colspan="8" class="muted">…${rows.length - shown.length} more; narrow the filters</td></tr>`;
+  $("#glist").innerHTML = h + "</tbody>";
+  $("#glist").querySelectorAll("tr[data-id]").forEach(tr => tr.onclick = () => openGame(tr.dataset.id));
+}
+
+// ---------- replay ----------
+let frameIdx = 0, timer = null;
+
+async function openGame(id) {
+  stop();
+  $("#rbody").innerHTML = `<div class="empty">Loading ${esc(id)}…</div>`;
+  try { current = await api("/api/game/" + encodeURIComponent(id)); }
+  catch (e) { $("#rbody").innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
+  frameIdx = 0;
+  const m = current.meta;
+  $("#rtitle").textContent = `Replay · ${m.game}` + (m.winner ? ` · winner ${m.winner} (P${m.winner_seat}) takes ${m.score} points` : " · no winner");
+  $("#rbody").innerHTML = `
+    <div class="controls">
+      <button id="bfirst" title="First (Home)">⏮</button><button id="bprev" title="Previous (←)">◀</button>
+      <button id="bplay" title="Play / pause (space)">▶ Play</button><button id="bnext" title="Next (→)">▶</button>
+      <button id="blast" title="Last (End)">⏭</button>
+      <input type="range" id="slider" min="0" max="${current.frames.length - 1}" value="0" aria-label="Decision">
+      <span class="stepinfo" id="stepinfo"></span>
+      <label class="speed" title="How long each step stays on screen during playback">Step time
+        <input type="range" id="speed" min="0.5" max="10" step="0.5" value="${stepSeconds}" aria-label="Seconds per step">
+        <output id="speedval">${stepSeconds.toFixed(1)} s</output></label>
+    </div>
+    <div class="replay-grid">
+      <div>
+        <div class="table-view" id="tableview"></div>
+        <h3 style="margin-top:12px">Events</h3>
+        <div class="log" id="log"></div>
+      </div>
+      <div class="decision" id="decision"></div>
+    </div>`;
+  $("#bfirst").onclick = () => jump(0);
+  $("#bprev").onclick = () => jump(frameIdx - 1);
+  $("#bnext").onclick = () => jump(frameIdx + 1);
+  $("#blast").onclick = () => jump(current.frames.length - 1);
+  $("#bplay").onclick = () => timer ? stop() : play();
+  $("#slider").oninput = e => jump(+e.target.value);
+  $("#speed").oninput = e => {
+    stepSeconds = +e.target.value;
+    $("#speedval").textContent = stepSeconds.toFixed(1) + " s";
+    try { localStorage.setItem("uno-step-seconds", String(stepSeconds)); } catch (err) {}
+    if (timer) schedule();  // apply the new speed right away
+  };
+  renderGameList();
+  go(0);
+  $("#replay").scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+function hashParams() { return Object.fromEntries(new URLSearchParams(location.hash.slice(1))); }
+function setHash() {
+  if (!current) return;
+  const h = `game=${encodeURIComponent(current.meta.game)}&step=${frameIdx}`;
+  try { history.replaceState(null, "", "#" + h); } catch (e) {}
+}
+
+// Playback: each step stays on screen for `stepSeconds` (slider, default 2 s, remembered per browser).
+let stepSeconds = 2;
+try {
+  const saved = parseFloat(localStorage.getItem("uno-step-seconds"));
+  if (saved >= 0.5 && saved <= 10) stepSeconds = saved;
+} catch (e) {}
+
+function play() {
+  if (frameIdx >= current.frames.length - 1) go(0);  // at the end, play again from the start
+  $("#bplay").textContent = "❚❚ Pause";
+  schedule();
+}
+function schedule() {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    if (frameIdx >= current.frames.length - 1) return stop();
+    go(frameIdx + 1);
+    if (frameIdx >= current.frames.length - 1) stop(); else schedule();
+  }, stepSeconds * 1000);
+}
+function stop() { clearTimeout(timer); timer = null; const b = $("#bplay"); if (b) b.textContent = "▶ Play"; }
+// Manual navigation; while playing, the countdown restarts so the chosen step gets its full time.
+function jump(i) { go(i); if (timer) schedule(); }
+
+document.addEventListener("keydown", e => {
+  if (!current || ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+  if (e.key === "ArrowRight") jump(frameIdx + 1);
+  else if (e.key === "ArrowLeft") jump(frameIdx - 1);
+  else if (e.key === "Home") jump(0);
+  else if (e.key === "End") jump(current.frames.length - 1);
+  else if (e.key === " ") { e.preventDefault(); timer ? stop() : play(); }
+  else return;
+});
+
+function go(i) {
+  if (!current) return;
+  frameIdx = Math.max(0, Math.min(current.frames.length - 1, i));
+  $("#slider").value = frameIdx;
+  const f = current.frames[frameIdx];
+  const total = current.frames.length - 1;
+  $("#stepinfo").textContent = f.kind === "end" ? `end · turn ${f.turn}` : `decision ${frameIdx + 1} / ${total} · turn ${f.turn}`;
+  renderTable(f);
+  renderDecision(f);
+  renderLog();
+  setHash();
+}
+
+function chosenCard(f) { return f.action && f.action.type === "play" ? f.action.card : null; }
+
+function renderTable(f) {
+  const m = current.meta, n = m.seats.length;
+  const maxHand = Math.max(7, ...current.frames.map(fr => Math.max(...fr.hands.map(h => h.length))));
+  const chosen = chosenCard(f);
+  let html = "";
+  for (let s = 0; s < n; s++) {
+    const hand = f.hands[s];
+    const active = f.seat === s;
+    const winner = f.kind === "end" && m.winner_seat === s;
+    let chosenMarked = false;
+    const cards = hand.map(id => {
+      let cls = "";
+      if (active && f.playable.includes(id)) cls += " playable";
+      if (active && chosen === id && !chosenMarked) { cls += " chosen"; chosenMarked = true; }
+      return cardHTML(id, cls);
+    }).join("");
+    const pts = f.kind === "end" ? ` · ${f.hand_points[s]} pts` : "";
+    const tag = active ? `<span class="tag">to act</span>` : winner ? `<span class="tag">winner</span>` : "";
+    html += `<div class="seat seat-${s % 4} ${active || winner ? "active" : ""}">
+      <div class="who"><span class="name">P${s} · ${esc(m.seats[s])}</span>${tag}</div>
+      <div class="badge">${hand.length} card${hand.length === 1 ? "" : "s"}${pts}</div>
+      <div class="hand">${cards || '<span class="muted">empty</span>'}</div>
+      ${spark(s, maxHand)}
+    </div>`;
+  }
+  const dir = n > 2 ? (f.direction === 1 ? "↻ P0 → P1 → P2 → P3" : "↺ P0 → P3 → P2 → P1") : "";
+  html += `<div class="center">
+    ${cardHTML(f.top, "big")}
+    <div class="colorname">${f.color ? "Color: " + cap(f.color) : "No color named yet"}</div>
+    <div class="dir">${dir}</div>
+    <div class="dir">Draw pile: ${f.draw_pile}</div>
+  </div>`;
+  $("#tableview").innerHTML = html;
+  $("#tableview").querySelectorAll(".spark").forEach(svg => {
+    svg.onclick = e => {
+      const r = svg.getBoundingClientRect();
+      jump(Math.round((e.clientX - r.left) / r.width * (current.frames.length - 1)));
+    };
+  });
+}
+
+function spark(seat, maxHand) {
+  const fr = current.frames, W = 200, H = 26;
+  const xs = i => fr.length > 1 ? i / (fr.length - 1) * W : 0;
+  const ys = v => H - 2 - (v / maxHand) * (H - 4);
+  const pts = fr.map((f, i) => `${xs(i).toFixed(1)},${ys(f.hands[seat].length).toFixed(1)}`).join(" ");
+  const cx = xs(frameIdx);
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Hand size over the game (click to jump)">
+    <title>Hand size over the game; click to jump</title>
+    <polyline points="${pts}" vector-effect="non-scaling-stroke"/>
+    <line x1="${cx}" x2="${cx}" y1="0" y2="${H}" vector-effect="non-scaling-stroke"/></svg>`;
+}
+
+const FLAG_TEXT = {
+  drew_with_playable: "drew while holding a playable card",
+  wild_with_colored: "played a wild while a colored card fit",
+  kept_playable: "kept a playable drawn card",
+  wd4_bluff: "bluffed a Wild Draw Four (held the current color)",
+};
+function actionText(f) {
+  const a = f.action;
+  if (!a) return "";
+  if (a.type === "play") return `plays ${cardLabel(a.card)}` + (a.color ? `, names ${cap(a.color)}` : "");
+  if (a.type === "choose_color") return `names ${cap(a.color)} as the starting color`;
+  if (a.type === "challenge") return "challenges the Wild Draw Four";
+  if (a.type === "accept") return "accepts the Wild Draw Four (draws 4)";
+  return a.type === "draw" ? "draws a card" : "keeps the drawn card";
+}
+
+function renderDecision(f) {
+  const el = $("#decision");
+  const m = current.meta;
+  if (f.kind === "end") {
+    el.innerHTML = `<h3>Game over</h3><p>${m.winner ? `<b>${esc(m.winner)}</b> (P${m.winner_seat}) wins and takes ${m.score} points, the sum of the other hands; everyone else scores 0.` : "No winner (step limit)."}</p>
+      <table><thead><tr><th>Seat</th><th>Player</th><th class="num">Cards left</th><th class="num">Points left</th><th class="num">Points scored</th></tr></thead><tbody>
+      ${m.seats.map((p, s) => `<tr><td>P${s}</td><td>${esc(p)}</td><td class="num">${f.hands[s].length}</td><td class="num">${f.hand_points[s]}</td><td class="num">${s === m.winner_seat ? m.score : 0}</td></tr>`).join("")}</tbody></table>`;
+    return;
+  }
+  const kindText = {turn: "turn", drawn_card: "play the card just drawn?", start_color: "starting color",
+                    challenge: "challenge the Wild Draw Four?"}[f.kind] || f.kind;
+  let html = `<h3>P${f.seat} · ${esc(f.player)} <span class="kind">· ${esc(kindText)}</span></h3>
+    <div><b>${esc(f.player)}</b> ${esc(actionText(f))}</div>`;
+  const flags = [];
+  for (const [k, v] of Object.entries(f.diag || {})) {
+    if (v && FLAG_TEXT[k]) flags.push(`<span class="flag">${FLAG_TEXT[k]}</span>`);
+    if (k === "color_is_most_held" && !v) flags.push(`<span class="flag">named a color it does not hold most of</span>`);
+    if (k === "challenge_right") flags.push(v ? `<span class="ok">right call: the Wild Draw Four was ${f.diag.guilty ? "a bluff" : "legal"}</span>`
+                                              : `<span class="flag">wrong call: the Wild Draw Four was ${f.diag.guilty ? "a bluff" : "legal"}</span>`);
+  }
+  if (f.fallback) flags.push(`<span class="flag">model error, random fallback: ${esc(f.error)}</span>`);
+  if (f.forced) flags.push(`<span class="ok">forced: only one option, model not asked</span>`);
+  html += `<div class="flags">${flags.join("")}</div>`;
+
+  const questions = (f.prompt && (f.prompt.requests || f.prompt.questions)) || [];
+  if (f.calls && f.calls.length) {
+    for (const call of f.calls) {
+      const q = questions.find(q => q.name === call.question && Object.keys(q.criteria).length === call.options.length);
+      const hist = call.history_rounds != null ? ` · history ${call.history_rounds} round${call.history_rounds === 1 ? "" : "s"}` : "";
+      const budget = call.prompt_tokens != null ? ` (${call.prompt_tokens} budget tokens)` : "";
+      html += `<div class="question"><div class="qhead">Question “${esc(call.question)}” · ${call.options.length} options in the order shown to the model${hist}${budget} · ${call.latency_ms} ms · ${call.input_tokens ?? "?"} tokens at the server</div>`;
+      for (const o of call.options) {
+        const p = call.probabilities[o] ?? 0;
+        const isPick = o === call.pick;
+        const name = ["draw", "keep", "play", "challenge", "accept"].includes(o) ? o : (["red","yellow","green","blue"].includes(o) ? cap(o) : cardLabel(o));
+        const desc = q ? q.criteria[o] : "";
+        html += `<div class="opt ${isPick ? "chosen" : ""}"><span class="oname" title="${esc(o)}">${isPick ? "✓ " : ""}${esc(name)}</span>
+          <span class="bar"><span style="width:${(100 * p).toFixed(1)}%"></span></span><span class="pv">${pct(p)}</span>
+          ${desc ? `<span class="desc">${esc(desc)}</span>` : ""}</div>`;
+      }
+      html += `</div>`;
+    }
+  } else if (!f.forced) {
+    html += `<p class="muted">No model call: ${esc(f.player)} is a built-in player.</p>`;
+  }
+  if (f.prompt) {
+    const reqs = f.prompt.requests || (f.prompt.questions || []).map(q => ({...q, state: f.prompt.state}));
+    const body = reqs.map(q => `<pre>${esc(q.state)}</pre><pre>${esc(JSON.stringify({[q.name]: {type: q.type, instructions: q.instructions, criteria: q.criteria}}, null, 2))}</pre>`).join("");
+    html += `<details><summary>Request${reqs.length > 1 ? "s" : ""} sent to the model${f.prompt.matches_log ? "" : " (rebuilt order differs from the log!)"}</summary>${body}</details>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderLog() {
+  const fr = current.frames;
+  let html = (current.meta.intro || []).map(t => `<div><span class="s">start</span>${esc(t)}</div>`).join("");
+  for (let i = 0; i < fr.length && i <= frameIdx; i++) {
+    for (const t of fr[i].events || []) html += `<div class="${i === frameIdx ? "now" : ""}"><span class="s">${i + 1}</span>${esc(t)}</div>`;
+  }
+  if (frameIdx === fr.length - 1 && current.meta.winner) html += `<div class="now"><span class="s">end</span>${esc(current.meta.winner)} wins</div>`;
+  const log = $("#log");
+  log.innerHTML = html;
+  log.scrollTop = log.scrollHeight;
+}
+
+// ---------- boot ----------
+(async () => {
+  try {
+    loadLeaderboard();
+    RUN = await api("/api/run");
+    renderResults(RUN);
+    GAMES = await api("/api/games");
+    const winners = [...new Set(GAMES.map(g => g.winner).filter(Boolean))].sort();
+    $("#fwinner").innerHTML = `<option value="">any</option>` + winners.map(w => `<option>${esc(w)}</option>`).join("");
+    ["#fwinner", "#fsort", "#fdeal"].forEach(s => $(s).oninput = renderGameList);
+    renderGameList();
+    const hp = hashParams();
+    const first = EMBED ? Object.keys(EMBED.replays)[0] : GAMES[0] && GAMES.slice().sort((a, b) => dealOf(a.game) - dealOf(b.game) || a.rotation - b.rotation)[0].game;
+    if (hp.game) {
+      await openGame(hp.game);
+      if (hp.step) go(+hp.step);
+      if (hp.prompt) { const d = document.querySelector("#decision details"); if (d) d.open = true; }
+    } else if (first) {
+      openGame(first).then(() => window.scrollTo(0, 0));
+    }
+  } catch (e) {
+    $("#runmeta").textContent = "Could not load the run: " + e.message;
+  }
+})();
+</script>
+</body>
+</html>

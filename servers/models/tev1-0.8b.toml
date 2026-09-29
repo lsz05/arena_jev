@@ -1,0 +1,9 @@
+name = "tev1-0.8b"
+port = 8123
+command = ["venvs/b-llm2jev/bin/python", "adapters/serve.py", "tev1", "--port", "8123", "--device", "cuda"]
+tokenizer = "togethercomputer/Tev1-0.8B-experimental"
+max_input_tokens = 32000
+max_options = 24
+notes = "servers/adapters/tev1.py: authors' payload() from github togethercomputer/tev1@1dde778 examples/decide.py (system prompt + JSON user turn, thinking off); probabilities = softmax of next-token logits over the allowed option letters (the authors decode greedy with a regex constraint to those letters); weights HF togethercomputer/Tev1-0.8B-experimental@6bb2dff bf16 incl. vision tower; hard cap 24 options (A-X); noul via the training data's yes/no options, score via keys 0..L-1; trained seq limit 2048 (4B recipe), 32k is our serving cap"
+[env]
+HF_HUB_OFFLINE = "1"

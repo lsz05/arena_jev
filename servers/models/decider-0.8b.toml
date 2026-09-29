@@ -1,0 +1,6 @@
+name = "decider-0.8b"
+port = 8102
+cwd = "src/decider"
+command = ["venvs/decider/bin/uvicorn", "decider.serve:app", "--host", "127.0.0.1", "--port", "8102"]
+[env]
+DECIDER_MODEL = "Mapika/decider-0.8b"

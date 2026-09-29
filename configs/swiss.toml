@@ -1,0 +1,19 @@
+# Swiss-style UNO tournament over every local model server in servers/models/ (python -m arena swiss configs/swiss.toml).
+# Start the servers first: python3 servers/launch.py start && python3 servers/launch.py wait
+[run]
+name = "swiss"
+target_games = 1000        # games per model
+seed = 20260929
+template = "B"             # option descriptions state effects and consequences
+history_rounds = 5         # trimmed, oldest round first, only above a model's own input limit
+policy = "argmax"
+wd4_challenge = true       # official Wild Draw Four challenge rule (bluffing allowed)
+shuffle_hand = true        # hand listed in a seeded random order at every decision
+must_play = true           # house rule (2026-09-29): a playable card must be played; draw only when nothing fits
+jitter = 2.0               # noise on the rating used for pairing, so tables vary
+restart_after = 20         # consecutive failed decisions before a server is restarted (then retired)
+max_steps = 1000           # decisions before a game is aborted (unrated). Stalled games (draw pile empty, everyone keeps
+                           # "drawing" instead of playing) otherwise ran to 5000; only ~1% of games end naturally above 1000
+max_lead = 40              # a model may be at most this many games ahead of the one furthest behind
+models = []                # empty: every servers/models/*.toml that answers
+exclude = []

@@ -1,0 +1,14 @@
+name = "simplejev-0.8b"
+port = 8116
+cwd = "src/simple-jev"
+command = ["venvs/a-simplejev/bin/simple-jev", "--model", "Qwen/Qwen3.5-0.8B", "--revision", "2fc06364715b967f1860aea9cf38778875588b17",
+           "--served-model-name", "simplejev-0.8b", "--device", "cuda", "--dtype", "float32",
+           "--classifier-prompt-policy", "baseline", "--max-model-len", "4096", "--max-batch-size", "4", "--max-batch-tokens", "4096",
+           "--port", "8116"]
+tokenizer = "Qwen/Qwen3.5-0.8B"
+max_input_tokens = 3000
+max_options = 255
+notes = "featherless-ai/simple-jev@c5363e0 hf-server (`simple-jev`, authors' /v1/systemone alias of /v1/classifier), untrained stock Qwen/Qwen3.5-0.8B@2fc0636, the author-documented small-model command used for JevBench v1.4 'SimpleJev (Qwen3.5-0.8B, CPU)' (baseline prompt policy, float32, 4096-token limit per rendered question incl. chat template; over-limit -> 422) but on CUDA; assistant-prefill option-label logits; prompt wrapper adds ~330 + ~26 tokens per option to the request text (so max_input_tokens 3000 holds up to ~29 options)"
+
+[env]
+PYTORCH_CUDA_ALLOC_CONF = "expandable_segments:True"  # variable-length inputs fragment the default allocator

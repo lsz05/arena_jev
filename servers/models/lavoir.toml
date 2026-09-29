@@ -1,0 +1,14 @@
+name = "lavoir"
+port = 8135
+command = ["venvs/c-laya/bin/python", "adapters/serve.py", "lavoir_model", "--port", "8135"]
+tokenizer = "answerdotai/ModernBERT-large"
+max_input_tokens = 990
+max_option_tokens = 38   # longest option description sent as is (our count); longer ones are shortened (render.compact_option)
+max_options = 5
+notes = "Authors' lavoir package (github moganai/lavoir@af79b0a7a7f9, servers/src/lavoir, pip -e; laya 0.3.21) on HF moganai/lavoir@4c5eaeb99b23 (servers/src/lavoir-weights; CC-BY-NC-4.0, research use): Lavoir.from_pretrained + predict(state, question) without slots (card's plain-classifier use, general-data temperatures), CUDA bf16 autocast (package default). Limits from its config/code: 1024 tokens total, question+options <= 256 tokens (no slots), option <= 48 tokens; the package would cut silently, adapters/laya_guard.py refuses instead (422). max_options=5 is a practical cap, not a coded one: the 256-token question+options budget fits at most 5 UNO template-B options (~35-51 tokens each; 6 can reach 258); short options allow ~20 (Laya's guidance). Eager encoder (ModernBERT reference_compile off, as laya.Agent defaults to)"
+
+[env]
+HF_HUB_OFFLINE = "1"
+TRANSFORMERS_OFFLINE = "1"
+TOKENIZERS_PARALLELISM = "false"
+USE_TF = "0"

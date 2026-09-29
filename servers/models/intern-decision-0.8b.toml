@@ -1,0 +1,9 @@
+name = "intern-decision-0.8b"
+port = 8124
+command = ["venvs/b-intern/bin/python", "adapters/serve.py", "intern_decision", "--port", "8124", "--device", "cuda"]
+tokenizer = "internlm/Intern-Decision-0.8B"
+max_input_tokens = 7400
+max_options = 62
+notes = "model card's inference.py (DecisionEngine, backend hf) from HF internlm/Intern-Decision-0.8B@85a0cc5, text only, via servers/adapters/intern_decision.py; transformers 5.14.1 as pinned (torch 2.13 cu130 instead of 2.9.1); bf16 sdpa, T=2.7478 checkpoint calibration; 8192-token limit on the whole rendered prompt (system prompt + schema + JSON skeleton, ~250 tokens + ~8/option), rejected with 422, no truncation; max 62 options (A-Z a-z 0-9); native choice/score/noul; vision tower loaded but unused"
+[env]
+HF_HUB_OFFLINE = "1"

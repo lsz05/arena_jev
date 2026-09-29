@@ -1,0 +1,13 @@
+name = "systemone-lite-0.5b"
+port = 8112
+# cwd holds symlinks to the pinned HF snapshot (dwidlee/systemone-lite-0.5b@4214f92): the authors' server
+# treats the request's "model" field as a model id, so "systemone-lite-0.5b" (and "local", the launcher's
+# ping) must resolve to a local directory; "jev-*" and "systemone-lite-latest" map to --model.
+cwd = "src/a-s1lite-models"
+command = ["venvs/a-s1lite/bin/systemone-lite", "--model", "systemone-lite-0.5b", "--port", "8112"]
+tokenizer = "dwidlee/systemone-lite-0.5b"
+max_input_tokens = 3900
+notes = "fritzprix/systemone-lite@fc6fbe3 `systemone-lite` server (authors' /v1/systemone, fp16 on CUDA) on HF dwidlee/systemone-lite-0.5b pinned @4214f92acfe5e23d3a3ad55429e117b85db9d584 (author overwrites weights in place); Qwen2.5-0.5B-Instruct SFT; option-restricted next-token scoring over the FIRST token of each option key (keys sharing a first token tie: in UNO every same-colour card id red_5/red_7/red_skip, and wild/wild_draw4, get identical probabilities); authors' code truncates at 4096 tokens (right side) instead of 422; request 'model' must be jev-*, systemone-lite-latest or systemone-lite-0.5b (another name makes the server load that id)"
+
+[env]
+PYTORCH_CUDA_ALLOC_CONF = "expandable_segments:True"  # variable-length inputs fragment the default allocator

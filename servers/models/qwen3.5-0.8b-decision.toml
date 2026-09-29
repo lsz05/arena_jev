@@ -1,0 +1,7 @@
+name = "qwen3.5-0.8b-decision"
+port = 8113
+command = ["venvs/a-rsi/bin/python", "adapters/serve.py", "mghafiri_decision", "--port", "8113", "--device", "cuda"]
+tokenizer = "mghafiri/qwen3.5-0.8B-decision-model"
+max_input_tokens = 2900
+max_options = 52
+notes = "adapter servers/adapters/mghafiri_decision.py around the authors' bundled jevlite.model.SystemOne (model card usage) from HF mghafiri/qwen3.5-0.8B-decision-model@4a99390; bf16, calibration.json temperatures applied, native noul/score; English-only; 52-option cap (A-Z,a-z labels); jevlite's 3072-token prompt budget enforced as HTTP 422 instead of its silent middle truncation"

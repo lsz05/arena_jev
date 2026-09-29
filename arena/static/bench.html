@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JevBench · Jev Arena</title>
+<link rel="stylesheet" href="../static/base.css">
+<style>
+.heat td.cell { text-align: center; font-size: 12px; min-width: 44px; }
+.heat th.fam { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; height: 110px; text-align: left; vertical-align: bottom; }
+.legend { display: flex; gap: 4px; align-items: center; font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+.legend span.sw { width: 26px; height: 12px; border-radius: 2px; display: inline-block; }
+details summary { cursor: pointer; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Jev Arena</h1>
+  <nav><a href="../">Home</a><a href="../leaderboard/">Leaderboard</a><a href="./" class="on">Bench</a><a href="../uno/">UNO</a></nav>
+  <span class="spacer"></span><button id="theme" type="button">◐ Theme</button>
+</header>
+<main>
+  <section class="hero">
+    <h2>JevBench · 231 public items</h2>
+    <p class="lead">The public items of <a href="https://github.com/fstandhartinger/jevbench" target="_blank" rel="noopener">JevBench</a>
+      (48 easy, 72 original, 111 hard), run on this machine with the official harness against each model's own server, one request at a time.
+      These are public-item accuracies, not the official JevBench score (which also uses sealed items, speed and cost).
+      Official results for other systems on the same 231 items come from JevBench v1.2's per-item outcomes.</p>
+    <div id="chart"></div>
+  </section>
+  <section>
+    <h2>Per model</h2>
+    <div class="chips" id="chips"></div>
+    <div class="scroll-x"><table class="sortable" id="tbl"></table></div>
+    <div class="note">95% interval: bootstrap over scenarios (paraphrases of one scenario are resampled together). Brier: multi-class Brier score
+      (lower is better). ECE: expected calibration error of the top label (lower is better). Paraphrase: share of paraphrase pairs answered the same way.
+      Rank: among every system with all 231 items (the official field plus the models here). ⚠: a caveat on this model's result (hover to read it).</div>
+  </section>
+  <section>
+    <h2>Accuracy by item family</h2>
+    <div class="scroll-x"><table class="heat" id="heat"></table></div>
+    <div class="legend" id="legend"></div>
+  </section>
+  <section>
+    <details><summary>Full field on the same 231 items</summary><div class="scroll-x"><table id="field"></table></div></details>
+  </section>
+</main>
+<div class="tooltip" id="tip"></div>
+<script src="../static/board.js"></script>
+<script>
+initTheme();
+const tierCell = t => r => fmt(r.tiers[t], v => pct(v));
+const COLS = [
+  {key: "display", label: "Model", cell: modelCell},
+  {key: "params", label: "Size", num: true, rank: true, dir: 1, cell: sizeCell},
+  {key: "acc", label: "Accuracy", num: true, rank: true, cell: r => `${pct(r.acc)}<small>${pct(r.ci95[0])}–${pct(r.ci95[1])}</small>`},
+  {key: "easy", label: "Easy", num: true, rank: true, value: r => r.tiers.easy, cell: tierCell("easy")},
+  {key: "original", label: "Original", num: true, rank: true, value: r => r.tiers.original, cell: tierCell("original")},
+  {key: "hard", label: "Hard", num: true, rank: true, value: r => r.tiers.hard, cell: tierCell("hard")},
+  {key: "brier", label: "Brier", num: true, rank: true, dir: 1, cell: r => fmt(r.brier, v => v.toFixed(3))},
+  {key: "ece", label: "ECE", num: true, rank: true, dir: 1, cell: r => fmt(r.ece, v => v.toFixed(3))},
+  {key: "paraphrase", label: "Paraphrase", num: true, rank: true, cell: r => fmt(r.paraphrase, v => pct(v))},
+  {key: "p50_ms", label: "Latency p50", num: true, rank: true, dir: 1, cell: r => fmt(r.p50_ms, v => Math.round(v) + " ms")},
+  {key: "overall_rank", label: "Rank", num: true, rank: true, dir: 1, cell: r => `${r.overall_rank}<small>of ${FIELD}</small>`},
+];
+let FIELD = 0;
+
+function chart(models, official) {
+  const ms = models.slice().sort((a, b) => b.acc - a.acc);
+  const jev = official.find(o => /^Jev 1\.13/.test(o.system));
+  const W = 760, rowH = 26, top = 24, left = 230, right = 60, H = top + rowH * ms.length + 28;
+  const lo = Math.max(0, Math.floor((Math.min(...ms.map(m => m.ci95[0]), ...official.map(o => o.acc)) - 0.02) * 10) / 10);
+  const x = v => left + (W - left - right) * (v - lo) / (1 - lo);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Accuracy with 95% intervals" style="width:100%;max-width:${W}px;height:auto">`;
+  for (let v = lo; v <= 1 + 1e-9; v += 0.1) s += `<line class="gridline" x1="${x(v)}" x2="${x(v)}" y1="${top - 8}" y2="${H - 22}"/><text x="${x(v)}" y="${H - 6}" text-anchor="middle">${Math.round(v * 100)}%</text>`;
+  official.forEach(o => s += `<circle class="dot faint" cx="${x(o.acc)}" cy="${top - 12}" r="3.5"><title>${esc(o.system)}: ${pct(o.acc)}</title></circle>`);
+  s += `<text x="${left - 10}" y="${top - 8}" text-anchor="end" font-size="11">official field</text>`;
+  if (jev) s += `<line class="ref" x1="${x(jev.acc)}" x2="${x(jev.acc)}" y1="${top - 4}" y2="${H - 22}"/><text x="${x(jev.acc) + 4}" y="${H - 26}" font-size="11">Jev 1.13 ${pct(jev.acc)}</text>`;
+  ms.forEach((m, i) => {
+    const cy = top + rowH * i + rowH / 2 + 4;
+    s += `<g class="row" data-i="${i}"><rect x="0" y="${cy - rowH / 2}" width="${W}" height="${rowH}" fill="transparent"/>
+      <text class="label" x="${left - 10}" y="${cy + 4}" text-anchor="end">${esc(m.display)}</text>
+      <line class="ci" x1="${x(m.ci95[0])}" x2="${x(m.ci95[1])}" y1="${cy}" y2="${cy}"/>
+      <circle class="dot" cx="${x(m.acc)}" cy="${cy}" r="5"/><text class="value" x="${x(m.ci95[1]) + 6}" y="${cy + 4}">${pct(m.acc)}</text></g>`;
+  });
+  $("#chart").innerHTML = s + "</svg>";
+  $("#chart").querySelectorAll(".row").forEach(g => { const m = ms[+g.dataset.i];
+    Tip.bind(g, `<b>${esc(m.display)}</b><br>${pct(m.acc)} (95% ${pct(m.ci95[0])}–${pct(m.ci95[1])})<br>easy ${pct(m.tiers.easy)} · original ${pct(m.tiers.original)} · hard ${pct(m.tiers.hard)}<br>rank ${m.overall_rank} of ${FIELD}`); });
+}
+
+function heat(models) {
+  const ms = models.slice().sort((a, b) => b.acc - a.acc);
+  const fams = Object.keys(ms[0]?.families || {});
+  fams.sort((a, b) => ms.reduce((s, m) => s + (m.families[b] ?? 0), 0) - ms.reduce((s, m) => s + (m.families[a] ?? 0), 0));
+  const step = v => Math.min(6, Math.floor(v * 7));
+  const ink = v => step(v) >= 4 ? "#fff" : "var(--text-primary)";
+  let h = "<thead><tr><th>Model</th>" + fams.map(f => `<th class="fam">${esc(f.replace(/_/g, " "))}</th>`).join("") + "</tr></thead><tbody>";
+  for (const m of ms) h += `<tr><td>${esc(m.display)}</td>` + fams.map(f => { const v = m.families[f];
+    return v == null ? `<td class="cell">–</td>` : `<td class="cell" style="background:var(--seq-${step(v)});color:${ink(v)}" title="${esc(m.display)} · ${esc(f)}: ${pct(v)}">${Math.round(100 * v)}</td>`; }).join("") + "</tr>";
+  $("#heat").innerHTML = h + "</tbody>";
+  $("#legend").innerHTML = "accuracy" + [0, 1, 2, 3, 4, 5, 6].map(i => `<span class="sw" style="background:var(--seq-${i})" title="${Math.round(i / 7 * 100)}–${Math.round((i + 1) / 7 * 100)}%"></span>`).join("") + "0% → 100% (cells show %)";
+}
+
+function field(models, official) {
+  const all = official.map(o => ({name: o.system, acc: o.acc, hard: o.hard, ours: false}))
+    .concat(models.map(m => ({name: m.display + " (this machine)", acc: m.acc, hard: m.tiers.hard, ours: true})))
+    .sort((a, b) => b.acc - a.acc);
+  $("#field").innerHTML = "<thead><tr><th>#</th><th>System</th><th class='num'>Accuracy</th><th class='num'>Hard</th></tr></thead><tbody>" +
+    all.map((s, i) => `<tr${s.ours ? " class='top'" : ""}><td>${i + 1}</td><td>${esc(s.name)}</td><td class="num">${pct(s.acc)}</td><td class="num">${pct(s.hard)}</td></tr>`).join("") + "</tbody>";
+}
+
+fetch("api/bench").then(r => r.json()).then(d => {
+  FIELD = d.field_size;
+  chart(d.models, d.official);
+  SortTable({table: "#tbl", chips: "#chips", cols: COLS, sortKey: "acc"}).render(d.models);
+  heat(d.models);
+  field(d.models, d.official);
+}).catch(e => { $("#chart").textContent = "Could not load the results: " + e.message; });
+</script>
+</body>
+</html>

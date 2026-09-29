@@ -1,0 +1,3 @@
+name = "jev-style-0.8b"
+port = 8103
+command = ["venvs/jevstyle/bin/jev-style", "serve", "--port", "8103", "--backend", "torch", "--device", "cuda"]

@@ -1,0 +1,34 @@
+# environments and third-party checkouts (rebuilt by servers/setup.sh and the notes in servers/models/*.toml)
+.venv/
+__pycache__/
+*.pyc
+servers/venvs/
+servers/src/
+servers/logs/
+servers/mps/
+third_party/
+
+# run records: committed compressed (games.jsonl.xz / decisions.jsonl.xz, see bench/pack_runs.py), never raw
+runs/**/*.jsonl
+runs/**/*.tmp
+runs/_shots/
+runs/*.log
+
+# JevBench item texts: only the 72 "original" items are MIT; the easy and hard tiers are not ours to redistribute.
+# Per-item results (task id, predicted label, probabilities) are kept; the requests with the item text are not.
+runs/jevbench-public-*/*/raw/
+!runs/jevbench-public-*/*/results.jsonl
+
+# machine-specific
+servers/cloudflared-config.proposed.yml
+
+# local UNO runs (not published for now); runs produced elsewhere are packed with bench/pack_runs.py and committed
+runs/20260928-235327_sanity/
+runs/20260928-235341_heuristic4/
+runs/20260929-030721_sanity-challenge/
+runs/20260929-050635_swiss-official/
+runs/20260929-124021_swiss/
+runs/jevbench-public-*/README-uno-comparison-local.md
+runs/jevbench-public-*/comparison.json
+runs/jevbench-public-*/*.run.log
+runs/jevbench-public-*/public_leaderboard.json

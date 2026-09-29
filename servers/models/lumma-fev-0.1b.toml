@@ -1,0 +1,7 @@
+name = "lumma-fev-0.1b"
+port = 8141
+command = ["venvs/d-lumma/bin/python", "adapters/lumma_fev_guarded.py", "--model", "FrontiersMind/Lumma-fev-0.1b", "--revision", "80940010c33352d2f17ae4449565264506117bdb", "--host", "127.0.0.1", "--port", "8141", "--device", "cuda"]
+tokenizer = "FrontiersMind/Lumma-fev-0.1b"
+max_input_tokens = 1400
+max_options = 255
+notes = "authors' lumma-fev-serve (pip lumma-fev==0.1.1, transformers 5.17.0, bf16) on HF FrontiersMind/Lumma-fev-0.1b@80940010c333; wrapper servers/adapters/lumma_fev_guarded.py only turns the model's silent state truncation (state > 1408 tokens) into HTTP 422; rows up to 2048 tokens; up to 255 options"

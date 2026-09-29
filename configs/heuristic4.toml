@@ -1,0 +1,19 @@
+# Four identical heuristic players: each should win ~25%. Seat order is fixed per deal, so the
+# per-seat numbers below also show how much sitting first (P0) is worth.
+[run]
+name = "heuristic4"
+format = "table"
+deals = 2500
+
+[[players]]
+name = "h1"
+type = "heuristic"
+[[players]]
+name = "h2"
+type = "heuristic"
+[[players]]
+name = "h3"
+type = "heuristic"
+[[players]]
+name = "h4"
+type = "heuristic"

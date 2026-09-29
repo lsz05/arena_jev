@@ -1,0 +1,9 @@
+name = "openjev-nli-0.8b"
+port = 8115
+command = ["venvs/a-rsi/bin/python", "adapters/serve.py", "openjev_nli", "--port", "8115", "--device", "cuda"]
+tokenizer = "Qwen/Qwen3.5-0.8B"
+max_input_tokens = 3900
+notes = "adapter servers/adapters/openjev_nli.py: authors' code/openjev_decide.py OpenJev.decide (+ modeling_openjev.OpenJevCrossEncoder) from HF AlexWortega/openjev@26de23c subfolder qwen3.5-0.8b-nli-v2s-long, questions built exactly as JevBench's local_openjev adapter (labels + rubric JSON appended to instructions); NLI cross-encoder, one forward pass per option (cost linear in options), option-order invariant; bf16; 4096 tokens per (state, one option) pair enforced as HTTP 422 (authors' tokenizer would truncate); tokenizer is the subfolder one (tokenizes identically to Qwen/Qwen3.5-0.8B on all 231 JevBench states; the repo root has no tokenizer.json); params include the unused 100.6M Qwen3.5 vision tower the authors' loader keeps"
+
+[env]
+PYTORCH_CUDA_ALLOC_CONF = "expandable_segments:True"  # variable-length inputs fragment the default allocator

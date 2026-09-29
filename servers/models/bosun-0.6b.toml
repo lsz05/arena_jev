@@ -1,0 +1,9 @@
+name = "bosun-0.6b"
+port = 8125
+command = ["venvs/b-bosun/bin/python", "adapters/serve.py", "bosun", "--port", "8125", "--device", "cuda"]
+tokenizer = "${HF_HUB_CACHE}/models--Hanno-Labs--bosun-v3.1-0.6b/snapshots/1d8b6f9611f9b64b514ce8b57cd86398fbc31a3b/tokenizer"  # the repo keeps it in tokenizer/
+max_input_tokens = 32000
+max_options = 255
+notes = "authors' remote code modeling_bosun.BosunForDecision.predict (HF Hanno-Labs/bosun-v3.1-0.6b@1d8b6f9, trust_remote_code) via servers/adapters/bosun.py; base Qwen/Qwen3-0.6B@c1899de + LoRA r16 (PEFT, not merged) + decision-token rows; bf16; transformers 4.57.1 (config says 4.57.0, yanked), peft 0.21.0; tokenizer = repo subfolder tokenizer/; seed 0 row_id '0' (fixed candidate shuffle); 2..255 candidates; native choice/score/noul; no length check in authors' code, base context 40960, ~10 tokens/option overhead"
+[env]
+HF_HUB_OFFLINE = "1"

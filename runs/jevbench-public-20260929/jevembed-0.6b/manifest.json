@@ -1,0 +1,22 @@
+{
+  "adapter": "typesafe",
+  "charged_usd": 0.0,
+  "cost_basis": "local_gpu_gb10",
+  "dataset_hash": "dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51",
+  "delay_s": 0.0,
+  "endpoint": "http://127.0.0.1:8126",
+  "finished_utc": "2026-09-28T18:51:06.703731+00:00",
+  "key_env_used": false,
+  "n_attempted": 231,
+  "n_planned": 231,
+  "price_input_per_m": null,
+  "price_output_per_m": null,
+  "request_options": {},
+  "requested_model": "jevembed-0.6b",
+  "resolved_models": [
+    "jevembed-0.6b",
+    "jevembed-qwen3-embedding-0.6b"
+  ],
+  "run_label": "jevembed-0.6b",
+  "started_utc": "2026-09-28T18:50:55.520285+00:00"
+}

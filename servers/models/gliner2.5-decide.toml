@@ -1,0 +1,11 @@
+name = "gliner2.5-decide"
+port = 8134
+command = ["venvs/c-gliner/bin/python", "adapters/serve.py", "gliner2_5_decide", "--port", "8134"]
+tokenizer = "fastino/GLiNER2.5-Decide"
+max_input_tokens = 384
+notes = "Authors' gliner2==2.0.0 [local] (pip) AutoExtractor on HF fastino/GLiNER2.5-Decide@5a7adf72a23b (servers/src/gliner2.5-decide), FP32, no quantize/compile; one classification task 'decision' with {option: description} labels + the card's `prompt` slot for the instructions, text = state; probabilities = the single-label head's softmax (class_act=softmax, multi_label=True, cls_threshold=0). No hard length limit in the code (DeBERTa-v3 relative positions, nothing truncated; server guard 8192): max_input_tokens=384 keeps request + schema (~7 tokens/option + 10) inside DeBERTa-v3's 512-token window. No option cap in the code"
+
+[env]
+HF_HUB_OFFLINE = "1"
+TRANSFORMERS_OFFLINE = "1"
+TOKENIZERS_PARALLELISM = "false"

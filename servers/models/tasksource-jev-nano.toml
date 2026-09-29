@@ -1,0 +1,6 @@
+name = "tasksource-jev-nano"
+port = 8146
+command = ["venvs/d-pylate/bin/python", "adapters/serve.py", "tasksource_jev_nano", "--port", "8146", "--device", "cuda"]
+tokenizer = "tasksource/tasksource-jev-nano-v0"
+max_input_tokens = 8000
+notes = "model card's PyLate snippet (pylate 1.6.0 installed without its fast-plaid index dependency, which has no aarch64 wheel; sentence-transformers 5.3.0, transformers 5.3.0) on HF tasksource/tasksource-jev-nano-v0@5ee8d27, fp32, T=0.5347 (decision_meta.json); adapter servers/adapters/tasksource_jev_nano.py. The checkpoint's PyLate defaults would silently truncate contexts to 300 and options to 32 tokens (trained 512/64): raised to the 8192 window instead, 422 beyond. choice option text = description else key; noul = options yes/no (criteria descriptions unused); score = levels as options; unlimited options"
