@@ -18,6 +18,7 @@
   --series-1: #2a78d6;
   --series-1-muted: #b7d3f6;
   --accent-ring: #2a78d6;
+  --hl-top: #fde2e8; --hl-first: #c8102e;
   --flag: #b55a2c;
   --good: #0ca30c;
   --card-red: #d63a33;
@@ -42,6 +43,7 @@
     --series-1: #3987e5;
     --series-1-muted: #1c5cab;
     --accent-ring: #6da7ec;
+    --hl-top: #4b2230; --hl-first: #ff7d8f;
     --flag: #ec835a;
     --good: #0ca30c;
     --card-red: #d8453e;
@@ -64,6 +66,7 @@
   --series-1: #3987e5;
   --series-1-muted: #1c5cab;
   --accent-ring: #6da7ec;
+  --hl-top: #4b2230; --hl-first: #ff7d8f;
   --flag: #ec835a;
   --good: #0ca30c;
   --card-red: #d8453e;
@@ -115,7 +118,8 @@ td.num, th.num { text-align: right; }
 .lb-table th:hover { color: var(--text-primary); }
 .lb-table th.on, .lb-table td.on { background: var(--surface-2); }
 .lb-table td { padding: 8px; vertical-align: middle; }
-.lb-table tr.top td { font-weight: 600; }
+.lb-table td.hl3, .lb-table td.hl1 { background: var(--hl-top); }
+.lb-table td.hl1 { color: var(--hl-first); font-weight: 700; }
 .lb-table td small { display: block; font-size: 11px; color: var(--text-muted); font-weight: 400; }
 .rk { display: inline-flex; width: 26px; height: 26px; border-radius: 50%; align-items: center; justify-content: center;
   font-weight: 700; font-size: 13px; border: 1px solid var(--border); }
@@ -517,6 +521,16 @@ function renderLeaderboard() {
   let h = "<thead><tr>" + cols.map(([t, k], i) => `<th class="${i > 1 ? "num" : ""} ${on(k)}" ${k ? `data-k="${k}" ${defTip(k)}` : ""}>${t}${k === key ? (dir < 0 ? " ↓" : " ↑") : ""}</th>`).join("") + "</tr></thead><tbody>";
   const dash = `<span class="muted">–</span>`;
   const f = (v, fn) => v == null ? dash : fn(v);
+  // per metric: the best value red and bold on pink, the rest of the top 3 on pink (the metric's own direction)
+  const DIR = Object.fromEntries(LB_METRICS.map(m => [m.key, m.dir]));
+  const vals = k => rows.map(r => r[k]).filter(v => v != null);
+  const PLACES = Object.fromEntries(Object.keys(DIR).filter(k => k !== "params" && k !== "games" && new Set(vals(k)).size > 1)
+    .map(k => [k, vals(k)]));  // a column whose values are all the same has nothing to point out
+  const hl = (k, r) => {
+    if (!PLACES[k] || r[k] == null) return "";
+    const n = 1 + PLACES[k].filter(x => DIR[k] < 0 ? x > r[k] : x < r[k]).length;
+    return n === 1 ? "hl1" : n <= 3 ? "hl3" : "";
+  };
   let rank = 0;
   for (const r of rows) {
     const has = r[key] != null;
@@ -526,19 +540,19 @@ function renderLeaderboard() {
       : `<span title="${r.params.toLocaleString("en-US")} parameters · ${esc(r.params_source || "")}${r.params_measured ? " · counted at load time" : " · from the weight files"}">${(r.params / 1e6).toFixed(2)}M</span>`;
     const repo = r.repo ? `<div class="mrepo"><a href="https://huggingface.co/${esc(r.repo)}" target="_blank" rel="noopener">${esc(r.repo)}</a></div>` : "";
     const games = `${r.games}` + (target ? `<span class="gbar" title="${r.games} / ${target}"><span style="width:${Math.min(100, 100 * r.games / target).toFixed(1)}%"></span></span>` : "");
-    h += `<tr class="${has && rank <= 3 ? "top" : ""}">
+    h += `<tr>
       <td>${rk}</td>
       <td><div class="mname">${esc(r.display)}${r.caveat ? ` <span class="caveat" tabindex="0" role="img" aria-label="Caveat: ${esc(r.caveat)}" data-tip="${esc(r.caveat)}">⚠</span>` : ""}</div>${repo}</td>
       <td class="num ${on("params")}">${size}</td>
       <td class="num ${on("games")}">${games}</td>
-      <td class="num ${on("ts_score")}">${f(r.ts_score, v => `${v.toFixed(1)}<small>μ ${r.ts_mu.toFixed(1)} ± ${r.ts_sigma.toFixed(1)}</small>`)}</td>
-      <td class="num ${on("win_rate")}">${f(r.win_rate, v => `${pct(v)}<small>${pct(r.win_rate_ci95[0])}–${pct(r.win_rate_ci95[1])}</small>`)}</td>
-      <td class="num ${on("avg_points_won")}">${f(r.avg_points_won, v => v.toFixed(1))}</td>
-      <td class="num ${on("avg_points_left")}">${f(r.avg_points_left, v => v.toFixed(1))}</td>
-      <td class="num ${on("jb_acc")}">${f(r.jb_acc, v => pct(v))}</td>
-      <td class="num ${on("jb_hard")}">${f(r.jb_hard, v => pct(v))}</td>
-      <td class="num ${on("memory_rounds")}">${f(r.memory_rounds, v => `${v.toFixed(2)}<small>${r.max_input_tokens ? `limit ${r.max_input_tokens.toLocaleString("en-US")} tok` : "rounds"}</small>`)}</td>
-      <td class="num ${on("latency_ms")}">${f(r.latency_ms, v => Math.round(v) + " ms")}</td>
+      <td class="num ${on("ts_score")} ${hl("ts_score", r)}">${f(r.ts_score, v => `${v.toFixed(1)}<small>μ ${r.ts_mu.toFixed(1)} ± ${r.ts_sigma.toFixed(1)}</small>`)}</td>
+      <td class="num ${on("win_rate")} ${hl("win_rate", r)}">${f(r.win_rate, v => `${pct(v)}<small>${pct(r.win_rate_ci95[0])}–${pct(r.win_rate_ci95[1])}</small>`)}</td>
+      <td class="num ${on("avg_points_won")} ${hl("avg_points_won", r)}">${f(r.avg_points_won, v => v.toFixed(1))}</td>
+      <td class="num ${on("avg_points_left")} ${hl("avg_points_left", r)}">${f(r.avg_points_left, v => v.toFixed(1))}</td>
+      <td class="num ${on("jb_acc")} ${hl("jb_acc", r)}">${f(r.jb_acc, v => pct(v))}</td>
+      <td class="num ${on("jb_hard")} ${hl("jb_hard", r)}">${f(r.jb_hard, v => pct(v))}</td>
+      <td class="num ${on("memory_rounds")} ${hl("memory_rounds", r)}">${f(r.memory_rounds, v => `${v.toFixed(2)}<small>${r.max_input_tokens ? `limit ${r.max_input_tokens.toLocaleString("en-US")} tok` : "rounds"}</small>`)}</td>
+      <td class="num ${on("latency_ms")} ${hl("latency_ms", r)}">${f(r.latency_ms, v => Math.round(v) + " ms")}</td>
     </tr>`;
   }
   $("#lbtable").innerHTML = h + "</tbody>";

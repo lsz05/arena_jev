@@ -12,6 +12,7 @@
   --series-1-muted: #b7d3f6;
   --accent-ring: #2a78d6;
   --good: #0ca30c;
+  --hl-top: #fde2e8; --hl-first: #c8102e;
   --seq-0: #f0f5fd; --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5; --seq-5: #256abf; --seq-6: #184f95;
 }
 @media (prefers-color-scheme: dark) {
@@ -20,6 +21,7 @@
     --surface-0: #121211; --surface-1: #1a1a19; --surface-2: #242422; --border: #3a3a37; --grid: #2e2e2b;
     --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #9a998f;
     --series-1: #3987e5; --series-1-muted: #1c5cab; --accent-ring: #6da7ec;
+    --hl-top: #4b2230; --hl-first: #ff7d8f;
     --seq-0: #1d2633; --seq-1: #104281; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #2a78d6; --seq-5: #5598e7; --seq-6: #9ec5f4;
   }
 }
@@ -28,6 +30,7 @@
   --surface-0: #121211; --surface-1: #1a1a19; --surface-2: #242422; --border: #3a3a37; --grid: #2e2e2b;
   --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #9a998f;
   --series-1: #3987e5; --series-1-muted: #1c5cab; --accent-ring: #6da7ec;
+  --hl-top: #4b2230; --hl-first: #ff7d8f;
   --seq-0: #1d2633; --seq-1: #104281; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #2a78d6; --seq-5: #5598e7; --seq-6: #9ec5f4;
 }
 * { box-sizing: border-box; }
@@ -63,6 +66,8 @@ td.num, th.num { text-align: right; }
 td small { display: block; font-size: 11px; color: var(--text-muted); font-weight: 400; }
 .sortable th[data-k] { cursor: pointer; user-select: none; }
 .sortable th.on, .sortable td.on { background: var(--surface-2); }
+.sortable td.hl3, .sortable td.hl1 { background: var(--hl-top); }
+.sortable td.hl1 { color: var(--hl-first); font-weight: 700; }
 .sortable th.grp { text-align: center; color: var(--text-primary); font-size: 13px; border-bottom: 2px solid var(--border); }
 .sortable th[rowspan] { vertical-align: bottom; }
 .sortable .gstart { border-left: 1px solid var(--border); }
@@ -78,7 +83,6 @@ td small { display: block; font-size: 11px; color: var(--text-muted); font-weigh
   font-weight: 700; font-size: 13px; border: 1px solid var(--border); }
 .rk1 { background: var(--series-1); border-color: var(--series-1); color: #fff; }
 .rk2, .rk3 { background: var(--series-1-muted); border-color: var(--series-1-muted); color: var(--text-primary); }
-tr.top td { font-weight: 600; }
 .mname { font-weight: 600; }
 .caveat, .has-tip { cursor: help; }
 .caveat { color: var(--text-secondary); font-weight: 400; }

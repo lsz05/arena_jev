@@ -36,10 +36,10 @@ initTheme();
 const J = "JevBench 231", U = "UNO", C = "Connect Four";
 const COLS = [
   {key: "display", label: "Model", cell: modelCell},
-  {key: "params", label: "Size", num: true, rank: true, dir: 1, cell: sizeCell},
+  {key: "params", label: "Size", num: true, rank: true, dir: 1, hl: false, cell: sizeCell},
   {key: "jb_acc", group: J, label: "Accuracy", num: true, rank: true, title: "all 231 public items", cell: r => fmt(r.jb_acc, v => pct(v))},
   {key: "jb_hard", group: J, label: "Hard", num: true, rank: true, title: "the 111 hard items", cell: r => fmt(r.jb_hard, v => pct(v))},
-  {key: "games", group: U, label: "Games", num: true, rank: true, cell: r => `${r.games}` + (TARGET ? `<span class="gbar" title="${r.games} / ${TARGET}"><span style="width:${Math.min(100, 100 * r.games / TARGET).toFixed(1)}%"></span></span>` : "")},
+  {key: "games", group: U, label: "Games", num: true, rank: true, hl: false, cell: r => `${r.games}` + (TARGET ? `<span class="gbar" title="${r.games} / ${TARGET}"><span style="width:${Math.min(100, 100 * r.games / TARGET).toFixed(1)}%"></span></span>` : "")},
   {key: "ts_score", group: U, label: "TrueSkill", num: true, rank: true, title: "μ − 3σ", cell: r => fmt(r.ts_score, v => `${v.toFixed(1)}<small>μ ${r.ts_mu.toFixed(1)} ± ${r.ts_sigma.toFixed(1)}</small>`)},
   {key: "win_rate", group: U, label: "Win rate", num: true, rank: true, cell: r => fmt(r.win_rate, v => `${pct(v)}<small>${pct(r.win_rate_ci95[0])}–${pct(r.win_rate_ci95[1])}</small>`)},
   {key: "avg_points_won", group: U, label: "Pts won", num: true, rank: true, cell: r => fmt(r.avg_points_won, v => v.toFixed(1))},

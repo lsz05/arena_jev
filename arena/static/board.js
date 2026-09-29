@@ -54,7 +54,8 @@ function defsList(cols, extra = []) {
 
 // A sortable, rankable table. cols: [{key, label, dir (-1 high first), cell(row) -> html, num, rank (bool: can rank by),
 // group (optional: consecutive columns with the same group share a heading row above their labels),
-// tip (optional: the metric's definition, shown on hover over its header and chip, and listed by defsList)}]
+// tip (optional: the metric's definition, shown on hover over its header and chip, and listed by defsList),
+// hl (false: no top-3 highlighting, for columns that are not a measure of quality such as size or game count)}]
 // opts.groupTips: {group name: definition} for the group headings.
 function SortTable(opts) {
   const state = {key: opts.sortKey, dir: opts.sortDir ?? -1};
@@ -107,12 +108,24 @@ function SortTable(opts) {
       h += top + "</tr>" + bottom + "</tr>";
     }
     h += "</thead><tbody>";
+    // per metric: its best value in red bold on a pink ground, the rest of its top 3 on pink (ties share a place;
+    // "best" follows the metric's own direction, not the current sort). hl: false leaves a column plain, and so does
+    // a column whose values are all the same.
+    const place = {};
+    for (const c of opts.cols.filter(c => c.rank && c.hl !== false)) {
+      const get = r => c.value ? c.value(r) : r[c.key];
+      const vals = rows.map(get).filter(v => v != null && !Number.isNaN(v));
+      if (new Set(vals).size < 2) continue;  // every value the same (e.g. no fallbacks at all): nothing to point out
+      const better = (c.dir ?? -1) < 0 ? (a, b) => a > b : (a, b) => a < b;
+      place[c.key] = r => { const v = get(r); return v == null ? 0 : 1 + vals.filter(x => better(x, v)).length; };
+    }
+    const hl = (c, r) => { const k = place[c.key] ? place[c.key](r) : 0; return k === 1 ? "hl1" : k > 1 && k <= 3 ? "hl3" : ""; };
     let rank = 0;
     for (const r of sorted) {
       const has = val(r) != null;
       if (has) rank += 1;
-      h += `<tr class="${has && rank <= 3 ? "top" : ""}"><td>${has ? `<span class="rk rk${rank <= 3 ? rank : ""}">${rank}</span>` : dash}</td>` +
-        opts.cols.map(c => `<td class="${cls(c)}">${c.cell(r)}</td>`).join("") + "</tr>";
+      h += `<tr><td>${has ? `<span class="rk rk${rank <= 3 ? rank : ""}">${rank}</span>` : dash}</td>` +
+        opts.cols.map(c => `<td class="${cls(c)} ${hl(c, r)}">${c.cell(r)}</td>`).join("") + "</tr>";
     }
     $(opts.table).innerHTML = h + "</tbody>";
     $(opts.table).querySelectorAll("th[data-k]").forEach(th => th.onclick = () => pick(th.dataset.k));

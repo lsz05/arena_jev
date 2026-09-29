@@ -50,7 +50,7 @@ initTheme();
 const tierCell = t => r => fmt(r.tiers[t], v => pct(v));
 const COLS = [
   {key: "display", label: "Model", cell: modelCell},
-  {key: "params", label: "Size", num: true, rank: true, dir: 1, cell: sizeCell,
+  {key: "params", label: "Size", num: true, rank: true, dir: 1, hl: false, cell: sizeCell,
    tip: "Parameters held by the model's server after its own load code, counted at load time (every tensor once). Hover a size for the exact count."},
   {key: "acc", label: "Accuracy", num: true, rank: true, cell: r => `${pct(r.acc)}<small>${pct(r.ci95[0])}–${pct(r.ci95[1])}</small>`,
    tip: "Share of the 231 public items answered correctly; below, the 95% interval (bootstrap over scenarios: paraphrases of one scenario are resampled together)."},

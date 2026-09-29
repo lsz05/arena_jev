@@ -123,7 +123,7 @@ const wdl = x => `${x.wins}-${x.draws}-${x.losses}`;
 const rateCell = (v, n) => v == null ? dash : `${pct(v)}<small>of ${n}</small>`;
 const SUM_COLS = [
   {key: "name", label: "Player", cell: p => `<b>${esc(p.name)}</b>`},
-  {key: "games", label: "Games", tip: "Games played in this match or league.",  num: true, rank: true, cell: p => p.games},
+  {key: "games", label: "Games", tip: "Games played in this match or league.", num: true, rank: true, hl: false, cell: p => p.games},
   {key: "score", label: "Points", tip: "Win 1, draw 0.5, loss 0, averaged over the games played (the league ranking); below, wins-draws-losses.",  num: true, rank: true, cell: p => `${fmt(p.score, v => pct(v))}<small>${wdl(p)}</small>`},
   {key: "ts_score", label: "TrueSkill", tip: "Conservative rating μ − 3σ from every game, a draw counting as a tie; below, μ and σ.",  num: true, rank: true, cell: p => fmt(p.ts_score, v => `${v.toFixed(1)}<small>μ ${p.ts_mu.toFixed(1)} ± ${p.ts_sigma.toFixed(1)}</small>`)},
   {key: "first_score", label: "As first", tip: "Wins-draws-losses when moving first.",  num: true, rank: true, value: p => p.games ? (p.as_first.wins + p.as_first.draws / 2) / Math.max(1, p.as_first.wins + p.as_first.draws + p.as_first.losses) : null, cell: p => wdl(p.as_first)},
