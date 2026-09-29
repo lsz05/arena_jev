@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 import mimetypes
+import re
+import hashlib
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
@@ -33,9 +35,10 @@ class Site:
         if target == "latest":
             runs = sorted(RUNS.glob("*_swiss"))
             target = str(runs[-1]) if runs else None
-        if target and (self.uno_dir is None or Path(target) != self.uno_dir):
-            if (Path(target) / "games.jsonl").exists():
-                self.uno, self.uno_dir = UnoApp(target), Path(target)
+        if not target or not (Path(target) / "games.jsonl").exists():
+            self.uno, self.uno_dir = None, None  # no run (any more): never serve a stale one from memory
+        elif self.uno_dir is None or Path(target) != self.uno_dir:
+            self.uno, self.uno_dir = UnoApp(target), Path(target)
         return self.uno
 
     def board(self) -> dict:
@@ -75,11 +78,20 @@ class Site:
         return 404, "text/plain", b"not found"
 
     @staticmethod
+    def version(name: str) -> str:
+        f = STATIC / name
+        return hashlib.sha1(f.read_bytes()).hexdigest()[:10] if f.is_file() else "0"
+
+    @staticmethod
     def static(name: str) -> Response:
         path = (STATIC / name).resolve()
         if STATIC.resolve() not in path.parents or not path.is_file():
             return 404, "text/plain", b"not found"
         ctype = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+        if path.suffix == ".html":  # versioned asset URLs, so cached copies of an older file are never used
+            text = re.sub(r"(static/)([\w.-]+\.(?:js|css))",
+                          lambda m: f"{m.group(1)}{m.group(2)}?v={Site.version(m.group(2))}", path.read_text())
+            return 200, "text/html; charset=utf-8", text.encode()
         if ctype.startswith("text/") or ctype in ("application/javascript",):
             ctype += "; charset=utf-8"
         return 200, ctype, path.read_bytes()

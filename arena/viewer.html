@@ -358,6 +358,14 @@ function moveTip(e) {
   tip.style.left = x + "px"; tip.style.top = y + "px";
 }
 function hideTip() { tip.style.display = "none"; }
+// Any element with data-tip shows it in the tooltip: on hover, on keyboard focus, and on tap (touch screens have no hover).
+function tipAt(el) { const b = el.getBoundingClientRect(); return {clientX: b.left, clientY: b.bottom}; }
+document.addEventListener("mouseover", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el) showTip(e, esc(el.dataset.tip)); });
+document.addEventListener("mousemove", e => { if (e.target.closest && e.target.closest("[data-tip]")) moveTip(e); });
+document.addEventListener("mouseout", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el && !el.contains(e.relatedTarget)) hideTip(); });
+document.addEventListener("focusin", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el) showTip(tipAt(el), esc(el.dataset.tip)); });
+document.addEventListener("focusout", () => hideTip());
+document.addEventListener("click", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el) showTip(tipAt(el), esc(el.dataset.tip)); else hideTip(); });
 
 // ---------- results ----------
 let RUN = null, GAMES = [], current = null;
@@ -492,7 +500,7 @@ function renderLeaderboard() {
     const games = `${r.games}` + (target ? `<span class="gbar" title="${r.games} / ${target}"><span style="width:${Math.min(100, 100 * r.games / target).toFixed(1)}%"></span></span>` : "");
     h += `<tr class="${has && rank <= 3 ? "top" : ""}">
       <td>${rk}</td>
-      <td><div class="mname">${esc(r.display)}${r.caveat ? ` <span class="caveat" title="${esc(r.caveat)}">⚠</span>` : ""}</div>${repo}</td>
+      <td><div class="mname">${esc(r.display)}${r.caveat ? ` <span class="caveat" tabindex="0" role="img" aria-label="Caveat: ${esc(r.caveat)}" data-tip="${esc(r.caveat)}">⚠</span>` : ""}</div>${repo}</td>
       <td class="num ${on("params")}">${size}</td>
       <td class="num ${on("games")}">${games}</td>
       <td class="num ${on("ts_score")}">${f(r.ts_score, v => `${v.toFixed(1)}<small>μ ${r.ts_mu.toFixed(1)} ± ${r.ts_sigma.toFixed(1)}</small>`)}</td>

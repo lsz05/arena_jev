@@ -104,6 +104,7 @@ def make_handler(route, allowed_hosts: list[str] | None):
             self.send_response(code)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-cache")  # revalidate: a proxy (Cloudflare) must not serve stale pages
             self.end_headers()
             self.wfile.write(body)
 
