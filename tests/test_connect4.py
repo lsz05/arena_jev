@@ -170,3 +170,64 @@ def test_replay_frames_rebuild_the_requests(tmp_path):
             replay.frames(run, "nope")
     finally:
         server.shutdown()
+
+
+def test_defend_hint_is_optional_and_replayed(tmp_path):
+    from arena.connect4 import replay
+    g = game_of("1122")
+    d = g.decision()
+    plain, hinted = render.question(g, d, "B"), render.question(g, d, "B", hint="defend")
+    assert plain.instructions == render.INSTRUCTIONS and hinted.instructions.startswith(render.INSTRUCTIONS + " While you")
+    with pytest.raises(ValueError):
+        render.question(g, d, "B", hint="nope")
+    server = serve(port=0, background=True)
+    try:
+        url = f"http://127.0.0.1:{server.server_address[1]}"
+        run = tmp_path / "20260101-000000_c4-mock-vs-heuristic-defend"
+        run.mkdir()
+        decs = []
+        rec = play_game([SystemOnePlayer("mock", SystemOneClient(url), hint="defend"), HeuristicPlayer()], (3,), 5, "G00-ab",
+                        on_decision=decs.append, hint="defend")
+        assert rec["rules"] == {"template": "B", "hint": "defend"}
+        (run / "games.jsonl").write_text(json.dumps(rec) + "\n")
+        (run / "decisions.jsonl").write_text("".join(json.dumps(x) + "\n" for x in decs))
+        frames = replay.frames(run, "G00-ab")["frames"]
+        asked = [f for f in frames if f.get("calls")]
+        assert asked and all(f["matches_log"] and "block that column" in f["request"]["questions"]["move"]["instructions"]
+                             for f in asked)
+        assert all("threat_cols" in x["diag"] for x in decs)
+    finally:
+        server.shutdown()
+
+
+def test_league_plays_every_pair_and_resumes(tmp_path):
+    from arena.connect4.league import League
+    from arena.connect4.replay import list_runs
+    config = {"league": True, "openings": 7, "template": "B", "policy": "argmax", "hint": None, "pair_workers": 3,
+              "seed": 1}
+    out = tmp_path / "20260101-000000_c4-league"
+    out.mkdir()
+    (out / "games.jsonl").touch()
+    (out / "decisions.jsonl").touch()
+    (out / "config.json").write_text(json.dumps({**config, "players": ["h1", "h2", "r1", "r2"]}))
+    players = {"h1": HeuristicPlayer("h1"), "h2": HeuristicPlayer("h2"), "r1": RandomPlayer("r1"), "r2": RandomPlayer("r2")}
+    league = League(out, players, config)
+    league.run()
+    games = [json.loads(line) for line in open(out / "games.jsonl")]
+    assert len(games) == 6 * 14 and len({g["game"] for g in games}) == len(games)
+    pairs = {tuple(sorted(g["players"])) for g in games}
+    assert len(pairs) == 6
+    summary = json.loads((out / "summary.json").read_text())
+    assert summary["games"] == 84 and all(p["games"] == 42 for p in summary["players"].values())
+    assert summary["players"]["h1"]["ts_score"] > summary["players"]["r1"]["ts_score"]
+    assert json.loads((out / "status.json").read_text())["state"] == "done"
+    assert list_runs(tmp_path)[0]["games"] == 84
+    # resume: drop the last pair and play it again
+    last_pair = games[-1]["pair"]
+    kept = [g for g in games if g["pair"] != last_pair]
+    (out / "games.jsonl").write_text("".join(json.dumps(g) + "\n" for g in kept))
+    again = League(out, players, config)
+    again.restore()
+    assert len(again.done) == 5 and again.games == 70
+    again.run()
+    assert sum(1 for _ in open(out / "games.jsonl")) == 84

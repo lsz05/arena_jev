@@ -8,6 +8,7 @@
     python -m arena viz runs/<dir> [--port 8200]            browse results and replay games
     python -m arena viz runs/<dir> --export out.html        one self-contained HTML file with a few replays
     python -m arena c4 <model-a> <model-b> [--openings 7]    Connect Four match between two players
+    python -m arena c4-league [--openings 7]                 Connect Four league over every model server
     python -m arena c4-show runs/<dir> [--game G00-ab]       replay a Connect Four game in the terminal
 """
 
@@ -69,9 +70,21 @@ def main() -> None:
     c4.add_argument("--openings", type=int, default=7, help="0: empty board only; 7: every first move; 49: every first two")
     c4.add_argument("--template", default="B", choices=["A", "B"])
     c4.add_argument("--policy", default="argmax", choices=["argmax", "sample"])
+    c4.add_argument("--hint", choices=["defend"], help="append a strategy hint to the instructions (default: none)")
     c4.add_argument("--workers", type=int, default=4, help="games played at the same time")
     c4.add_argument("--seed", type=int, default=20260929)
     c4.add_argument("--out", default="runs")
+    lg = sub.add_parser("c4-league", help="Connect Four league: every pair of model servers, every opening, both colors")
+    lg.add_argument("--models", help="comma-separated model names (default: every servers/models/*.toml that answers)")
+    lg.add_argument("--exclude", help="comma-separated model names to leave out")
+    lg.add_argument("--openings", type=int, default=7, help="0, 7 or 49 openings per pair, each with both colors")
+    lg.add_argument("--template", default="B", choices=["A", "B"])
+    lg.add_argument("--policy", default="argmax", choices=["argmax", "sample"])
+    lg.add_argument("--hint", choices=["defend"])
+    lg.add_argument("--pair-workers", type=int, default=4, help="games of one pair played at the same time")
+    lg.add_argument("--seed", type=int, default=20260929)
+    lg.add_argument("--out", default="runs")
+    lg.add_argument("--resume", metavar="RUN_DIR", help="continue a stopped league (its own settings are used)")
     c4s = sub.add_parser("c4-show", help="replay a Connect Four game in the terminal")
     c4s.add_argument("run_dir")
     c4s.add_argument("--game")
@@ -79,7 +92,13 @@ def main() -> None:
     a = ap.parse_args()
     if a.cmd == "c4":
         from .connect4.match import run as c4_run
-        c4_run(a.a, a.b, a.openings, a.template, a.policy, a.workers, a.seed, a.out)
+        c4_run(a.a, a.b, a.openings, a.template, a.policy, a.workers, a.seed, a.out, hint=a.hint)
+        return
+    if a.cmd == "c4-league":
+        from .connect4.league import run as league_run
+        split = lambda v: [x.strip() for x in v.split(",") if x.strip()] if v else None  # noqa: E731
+        league_run(split(a.models), split(a.exclude), a.openings, a.template, a.policy, a.hint, a.pair_workers, a.seed,
+                   a.out, a.resume)
         return
     if a.cmd == "c4-show":
         from .connect4.match import show

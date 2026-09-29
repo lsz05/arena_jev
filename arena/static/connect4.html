@@ -57,13 +57,17 @@ pre.req { background: var(--surface-2); border-radius: 6px; padding: 10px; font-
       A model sees the board from its own side (its discs are X) and chooses among the legal columns; the options say where
       the disc lands, with no hints about wins or blocks.</p>
     <div class="pickrow"><label for="run" class="muted">Match</label><select id="run"></select></div>
-    <div class="scroll-x"><table id="sum"></table></div>
-    <div class="note">Took win: share of the moves where a column would have won at once and the model played it. Blocked: share of the
+    <div class="chips" id="sumchips"></div>
+    <div class="scroll-x"><table id="sum" class="sortable"></table></div>
+    <div class="note">Points: win 1, draw 0.5, per game (the league ranking). TrueSkill: conservative rating μ − 3σ.
+      P on block: the probability the model gave the blocking column(s) when it had to block, next to the chance level
+      (the share of legal columns that block). Took win: share of the moves where a column would have won at once and the model played it. Blocked: share of the
       moves where the opponent threatened to win at once (and the model could not win itself) and the model blocked it.
       Let win on top: share of moves after which the opponent could win by playing on top of the new disc.</div>
   </section>
   <section>
     <h2>Games</h2>
+    <div class="pickrow"><label for="gfilter" class="muted">Player</label><select id="gfilter"></select><span id="gcount" class="muted"></span></div>
     <div class="scroll-x" style="max-height: 320px; overflow-y: auto"><table id="games"></table></div>
   </section>
   <section id="replay">
@@ -112,37 +116,61 @@ async function loadRuns() {
   S.runs = (await (await fetch("api/runs")).json()).runs;
   const sel = $("#run");
   if (!S.runs.length) { $("#sum").innerHTML = "<tbody><tr><td>No Connect Four match yet: run <code>python -m arena c4 A B</code>.</td></tr></tbody>"; return; }
-  sel.innerHTML = S.runs.map(r => `<option value="${esc(r.run)}">${esc(r.a)} vs ${esc(r.b)} · ${r.games} games · ${when(r.run)}</option>`).join("");
+  sel.innerHTML = S.runs.map(r => `<option value="${esc(r.run)}">${r.league ? `League · ${Object.keys(r.players).length} models` : `${esc(r.a)} vs ${esc(r.b)}`} · ${r.games} games${r.state === "running" ? " (running)" : ""}${r.hint ? " · hint: " + esc(r.hint) : ""} · ${when(r.run)}</option>`).join("");
   const want = hashArgs().run;
   sel.value = S.runs.some(r => r.run === want) ? want : S.runs[0].run;
   sel.onchange = () => loadRun(sel.value);
   await loadRun(sel.value, hashArgs());
 }
 
+const wdl = x => `${x.wins}-${x.draws}-${x.losses}`;
+const rateCell = (v, n) => v == null ? dash : `${pct(v)}<small>of ${n}</small>`;
+const SUM_COLS = [
+  {key: "name", label: "Player", cell: p => `<b>${esc(p.name)}</b>`},
+  {key: "games", label: "Games", num: true, rank: true, cell: p => p.games},
+  {key: "score", label: "Points", num: true, rank: true, title: "win 1, draw 0.5, per game", cell: p => `${fmt(p.score, v => pct(v))}<small>${wdl(p)}</small>`},
+  {key: "ts_score", label: "TrueSkill", num: true, rank: true, title: "μ − 3σ", cell: p => fmt(p.ts_score, v => `${v.toFixed(1)}<small>μ ${p.ts_mu.toFixed(1)} ± ${p.ts_sigma.toFixed(1)}</small>`)},
+  {key: "first_score", label: "As first", num: true, rank: true, value: p => p.games ? (p.as_first.wins + p.as_first.draws / 2) / Math.max(1, p.as_first.wins + p.as_first.draws + p.as_first.losses) : null, cell: p => wdl(p.as_first)},
+  {key: "second_score", label: "As second", num: true, rank: true, value: p => p.games ? (p.as_second.wins + p.as_second.draws / 2) / Math.max(1, p.as_second.wins + p.as_second.draws + p.as_second.losses) : null, cell: p => wdl(p.as_second)},
+  {key: "took_immediate_win", label: "Took win", num: true, rank: true, cell: p => rateCell(p.took_immediate_win, p.chances_to_win)},
+  {key: "blocked_immediate_threat", label: "Blocked", num: true, rank: true, cell: p => rateCell(p.blocked_immediate_threat, p.threats_to_block)},
+  {key: "p_on_block", label: "P on block", num: true, rank: true, title: "probability given to the blocking column; chance level below",
+   cell: p => fmt(p.p_on_block, v => `${v.toFixed(3)}<small>chance ${fmt(p.p_on_block_chance, c => c.toFixed(3))}</small>`)},
+  {key: "let_opponent_win_on_top", label: "Let win on top", num: true, rank: true, dir: 1, cell: p => fmt(p.let_opponent_win_on_top, v => pct(v))},
+  {key: "fallbacks", label: "Fallbacks", num: true, rank: true, dir: 1, cell: p => p.fallbacks},
+  {key: "avg_latency_ms", label: "Latency", num: true, rank: true, dir: 1, cell: p => fmt(p.avg_latency_ms, v => Math.round(v) + " ms")},
+];
+let SUM_TABLE = null;
 function summary(r) {
-  const wdl = x => `${x.wins}-${x.draws}-${x.losses}`;
-  const rate = (v, n) => v == null ? dash : `${pct(v)}<small>of ${n}</small>`;
-  $("#sum").innerHTML = `<thead><tr><th>Player</th><th class="num">W-D-L</th><th class="num">Score</th><th class="num">As first</th>
-    <th class="num">As second</th><th class="num">Took win</th><th class="num">Blocked</th><th class="num">Let win on top</th>
-    <th class="num">Fallbacks</th><th class="num">Latency</th></tr></thead><tbody>` +
-    Object.entries(r.players).map(([name, p]) => `<tr><td><b>${esc(name)}</b></td><td class="num">${wdl(p)}</td>
-      <td class="num">${fmt(p.score, v => pct(v))}</td><td class="num">${wdl(p.as_first)}</td><td class="num">${wdl(p.as_second)}</td>
-      <td class="num">${rate(p.took_immediate_win, p.chances_to_win)}</td><td class="num">${rate(p.blocked_immediate_threat, p.threats_to_block)}</td>
-      <td class="num">${fmt(p.let_opponent_win_on_top, v => pct(v))}</td><td class="num">${p.fallbacks}</td>
-      <td class="num">${fmt(p.avg_latency_ms, v => Math.round(v) + " ms")}</td></tr>`).join("") + "</tbody>";
+  const rows = Object.entries(r.players).map(([name, p]) => ({name, display: name, ...p}));
+  const hasTs = rows.some(p => p.ts_score != null);
+  SUM_TABLE = SortTable({table: "#sum", chips: r.league ? "#sumchips" : null, cols: SUM_COLS.filter(c => hasTs || c.key !== "ts_score"), sortKey: "score"});
+  SUM_TABLE.render(rows);
 }
 
 async function loadRun(run, args = {}) {
   S.run = run;
   summary(S.runs.find(r => r.run === run));
   S.games = (await (await fetch(`api/run/${encodeURIComponent(run)}/games`)).json()).games;
+  const names = [...new Set(S.games.flatMap(g => g.players))].sort();
+  $("#gfilter").innerHTML = `<option value="">all players</option>` + names.map(n => `<option>${esc(n)}</option>`).join("");
+  $("#gfilter").onchange = gameTable;
+  gameTable();
+  const g = S.games.some(x => x.game === args.game) ? args.game : S.games[0]?.game;
+  if (g) await loadGame(g, +args.ply || 0);
+}
+
+const MAX_ROWS = 600;
+function gameTable() {
+  const who = $("#gfilter").value;
+  const list = who ? S.games.filter(g => g.players.includes(who)) : S.games;
+  $("#gcount").textContent = list.length > MAX_ROWS ? `showing ${MAX_ROWS} of ${list.length} games; pick a player to narrow the list` : `${list.length} games`;
   $("#games").innerHTML = `<thead><tr><th>Game</th><th>Opening</th><th>First</th><th>Second</th><th>Winner</th><th class="num">Moves</th></tr></thead><tbody>` +
-    S.games.map(g => `<tr data-g="${esc(g.game)}"><td>${esc(g.game)}</td><td>${g.opening.length ? g.opening.join(", ") : "none"}</td>
+    list.slice(0, MAX_ROWS).map(g => `<tr data-g="${esc(g.game)}"><td>${esc(g.game)}</td><td>${g.opening.length ? g.opening.join(", ") : "none"}</td>
       <td><span class="dot first"></span>${esc(g.players[0])}</td><td><span class="dot second"></span>${esc(g.players[1])}</td>
       <td>${g.winner == null ? "draw" : `<span class="dot ${SIDE[g.winner_seat]}"></span>${esc(g.winner)}`}</td><td class="num">${g.plies}</td></tr>`).join("") + "</tbody>";
   $("#games").querySelectorAll("tbody tr").forEach(tr => tr.onclick = () => { loadGame(tr.dataset.g); $("#replay").scrollIntoView({behavior: "smooth"}); });
-  const g = S.games.some(x => x.game === args.game) ? args.game : S.games[0]?.game;
-  if (g) await loadGame(g, +args.ply || 0);
+  if (S.data) $("#games").querySelectorAll("tbody tr").forEach(tr => tr.classList.toggle("sel", tr.dataset.g === S.data.meta.game));
 }
 
 async function loadGame(gid, ply = 0) {

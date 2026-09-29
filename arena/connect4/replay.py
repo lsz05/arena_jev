@@ -25,8 +25,9 @@ def list_runs(root: Path) -> list[dict]:
         if summary is None:
             from .match import summarize  # a run still in progress, or stopped before its summary
             summary = summarize(d)
-        out.append({"run": d.name, "a": config.get("a"), "b": config.get("b"), "openings": config.get("openings"),
-                    "template": config.get("template"), "policy": config.get("policy"),
+        out.append({"run": d.name, "league": bool(config.get("league")), "a": config.get("a"), "b": config.get("b"),
+                    "state": (summary.get("status") or {}).get("state"), "openings": config.get("openings"),
+                    "template": config.get("template"), "policy": config.get("policy"), "hint": config.get("hint"),
                     "games": summary["games"], "avg_plies": summary["avg_plies"], "players": summary["players"]})
     return out
 
@@ -42,7 +43,9 @@ def frames(run_dir: Path, game_id: str) -> dict:
     if record is None:
         raise KeyError(game_id)
     config = json.loads((run_dir / "config.json").read_text()) if (run_dir / "config.json").exists() else {}
-    template = (record.get("rules") or {}).get("template") or config.get("template", "B")
+    rules = record.get("rules") or {}
+    template = rules.get("template") or config.get("template", "B")
+    hint = rules.get("hint", config.get("hint"))
     marker = f'"game": "{game_id}"'
     by_ply = {d["ply"]: d for d in map(json.loads, (line for line in open(run_dir / "decisions.jsonl") if marker in line))}
     names = record["players"]
@@ -66,7 +69,7 @@ def frames(run_dir: Path, game_id: str) -> dict:
                 if k in d:
                     frame[k] = d[k]
             if d.get("calls"):
-                q = render.question(game, decision, template, random.Random(f"{record['seed']}:{ply}"))
+                q = render.question(game, decision, template, random.Random(f"{record['seed']}:{ply}"), hint)
                 first = d["calls"][0]
                 state = render.render_state(game, decision, with_moves=first.get("with_moves", True))
                 frame["request"] = {"state": state, "questions": {q.name: q.to_json()}}
@@ -80,5 +83,5 @@ def frames(run_dir: Path, game_id: str) -> dict:
            "winner": record["winner"], "winner_seat": record["winner_seat"],
            "line": [[c + 1, r + 1] for c, r in game.line]}
     meta = {k: record.get(k) for k in ("game", "players", "opening", "winner", "winner_seat", "result", "plies", "seed")}
-    meta["template"] = template
+    meta["template"], meta["hint"] = template, hint
     return {"meta": meta, "frames": out + [end]}

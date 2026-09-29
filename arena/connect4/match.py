@@ -33,7 +33,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def play_game(players, opening, seed: int, game_id: str, on_decision=None, meta: dict | None = None,
-              template: str = "B") -> dict:
+              template: str = "B", hint: str | None = None) -> dict:
     """players[0] moves first (after the opening, whose moves alternate from player 0)."""
     game = Connect4Game(opening)
     while not game.over:
@@ -48,6 +48,7 @@ def play_game(players, opening, seed: int, game_id: str, on_decision=None, meta:
             "could_win": bool(wins), "took_win": col in wins,
             "must_block": bool(threats) and not wins, "blocked": col in threats,
             "gave_win_on_top": gives_win_on_top(game, col, me) and not game.wins_with(col, me),
+            "win_cols": [c + 1 for c in wins], "threat_cols": [c + 1 for c in threats],
         }
         record = {"game": game_id, "ply": game.ply, "seat": me, "player": players[me].name,
                   "legal": [c + 1 for c in decision.legal], "action": col + 1, "diag": diag, **choice.info}
@@ -61,14 +62,14 @@ def play_game(players, opening, seed: int, game_id: str, on_decision=None, meta:
         "winner": names[game.winner] if game.winner is not None else None,
         "result": "draw" if game.winner is None else ("first" if game.winner == 0 else "second"),
         "plies": game.ply, "line": [[c + 1, r + 1] for c, r in game.line],
-        "rules": {"template": template}, **(meta or {}),
+        "rules": {"template": template, "hint": hint}, **(meta or {}),
     }
 
 
 # ---- players by name ------------------------------------------------------------------------------
 
 
-def make_player(name: str, template: str = "B", policy: str = "argmax"):
+def make_player(name: str, template: str = "B", policy: str = "argmax", hint: str | None = None):
     if name == "random":
         return RandomPlayer()
     if name == "heuristic":
@@ -81,7 +82,7 @@ def make_player(name: str, template: str = "B", policy: str = "argmax"):
     limit = spec.get("max_input_tokens") or reg.get("max_input_tokens")
     tok = spec.get("tokenizer") or reg.get("tokenizer") or tokens.DEFAULT_TOKENIZER
     client = SystemOneClient(f"http://127.0.0.1:{spec['port']}", model=name, timeout=120, retries=2)
-    return SystemOnePlayer(name, client, template=template, policy=policy,
+    return SystemOnePlayer(name, client, template=template, policy=policy, hint=hint,
                            max_options=spec.get("max_options") or reg.get("max_options") or 255,
                            max_prompt_tokens=limit, count_tokens=tokens.counter(tok) if limit else None)
 
@@ -101,13 +102,13 @@ def openings(n: int) -> list[tuple[int, ...]]:
 
 
 def run(a: str, b: str, n_openings: int = 7, template: str = "B", policy: str = "argmax", workers: int = 4,
-        seed: int = 20260929, out_root: str | Path = "runs") -> Path:
-    pa, pb = make_player(a, template, policy), make_player(b, template, policy)
+        seed: int = 20260929, out_root: str | Path = "runs", hint: str | None = None) -> Path:
+    pa, pb = make_player(a, template, policy, hint), make_player(b, template, policy, hint)
     if pa.name == pb.name:
         raise SystemExit("the two players must differ")
-    out = Path(out_root) / f"{datetime.now():%Y%m%d-%H%M%S}_c4-{a}-vs-{b}"
+    out = Path(out_root) / f"{datetime.now():%Y%m%d-%H%M%S}_c4-{a}-vs-{b}{'-' + hint if hint else ''}"
     out.mkdir(parents=True)
-    config = {"a": a, "b": b, "openings": n_openings, "template": template, "policy": policy, "seed": seed}
+    config = {"a": a, "b": b, "openings": n_openings, "template": template, "policy": policy, "hint": hint, "seed": seed}
     (out / "config.json").write_text(json.dumps(config, indent=1))
     schedule = []
     for i, op in enumerate(openings(n_openings)):
@@ -123,13 +124,14 @@ def run(a: str, b: str, n_openings: int = 7, template: str = "B", policy: str = 
 
     def one(item):
         gid, players, op, s = item
-        g = play_game(list(players), op, s, gid, on_decision=log, template=template)
+        g = play_game(list(players), op, s, gid, on_decision=log, template=template, hint=hint)
         with lock:
             games_f.write(json.dumps(g, ensure_ascii=False) + "\n")
             games_f.flush()
         return g
 
-    print(f"{a} vs {b}: {len(schedule)} games ({n_openings or 'no'} openings x both colors) -> {out}", flush=True)
+    print(f"{a} vs {b}: {len(schedule)} games ({n_openings or 'no'} openings x both colors, hint {hint or 'none'}) -> {out}",
+          flush=True)
     with ThreadPoolExecutor(max_workers=workers) as pool:
         games = list(pool.map(one, schedule))
     dec_f.close()
@@ -141,8 +143,10 @@ def run(a: str, b: str, n_openings: int = 7, template: str = "B", policy: str = 
 
 def summarize(run_dir: str | Path) -> dict:
     run_dir = Path(run_dir)
-    games = [json.loads(line) for line in open(run_dir / "games.jsonl")]
-    decisions = [json.loads(line) for line in open(run_dir / "decisions.jsonl")]
+    complete = lambda path: (json.loads(line) for line in open(path) if line.endswith("\n"))  # noqa: E731 - skip a line being written
+    games = list(complete(run_dir / "games.jsonl"))
+    ids = {g["game"] for g in games}
+    decisions = [d for d in complete(run_dir / "decisions.jsonl") if d["game"] in ids]  # pairs still being played wait
     per = defaultdict(lambda: Counter())
     for g in games:
         for seat, name in enumerate(g["players"]):
@@ -153,6 +157,7 @@ def summarize(run_dir: str | Path) -> dict:
             per[name]["games"] += 1
     calls = defaultdict(lambda: {"decisions": 0, "calls": 0, "fallbacks": 0, "latency": 0.0, "pos": Counter()})
     diag = defaultdict(lambda: Counter())
+    mass = defaultdict(lambda: defaultdict(list))  # probability the model put on the winning / blocking columns
     for d in decisions:
         name, c = d["player"], calls[d["player"]]
         c["decisions"] += 1
@@ -162,12 +167,20 @@ def summarize(run_dir: str | Path) -> dict:
             c["latency"] += call["latency_ms"]
             c["pos"][call["options"].index(call["pick"]) if len(call["options"]) == 7 else "n/a"] += 1
         x = d["diag"]
+        first = (d.get("calls") or [None])[0]
+        if first and len(first["options"]) == len(d["legal"]):  # one call saw every column (no knockout)
+            probs = first["probabilities"]
+            for kind, cols, when in (("win", x.get("win_cols"), x["could_win"]), ("block", x.get("threat_cols"), x["must_block"])):
+                if when and cols:
+                    mass[name][kind].append(sum(probs[str(c)] for c in cols))
+                    mass[name][kind + "_chance"].append(len(cols) / len(d["legal"]))
         diag[name]["could_win"] += x["could_win"]
         diag[name]["took_win"] += x["took_win"] and x["could_win"]
         diag[name]["must_block"] += x["must_block"]
         diag[name]["blocked"] += x["blocked"] and x["must_block"]
         diag[name]["gave_win_on_top"] += x["gave_win_on_top"]
     rate = lambda k, n: round(k / n, 3) if n else None  # noqa: E731
+    mean = lambda v: round(sum(v) / len(v), 3) if v else None  # noqa: E731
     players = {}
     for name, r in per.items():
         c, x = calls[name], diag[name]
@@ -179,14 +192,18 @@ def summarize(run_dir: str | Path) -> dict:
             "took_immediate_win": rate(x["took_win"], x["could_win"]), "chances_to_win": x["could_win"],
             "blocked_immediate_threat": rate(x["blocked"], x["must_block"]), "threats_to_block": x["must_block"],
             "let_opponent_win_on_top": rate(x["gave_win_on_top"], c["decisions"]),
+            "p_on_win": mean(mass[name]["win"]), "p_on_win_chance": mean(mass[name]["win_chance"]),
+            "p_on_block": mean(mass[name]["block"]), "p_on_block_chance": mean(mass[name]["block_chance"]),
             "decisions": c["decisions"], "model_calls": c["calls"], "fallbacks": c["fallbacks"],
             "avg_latency_ms": round(c["latency"] / c["calls"], 1) if c["calls"] else None,
             "pick_position_7": {str(k): v for k, v in sorted(c["pos"].items(), key=lambda kv: str(kv[0])) if k != "n/a"},
         }
     summary = {"games": len(games), "avg_plies": round(sum(g["plies"] for g in games) / max(1, len(games)), 1),
                "results": Counter(g["result"] for g in games), "players": players}
-    (run_dir / "summary.json").write_text(json.dumps(summary, indent=1))
-    (run_dir / "summary.md").write_text(to_markdown(summary))
+    for name, text in (("summary.json", json.dumps(summary, indent=1)), ("summary.md", to_markdown(summary))):
+        tmp = run_dir / (name + ".tmp")  # replaced in one step: the site may read it at any time
+        tmp.write_text(text)
+        tmp.replace(run_dir / name)
     return summary
 
 

@@ -16,6 +16,11 @@ from .engine import COLS, ROWS, Connect4Game, Decision
 TEMPLATES = ("A", "B")  # A: the column only; B: also the row the disc lands on
 
 INSTRUCTIONS = "Choose the column that gives you the best chance of winning this game of Connect Four."
+# Optional strategy hints appended to the instructions (the default is none: the model's own reading is measured).
+HINTS = {
+    "defend": ("While you try to connect your own discs, you must also stop the opponent from connecting theirs: if "
+               "the opponent could complete four in a row with its next disc, block that column."),
+}
 
 
 @dataclass
@@ -59,9 +64,12 @@ def render_state(game: Connect4Game, decision: Decision, with_moves: bool = True
     return "\n".join(lines)
 
 
-def question(game: Connect4Game, decision: Decision, template: str = "B", rng: random.Random | None = None) -> Question:
+def question(game: Connect4Game, decision: Decision, template: str = "B", rng: random.Random | None = None,
+             hint: str | None = None) -> Question:
     if template not in TEMPLATES:
         raise ValueError(f"unknown template {template!r}; expected one of {TEMPLATES}")
+    if hint is not None and hint not in HINTS:
+        raise ValueError(f"unknown hint {hint!r}; expected one of {sorted(HINTS)}")
     options = {}
     for col in decision.legal:
         if template == "A":
@@ -71,7 +79,8 @@ def question(game: Connect4Game, decision: Decision, template: str = "B", rng: r
     names = list(options)
     if rng is not None:
         rng.shuffle(names)
-    return Question("move", INSTRUCTIONS, {n: options[n] for n in names})
+    instructions = INSTRUCTIONS + (" " + HINTS[hint] if hint else "")
+    return Question("move", instructions, {n: options[n] for n in names})
 
 
 def fit_state(game: Connect4Game, decision: Decision, q: Question, max_tokens: int | None, count_tokens) -> tuple[str, bool, int | None]:

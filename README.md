@@ -70,6 +70,10 @@ python3 servers/launch.py start kev-0.8b decider-0.8b && python3 servers/launch.
   immediate win when one existed, blocked the opponent's immediate win, let the opponent win on top of its own disc.
 - Output: `runs/<time>_c4-<a>-vs-<b>/` with `games.jsonl`, `decisions.jsonl` (options, probabilities, latency per
   move) and `summary.md`.
+- League: `.venv/bin/python -m arena c4-league` plays every pair of running model servers, every opening with both
+  colors (378 pairs x 14 games = 5292 games for 28 models); standings by points (win 1, draw 0.5) with TrueSkill;
+  `--resume runs/<run>` continues a stopped league. `--hint defend` appends a defence hint to the instructions (an
+  experiment: with 4 models it changed neither the blocking rate nor the probability on the blocking column).
 - Replay in the browser: `.venv/bin/python -m arena site` serves `/arenas/connect4/` with every match in `runs/`: the
   summary, the games, and each game move by move (board, the probability of each column, the columns that would
   win at once or had to be blocked, and the request sent, rebuilt from the game's seed).

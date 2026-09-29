@@ -62,20 +62,22 @@ class SystemOnePlayer:
     the decision is flagged."""
 
     def __init__(self, name: str, client: SystemOneClient, *, template: str = "B", policy: str = "argmax",
-                 max_options: int = 255, max_prompt_tokens: int | None = None, count_tokens=None):
+                 max_options: int = 255, max_prompt_tokens: int | None = None, count_tokens=None,
+                 hint: str | None = None):
         if policy not in ("argmax", "sample"):
             raise ValueError(f"policy must be argmax or sample, got {policy!r}")
         self.name, self.client, self.template, self.policy = name, client, template, policy
         self.max_options = max_options
         self.max_prompt_tokens = max_prompt_tokens
         self.count_tokens = count_tokens
+        self.hint = hint
 
     def act(self, game: Connect4Game, decision: Decision, rng: random.Random) -> Choice:
         info: dict = {"calls": []}
         if len(decision.legal) == 1:
             info["forced"] = True
             return Choice(decision.legal[0], info)
-        q = render.question(game, decision, self.template, rng)
+        q = render.question(game, decision, self.template, rng, self.hint)
         try:
             return Choice(int(self._ask(game, decision, q, rng, info)) - 1, info)
         except (SystemOneError, KeyError, ValueError) as e:
