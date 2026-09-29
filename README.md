@@ -52,6 +52,25 @@ python3 servers/launch.py start && python3 servers/launch.py wait
 - On the machine that shows the results: `git pull`, `python3 bench/pack_runs.py unpack runs/<run>`, then start the
   site with `.venv/bin/python -m arena site --uno-run latest --port 8200` (the UNO page uses the newest `*_swiss` run).
 
+## Connect Four: two models against each other
+
+```bash
+python3 servers/launch.py start kev-0.8b decider-0.8b && python3 servers/launch.py wait kev-0.8b decider-0.8b
+.venv/bin/python -m arena c4 kev-0.8b decider-0.8b              # 7 openings x both colors = 14 games
+.venv/bin/python -m arena c4 kev-0.8b heuristic --openings 49   # 98 games; players: model names, random, heuristic
+.venv/bin/python -m arena c4-show runs/<dir> --game G03-ab      # replay a game in the terminal
+```
+
+- Standard rules (7 columns x 6 rows, four in a row wins, a full board is a draw), engine in `arena/connect4/`.
+- The board is drawn from the mover's point of view (X is always "you"); options are the legal columns with keys
+  "1".."7" and say where the disc lands, with no tactical hints. The move list is dropped only when a request would
+  exceed the model's own input limit.
+- Each opening (none, every first move, or every first two moves) is played once with each player moving first.
+- Per player: wins, draws and losses (overall, as first and as second), and three checks that need no solver: took an
+  immediate win when one existed, blocked the opponent's immediate win, let the opponent win on top of its own disc.
+- Output: `runs/<time>_c4-<a>-vs-<b>/` with `games.jsonl`, `decisions.jsonl` (options, probabilities, latency per
+  move) and `summary.md`.
+
 ## Layout
 
 | File | Purpose |
@@ -64,6 +83,7 @@ python3 servers/launch.py start && python3 servers/launch.py wait
 | `arena/match.py`, `tournament.py` | one game, fixed schedules with seat rotations, parallel execution, logging |
 | `arena/swiss.py` | Swiss tournament over all model servers, rated with TrueSkill (resume, hold, maximum lead) |
 | `arena/stats.py`, `leaderboard.py` | win rates with Wilson 95% intervals, points, diagnostics, the leaderboard |
+| `arena/connect4/` | Connect Four: engine, prompts, players, two-player matches, terminal replay |
 | `arena/replay.py`, `viz.py`, `viewer.html` | replays: re-simulate a game from its seed and logged actions, and rebuild the requests sent to the models |
 | `arena/site.py`, `arena/static/` | the site: home, leaderboard, JevBench results and the UNO viewer under `/arenas/` |
 | `servers/` | model servers: launcher, adapters, one file per model, environment manifests |

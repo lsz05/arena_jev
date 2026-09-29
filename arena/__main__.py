@@ -7,6 +7,8 @@
     python -m arena mock-server [--port 8199]               fake System One server for dry runs
     python -m arena viz runs/<dir> [--port 8200]            browse results and replay games
     python -m arena viz runs/<dir> --export out.html        one self-contained HTML file with a few replays
+    python -m arena c4 <model-a> <model-b> [--openings 7]    Connect Four match between two players
+    python -m arena c4-show runs/<dir> [--game G00-ab]       replay a Connect Four game in the terminal
 """
 
 from __future__ import annotations
@@ -61,7 +63,28 @@ def main() -> None:
     v.add_argument("--export", metavar="HTML", help="write a self-contained file instead of serving")
     v.add_argument("--deals", type=int, default=3, help="with --export: include replays of the first N deals")
 
+    c4 = sub.add_parser("c4", help="Connect Four match between two players (model names, random, heuristic)")
+    c4.add_argument("a")
+    c4.add_argument("b")
+    c4.add_argument("--openings", type=int, default=7, help="0: empty board only; 7: every first move; 49: every first two")
+    c4.add_argument("--template", default="B", choices=["A", "B"])
+    c4.add_argument("--policy", default="argmax", choices=["argmax", "sample"])
+    c4.add_argument("--workers", type=int, default=4, help="games played at the same time")
+    c4.add_argument("--seed", type=int, default=20260929)
+    c4.add_argument("--out", default="runs")
+    c4s = sub.add_parser("c4-show", help="replay a Connect Four game in the terminal")
+    c4s.add_argument("run_dir")
+    c4s.add_argument("--game")
+
     a = ap.parse_args()
+    if a.cmd == "c4":
+        from .connect4.match import run as c4_run
+        c4_run(a.a, a.b, a.openings, a.template, a.policy, a.workers, a.seed, a.out)
+        return
+    if a.cmd == "c4-show":
+        from .connect4.match import show
+        print(show(a.run_dir, a.game))
+        return
     if a.cmd == "run":
         from .tournament import run
         run(a.config, a.out, a.deals)
