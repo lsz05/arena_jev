@@ -5,7 +5,8 @@ replays), /arenas/leaderboard/, /arenas/bench/.
 
 --uno-run may be "latest" (the newest runs/*_swiss directory, re-resolved when a newer one appears).
 Pages share arena/static/ (served at <base>/static/). The leaderboard page reads the UNO run's leaderboard.json
-(or the registry and JevBench results alone before any tournament); the bench page reads runs/jevbench-*.
+(or the registry and JevBench results alone before any tournament) with the newest Connect Four league merged in on
+every request; the bench page reads runs/jevbench-*.
 """
 
 from __future__ import annotations
@@ -44,7 +45,7 @@ class Site:
 
     def board(self) -> dict:
         uno = self._uno()
-        return uno.board() if uno else leaderboard.build(None)
+        return leaderboard.with_connect4(uno.board() if uno else leaderboard.build(None), RUNS)
 
     def route(self, path: str) -> Response:
         b = self.base

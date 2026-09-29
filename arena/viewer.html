@@ -147,6 +147,10 @@ td.num, th.num { text-align: right; }
 .results-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
 .results-grid .chartbox { max-width: 640px; }
 .note { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+ul.defs { list-style: none; margin: 8px 0 0; padding: 0; font-size: 12px; color: var(--text-muted); display: grid; gap: 2px; }
+ul.defs b { color: var(--text-secondary); font-weight: 600; }
+th[data-tip], .chip[data-tip] { cursor: help; }
+th[data-k][data-tip] { cursor: pointer; }
 
 /* game list */
 .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
@@ -254,11 +258,7 @@ pre { white-space: pre-wrap; word-break: break-word; background: var(--surface-2
     </div>
     <div class="lb-sort" id="lbsort"></div>
     <div class="scroll-x"><table class="lb-table" id="lbtable"></table></div>
-    <div class="note">Size: parameters loaded for inference, exact to the parameter (hover a size for the count and where it comes from).
-      TrueSkill: conservative rating μ − 3σ from 4-player games (the winner ranks first, the others by points left).
-      Pts won: the winner takes the sum of the other hands, everyone else scores 0. Pts left: points still in hand at the end (lower is better).
-      JevBench: accuracy on the 231 public items (Hard: the 111 hard ones). Memory: average history rounds kept per request;
-      a model gets fewer rounds only when its own input limit cannot hold them. Models without a value for the chosen metric are listed last.</div>
+    <div id="lbdefs"></div>
   </section>
 
   <section id="results">
@@ -272,7 +272,7 @@ pre { white-space: pre-wrap; word-break: break-word; background: var(--surface-2
       <div class="scroll-x">
         <h3>Per player</h3>
         <table id="ptable"></table>
-        <div class="note">Flags are legal but usually weak moves: drawing while holding a playable card; playing a wild while a colored card fits; naming a color other than the one held most. Seats are rotated, so every player gets every starting hand once.</div>
+        <div id="pdefs"></div>
       </div>
     </div>
   </section>
@@ -415,9 +415,10 @@ function renderResults(run) {
   $("#wrnote").textContent = `Dashed line: chance level with ${n} players. Wins by seat: ${seat}. Aborted games: ${s.aborted ?? 0}.`;
 
   const flag = (p, k) => p.diagnostics && p.diagnostics[k] ? pct(p.diagnostics[k].rate) : "–";
-  let t = `<thead><tr><th>Player</th><th class="num">Games</th><th class="num">Wins</th><th class="num">Win rate</th><th class="num">95% CI</th>
-    <th class="num" title="Points scored per game: the winner takes the sum of the other hands, everyone else scores 0 (higher is better)">Avg pts won</th><th class="num" title="Points left in hand at the end of each game; 0 when winning (lower is better)">Avg pts left</th><th class="num">Drew w/ playable</th><th class="num">Wild w/ colored</th><th class="num">Color ≠ most held</th>
-    <th class="num">Fallback</th><th class="num">Latency</th><th class="num">Tokens</th></tr></thead><tbody>`;
+  const th = (k, label) => `<th class="num" ${defTip(k)}>${label}</th>`;
+  let t = `<thead><tr><th>Player</th>${th("games", "Games")}${th("wins", "Wins")}${th("win_rate", "Win rate")}${th("ci", "95% CI")}
+    ${th("avg_points_won", "Avg pts won")}${th("avg_points_left", "Avg pts left")}${th("drew", "Drew w/ playable")}${th("wild", "Wild w/ colored")}${th("color", "Color ≠ most held")}
+    ${th("fallback", "Fallback")}${th("latency_ms", "Latency")}${th("tokens", "Tokens")}</tr></thead><tbody>`;
   for (const [name, p] of players) {
     const mc = p.model_calls;
     const colorFlag = p.diagnostics && p.diagnostics.color_is_most_held ? pct(1 - p.diagnostics.color_is_most_held.rate) : "–";
@@ -428,9 +429,34 @@ function renderResults(run) {
       <td class="num">${mc ? mc.avg_input_tokens.toFixed(0) : "–"}</td></tr>`;
   }
   $("#ptable").innerHTML = t + "</tbody>";
+  $("#pdefs").innerHTML = defsList(["avg_points_won", "avg_points_left", "drew", "wild", "color", "fallback", "tokens"])
+    .replace("</ul>", "<li><b>Flags</b> (drew, wild, color) mark legal but usually weak moves. Seats are rotated, so every player gets every starting hand once.</li></ul>");
 }
 
 // ---------- leaderboard ----------
+// Metric definitions: shown on hover over a column header or chip, and listed under the tables.
+const DEFS = {
+  params: ["Size", "Parameters held by the model's server after its own load code, counted at load time (every tensor once). Hover a size for the exact count."],
+  games: ["Games", "UNO games played; the bar shows progress toward the target per model."],
+  ts_score: ["TrueSkill", "Conservative rating μ − 3σ from 4-player games: the winner ranks first, the others by points left in hand."],
+  win_rate: ["Win rate", "Share of games won; below, the 95% Wilson interval."],
+  avg_points_won: ["Pts won", "Average points scored per game: the winner takes the sum of the other hands, everyone else scores 0."],
+  avg_points_left: ["Pts left", "Average points still in hand when a game ends (0 for the winner; lower is better)."],
+  jb_acc: ["JevBench 231", "Accuracy on the 231 public JevBench items."],
+  jb_hard: ["Hard", "Accuracy on the 111 hard public JevBench items."],
+  memory_rounds: ["Memory", "Average rounds of history kept per request (up to the run's maximum; fewer only when the model's input limit cannot hold them)."],
+  latency_ms: ["Latency", "Average time per model request during the games."],
+  wins: ["Wins", "Games won."],
+  ci: ["95% CI", "95% Wilson interval of the win rate."],
+  drew: ["Drew w/ playable", "Share of turns with a playable card on which the model drew instead."],
+  wild: ["Wild w/ colored", "Share of wild cards played while a colored card also fit."],
+  color: ["Color ≠ most held", "Share of color choices naming a color other than the one it held most of."],
+  fallback: ["Fallback", "Share of decisions played at random because the model's server returned an error."],
+  tokens: ["Tokens", "Average input tokens per request, as counted by the model's server."],
+};
+const defTip = k => DEFS[k] ? `data-tip="${esc(DEFS[k][1])}"` : "";
+const defsList = keys => `<ul class="defs">` + keys.filter(k => DEFS[k]).map(k => `<li><b>${esc(DEFS[k][0])}</b>: ${esc(DEFS[k][1])}</li>`).join("") + "</ul>";
+
 const LB_METRICS = [
   {key: "ts_score", label: "TrueSkill", dir: -1, title: "Conservative TrueSkill rating μ − 3σ"},
   {key: "win_rate", label: "Win rate", dir: -1},
@@ -481,12 +507,14 @@ function renderLeaderboard() {
   const target = LB.target_games_per_model;
   $("#lbmeta").textContent = `${LB.rows.length} models · ${LB.games} games` + (target ? ` · target ${target} games per model` : "") + ` · updated ${LB.updated}`;
   $("#lblive").hidden = !LB.in_progress;
+  $("#lbdefs").innerHTML = defsList(["params", "games", "ts_score", "win_rate", "avg_points_won", "avg_points_left", "jb_acc", "jb_hard", "memory_rounds", "latency_ms"])
+    .replace("</ul>", "<li><b>⚠</b>: a caveat on this model's result; hover the mark to read it. Models without a value for the chosen metric are listed last.</li></ul>");
   $("#lbsort").innerHTML = `<span class="muted">Rank by</span>` + LB_METRICS.map(m =>
-    `<button class="chip ${m.key === key ? "on" : ""}" data-k="${m.key}" title="${esc(m.title || "")}">${m.label}${m.key === key ? (dir < 0 ? " ↓" : " ↑") : ""}</button>`).join("");
+    `<button class="chip ${m.key === key ? "on" : ""}" data-k="${m.key}" ${defTip(m.key)}>${m.label}${m.key === key ? (dir < 0 ? " ↓" : " ↑") : ""}</button>`).join("");
   const on = k => k === key ? "on" : "";
   const cols = [["#", null], ["Model", null], ["Size", "params"], ["Games", "games"], ["TrueSkill", "ts_score"], ["Win rate", "win_rate"],
                 ["Pts won", "avg_points_won"], ["Pts left", "avg_points_left"], ["JevBench 231", "jb_acc"], ["Hard", "jb_hard"], ["Memory", "memory_rounds"], ["Latency", "latency_ms"]];
-  let h = "<thead><tr>" + cols.map(([t, k], i) => `<th class="${i > 1 ? "num" : ""} ${on(k)}" ${k ? `data-k="${k}"` : ""}>${t}${k === key ? (dir < 0 ? " ↓" : " ↑") : ""}</th>`).join("") + "</tr></thead><tbody>";
+  let h = "<thead><tr>" + cols.map(([t, k], i) => `<th class="${i > 1 ? "num" : ""} ${on(k)}" ${k ? `data-k="${k}" ${defTip(k)}` : ""}>${t}${k === key ? (dir < 0 ? " ↓" : " ↑") : ""}</th>`).join("") + "</tr></thead><tbody>";
   const dash = `<span class="muted">–</span>`;
   const f = (v, fn) => v == null ? dash : fn(v);
   let rank = 0;

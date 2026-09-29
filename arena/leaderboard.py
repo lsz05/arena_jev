@@ -3,7 +3,9 @@
 Sources:
 - the run directory: games.jsonl (for TrueSkill) and summary.json (win rates, points, diagnostics);
 - the model registry bench/models.json (display name, repo, parameter count, languages);
-- JevBench runs runs/jevbench-*/<model>/ (accuracy on the 231 public items, hard tier, calibration).
+- JevBench runs runs/jevbench-*/<model>/ (accuracy on the 231 public items, hard tier, calibration);
+- the newest Connect Four league runs/*_c4-league*/summary.json (points, TrueSkill, tactical diagnostics), merged into
+  the rows by the site on every request (with_connect4), since that summary is rewritten while the league runs.
 
 TrueSkill: every game is a 4-player free-for-all. The winner ranks first; the others are ranked by
 the points left in their hands (fewer is better, equal points tie). Games are applied in the order they
@@ -75,6 +77,45 @@ def jevbench_results(runs: Path = RUNS) -> dict[str, dict]:
             "run": summary.parent.parent.name,
         }
     return out
+
+
+C4_FIELDS = {  # league summary key -> row field
+    "games": "c4_games", "wins": "c4_wins", "draws": "c4_draws", "losses": "c4_losses", "score": "c4_score",
+    "ts_mu": "c4_ts_mu", "ts_sigma": "c4_ts_sigma", "ts_score": "c4_ts_score",
+    "took_immediate_win": "c4_took_win", "chances_to_win": "c4_win_chances",
+    "blocked_immediate_threat": "c4_blocked", "threats_to_block": "c4_threats",
+    "p_on_block": "c4_p_block", "p_on_block_chance": "c4_p_block_chance",
+    "let_opponent_win_on_top": "c4_gave_win_on_top", "fallbacks": "c4_fallbacks", "avg_latency_ms": "c4_latency_ms",
+}
+
+
+def _read_json(path: Path) -> dict | None:
+    return json.loads(path.read_text()) if path.exists() else None
+
+
+def connect4_results(runs: Path = RUNS) -> tuple[dict | None, dict[str, dict]]:
+    """The newest Connect Four league under runs/*_c4-*/ (config "league": true; two-player matches are ignored):
+    its progress, or None without a league, and its results per model name as c4_* row fields."""
+    leagues = [d for d in sorted(runs.glob("*_c4-*")) if (_read_json(d / "config.json") or {}).get("league")]
+    if not leagues:
+        return None, {}
+    run = leagues[-1]
+    summary = _read_json(run / "summary.json") or {}  # written once the first pair is recorded
+    status = summary.get("status") or _read_json(run / "status.json") or {}
+    progress = {"run": run.name, "state": status.get("state"), "pairs_done": status.get("pairs_done"),
+                "pairs": status.get("pairs"), "games": summary.get("games", status.get("games", 0))}
+    results = {name: {field: p.get(key) for key, field in C4_FIELDS.items()}
+               for name, p in (summary.get("players") or {}).items()}
+    return progress, results
+
+
+def with_connect4(board: dict, runs: Path = RUNS) -> dict:
+    """A copy of the board with the newest Connect Four league merged into its rows (c4_* fields, None for a model
+    without games there) and the league's progress as "c4"."""
+    progress, results = connect4_results(runs)
+    empty = dict.fromkeys(C4_FIELDS.values())
+    rows = [{**row, **empty, **results.get(row["name"], {})} for row in board["rows"]]
+    return {**board, "rows": rows, "c4": progress}
 
 
 def build(run_dir: str | Path | None, registry: dict[str, dict] | None = None) -> dict:

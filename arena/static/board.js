@@ -43,8 +43,19 @@ const Tip = {
   bind(el, html) { el.addEventListener("mouseenter", e => Tip.show(e, html)); el.addEventListener("mousemove", e => Tip.move(e)); el.addEventListener("mouseleave", () => Tip.hide()); },
 };
 
+// The definition of a column (tip, or the older title) as a tooltip attribute.
+const tipAttr = c => (c.tip || c.title) ? `data-tip="${esc(c.tip || c.title)}"` : "";
+
+// The definitions of the columns that have one, one per line: the note under a table.
+function defsList(cols, extra = []) {
+  const items = cols.filter(c => c.tip).map(c => [c.group ? `${c.group} · ${c.label}` : c.label, c.tip]).concat(extra);
+  return `<ul class="defs">` + items.map(([k, v]) => `<li><b>${esc(k)}</b>: ${esc(v)}</li>`).join("") + "</ul>";
+}
+
 // A sortable, rankable table. cols: [{key, label, dir (-1 high first), cell(row) -> html, num, rank (bool: can rank by),
-// group (optional: consecutive columns with the same group share a heading row above their labels)}]
+// group (optional: consecutive columns with the same group share a heading row above their labels),
+// tip (optional: the metric's definition, shown on hover over its header and chip, and listed by defsList)}]
+// opts.groupTips: {group name: definition} for the group headings.
 function SortTable(opts) {
   const state = {key: opts.sortKey, dir: opts.sortDir ?? -1};
   function render(rows) {
@@ -57,7 +68,7 @@ function SortTable(opts) {
     });
     const arrow = c => c.key === state.key ? (state.dir < 0 ? " ↓" : " ↑") : "";
     if (opts.chips) {
-      const chip = c => `<button class="chip ${c.key === state.key ? "on" : ""}" data-k="${c.key}" title="${esc(c.title || "")}">${c.label}${arrow(c)}</button>`;
+      const chip = c => `<button class="chip ${c.key === state.key ? "on" : ""}" data-k="${c.key}" ${tipAttr(c)}>${c.label}${arrow(c)}</button>`;
       const ranked = opts.cols.filter(c => c.rank);
       const box = $(opts.chips);
       if (!ranked.some(c => c.group)) {
@@ -67,7 +78,8 @@ function SortTable(opts) {
         const segs = [];
         ranked.forEach(c => { const g = c.group || ""; if (!segs.length || segs[segs.length - 1].g !== g) segs.push({g, cols: []}); segs[segs.length - 1].cols.push(c); });
         box.classList.add("two-row");
-        box.innerHTML = segs.map((sg, i) => `<div class="chipseg ${sg.g ? "grouped" : ""}"><div class="chip-head">${i === 0 && !sg.g ? "Rank by" : esc(sg.g)}</div>` +
+        const gtip = g => (opts.groupTips || {})[g] ? ` data-tip="${esc(opts.groupTips[g])}"` : "";
+        box.innerHTML = segs.map((sg, i) => `<div class="chipseg ${sg.g ? "grouped" : ""}"><div class="chip-head"${gtip(sg.g)}>${i === 0 && !sg.g ? "Rank by" : esc(sg.g)}</div>` +
           `<div class="chip-row">${sg.cols.map(chip).join("")}</div></div>`).join("");
       }
       box.querySelectorAll("button").forEach(b => b.onclick = () => pick(b.dataset.k));
@@ -76,7 +88,7 @@ function SortTable(opts) {
     const grouped = opts.cols.some(c => c.group);
     const starts = new Set(opts.cols.filter((c, i) => c.group && c.group !== opts.cols[i - 1]?.group).map(c => c.key));
     const cls = c => `${c.num ? "num" : ""} ${on(c)} ${starts.has(c.key) ? "gstart" : ""}`;
-    const label = (c, span = "") => `<th class="${cls(c)}" ${span} ${c.rank ? `data-k="${c.key}"` : ""} title="${esc(c.title || "")}">${c.label}${arrow(c)}</th>`;
+    const label = (c, span = "") => `<th class="${cls(c)}" ${span} ${c.rank ? `data-k="${c.key}"` : ""} ${tipAttr(c)}>${c.label}${arrow(c)}</th>`;
     let h = "<thead>";
     if (!grouped) {
       h += "<tr><th>#</th>" + opts.cols.map(c => label(c)).join("") + "</tr>";
@@ -87,7 +99,8 @@ function SortTable(opts) {
         if (starts.has(c.key)) {
           let n = 0;
           while (opts.cols[i + n]?.group === c.group) n++;
-          top += `<th class="grp gstart" colspan="${n}">${esc(c.group)}</th>`;
+          const gt = (opts.groupTips || {})[c.group];
+          top += `<th class="grp gstart" colspan="${n}"${gt ? ` data-tip="${esc(gt)}"` : ""}>${esc(c.group)}</th>`;
         }
         bottom += label(c);
       });

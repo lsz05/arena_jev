@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leaderboard · Jev Arena</title>
 <link rel="stylesheet" href="../static/base.css">
+<style>
+main { max-width: 1600px; } /* room for the whole table on wide screens; narrower ones scroll it */
+</style>
 </head>
 <body>
 <header>
@@ -18,11 +21,7 @@
     <p class="lead" id="meta">loading…</p>
     <div class="chips" id="chips"></div>
     <div class="scroll-x"><table class="sortable" id="board"></table></div>
-    <div class="note">Size: parameters loaded for inference, exact (hover for the count and its source). TrueSkill: conservative rating μ − 3σ
-      from 4-player games (winner first, the others by points left). Pts won: the winner takes the sum of the other hands, everyone else 0.
-      Pts left: points still in hand at the end (lower is better). Memory: average history rounds kept (up to 5; fewer only when the model's
-      input limit is too small). Bluff: share of its Wild Draw Fours played while holding the current color. Challenge ✓: share of its
-      challenge decisions that matched the truth. JevBench 231: accuracy on the 231 public items (Hard: the 111 hard ones). ⚠: a caveat on this model's result (hover to read it).</div>
+    <div id="defs"></div>
   </section>
   <section>
     <h2>Does JevBench accuracy predict UNO strength?</h2>
@@ -34,7 +33,7 @@
 <script src="../static/board.js"></script>
 <script>
 initTheme();
-const J = "JevBench 231", U = "UNO";
+const J = "JevBench 231", U = "UNO", C = "Connect Four";
 const COLS = [
   {key: "display", label: "Model", cell: modelCell},
   {key: "params", label: "Size", num: true, rank: true, dir: 1, cell: sizeCell},
@@ -49,7 +48,36 @@ const COLS = [
   {key: "wd4_bluff", group: U, label: "Bluff", num: true, rank: true, dir: 1, cell: r => fmt(r.wd4_bluff, v => pct(v))},
   {key: "challenge_right", group: U, label: "Challenge ✓", num: true, rank: true, cell: r => fmt(r.challenge_right, v => pct(v))},
   {key: "latency_ms", group: U, label: "Latency", num: true, rank: true, dir: 1, cell: r => fmt(r.latency_ms, v => Math.round(v) + " ms")},
+  {key: "c4_score", group: C, label: "Points", num: true, rank: true, title: "per game: win 1, draw 0.5 (wins-draws-losses below)", cell: r => fmt(r.c4_score, v => `${pct(v)}<small>${r.c4_wins}-${r.c4_draws}-${r.c4_losses}</small>`)},
+  {key: "c4_ts_score", group: C, label: "TrueSkill", num: true, rank: true, title: "μ − 3σ", cell: r => fmt(r.c4_ts_score, v => `${v.toFixed(1)}<small>μ ${r.c4_ts_mu.toFixed(1)} ± ${r.c4_ts_sigma.toFixed(1)}</small>`)},
+  {key: "c4_took_win", group: C, label: "Took win", num: true, rank: true, title: "played a winning column when it had one", cell: r => fmt(r.c4_took_win, v => `${pct(v)}<small>of ${r.c4_win_chances}</small>`)},
+  {key: "c4_blocked", group: C, label: "Blocked", num: true, rank: true, title: "blocked the opponent's immediate win when it had to", cell: r => fmt(r.c4_blocked, v => `${pct(v)}<small>of ${r.c4_threats}</small>`)},
 ];
+// Each metric's definition: shown on hover over its header and chip, and listed under the table.
+const TIPS = {
+  params: "Parameters held by the model's server after its own load code, counted at load time (every tensor once). Hover a size for the exact count.",
+  jb_acc: "Share of the 231 public JevBench items answered correctly.",
+  jb_hard: "Accuracy on the 111 hard public JevBench items.",
+  games: "UNO games played; the bar shows progress toward the target per model.",
+  ts_score: "UNO TrueSkill: conservative rating μ − 3σ from 4-player games (the winner ranks first, the others by points left in hand); below, μ and σ.",
+  win_rate: "Share of UNO games won; below, the 95% Wilson interval.",
+  avg_points_won: "Average points scored per UNO game: the winner takes the sum of the other hands, everyone else scores 0.",
+  avg_points_left: "Average points still in hand when a UNO game ends (0 for the winner; lower is better).",
+  memory_rounds: "Average rounds of UNO history kept per request (up to 5; fewer only when the model's input limit cannot hold them).",
+  wd4_bluff: "Share of its Wild Draw Fours played while holding a card of the current color (lower is more honest).",
+  challenge_right: "Share of its decisions on a Wild Draw Four played against it (challenge or accept) that matched the truth.",
+  latency_ms: "Average time per model request during UNO.",
+  c4_score: "Connect Four league points: win 1, draw 0.5, loss 0, averaged over its games; below, wins-draws-losses.",
+  c4_ts_score: "Connect Four TrueSkill: conservative rating μ − 3σ from the league games, a draw counting as a tie; below, μ and σ.",
+  c4_took_win: "When a column would have won at once, how often the model played it; below, the number of such moves.",
+  c4_blocked: "When the opponent could win with its next disc (and the model could not win at once itself), how often the model blocked it; below, the number of such moves.",
+};
+COLS.forEach(c => { if (TIPS[c.key]) { c.tip = TIPS[c.key]; delete c.title; } });
+const GROUP_TIPS = {
+  [J]: "JevBench: 231 public decision items (48 easy, 72 original, 111 hard), run locally with the official harness.",
+  [U]: "UNO: 4-player Swiss tournament, official rules with the Wild Draw Four challenge.",
+  [C]: "Connect Four: the newest league, in which every pair of models plays each opening with both colors.",
+};
 let TARGET = null, table = null, timer = null;
 
 async function load() {
@@ -58,14 +86,18 @@ async function load() {
   if (!table) {
     const has = k => b.rows.some(r => r[k] != null);
     table = SortTable({table: "#board", chips: "#chips", cols: COLS, sortKey: has("ts_score") ? "ts_score" : has("jb_acc") ? "jb_acc" : "params",
-                       sortDir: has("ts_score") || has("jb_acc") ? -1 : 1});
+                       sortDir: has("ts_score") || has("jb_acc") ? -1 : 1, groupTips: GROUP_TIPS});
+    $("#defs").innerHTML = defsList(COLS, [["⚠", "A caveat on this model's result; hover the mark to read it."],
+                                           ["–", "No result yet for this metric; such models are listed last when ranking by it."]]);
   }
   table.render(b.rows);
-  $("#meta").textContent = `${b.rows.length} models · ${b.games.toLocaleString("en-US")} UNO games` + (TARGET ? ` · target ${TARGET} games per model` : "") + ` · updated ${b.updated}`;
-  $("#live").hidden = !b.in_progress;
+  const c4 = b.c4, live = b.in_progress || c4?.state === "running";  // poll while the UNO run or the league goes on
+  $("#meta").textContent = `${b.rows.length} models · ${b.games.toLocaleString("en-US")} UNO games` + (TARGET ? ` · target ${TARGET} games per model` : "") +
+    (c4 ? ` · Connect Four league ${c4.pairs_done}/${c4.pairs} pairs, ${c4.games.toLocaleString("en-US")} games` + (c4.state === "running" ? " (live)" : "") : "") + ` · updated ${b.updated}`;
+  $("#live").hidden = !live;
   scatter(b.rows);
-  if (b.in_progress && !timer) timer = setInterval(load, 30000);
-  if (!b.in_progress && timer) { clearInterval(timer); timer = null; }
+  if (live && !timer) timer = setInterval(load, 30000);
+  if (!live && timer) { clearInterval(timer); timer = null; }
 }
 
 function spearman(xs, ys) {

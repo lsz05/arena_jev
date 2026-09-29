@@ -59,11 +59,7 @@ pre.req { background: var(--surface-2); border-radius: 6px; padding: 10px; font-
     <div class="pickrow"><label for="run" class="muted">Match</label><select id="run"></select></div>
     <div class="chips" id="sumchips"></div>
     <div class="scroll-x"><table id="sum" class="sortable"></table></div>
-    <div class="note">Points: win 1, draw 0.5, per game (the league ranking). TrueSkill: conservative rating μ − 3σ.
-      P on block: the probability the model gave the blocking column(s) when it had to block, next to the chance level
-      (the share of legal columns that block). Took win: share of the moves where a column would have won at once and the model played it. Blocked: share of the
-      moves where the opponent threatened to win at once (and the model could not win itself) and the model blocked it.
-      Let win on top: share of moves after which the opponent could win by playing on top of the new disc.</div>
+    <div id="defs"></div>
   </section>
   <section>
     <h2>Games</h2>
@@ -127,18 +123,19 @@ const wdl = x => `${x.wins}-${x.draws}-${x.losses}`;
 const rateCell = (v, n) => v == null ? dash : `${pct(v)}<small>of ${n}</small>`;
 const SUM_COLS = [
   {key: "name", label: "Player", cell: p => `<b>${esc(p.name)}</b>`},
-  {key: "games", label: "Games", num: true, rank: true, cell: p => p.games},
-  {key: "score", label: "Points", num: true, rank: true, title: "win 1, draw 0.5, per game", cell: p => `${fmt(p.score, v => pct(v))}<small>${wdl(p)}</small>`},
-  {key: "ts_score", label: "TrueSkill", num: true, rank: true, title: "μ − 3σ", cell: p => fmt(p.ts_score, v => `${v.toFixed(1)}<small>μ ${p.ts_mu.toFixed(1)} ± ${p.ts_sigma.toFixed(1)}</small>`)},
-  {key: "first_score", label: "As first", num: true, rank: true, value: p => p.games ? (p.as_first.wins + p.as_first.draws / 2) / Math.max(1, p.as_first.wins + p.as_first.draws + p.as_first.losses) : null, cell: p => wdl(p.as_first)},
-  {key: "second_score", label: "As second", num: true, rank: true, value: p => p.games ? (p.as_second.wins + p.as_second.draws / 2) / Math.max(1, p.as_second.wins + p.as_second.draws + p.as_second.losses) : null, cell: p => wdl(p.as_second)},
-  {key: "took_immediate_win", label: "Took win", num: true, rank: true, cell: p => rateCell(p.took_immediate_win, p.chances_to_win)},
-  {key: "blocked_immediate_threat", label: "Blocked", num: true, rank: true, cell: p => rateCell(p.blocked_immediate_threat, p.threats_to_block)},
-  {key: "p_on_block", label: "P on block", num: true, rank: true, title: "probability given to the blocking column; chance level below",
+  {key: "games", label: "Games", tip: "Games played in this match or league.",  num: true, rank: true, cell: p => p.games},
+  {key: "score", label: "Points", tip: "Win 1, draw 0.5, loss 0, averaged over the games played (the league ranking); below, wins-draws-losses.",  num: true, rank: true, cell: p => `${fmt(p.score, v => pct(v))}<small>${wdl(p)}</small>`},
+  {key: "ts_score", label: "TrueSkill", tip: "Conservative rating μ − 3σ from every game, a draw counting as a tie; below, μ and σ.",  num: true, rank: true, cell: p => fmt(p.ts_score, v => `${v.toFixed(1)}<small>μ ${p.ts_mu.toFixed(1)} ± ${p.ts_sigma.toFixed(1)}</small>`)},
+  {key: "first_score", label: "As first", tip: "Wins-draws-losses when moving first.",  num: true, rank: true, value: p => p.games ? (p.as_first.wins + p.as_first.draws / 2) / Math.max(1, p.as_first.wins + p.as_first.draws + p.as_first.losses) : null, cell: p => wdl(p.as_first)},
+  {key: "second_score", label: "As second", tip: "Wins-draws-losses when moving second.",  num: true, rank: true, value: p => p.games ? (p.as_second.wins + p.as_second.draws / 2) / Math.max(1, p.as_second.wins + p.as_second.draws + p.as_second.losses) : null, cell: p => wdl(p.as_second)},
+  {key: "took_immediate_win", label: "Took win", tip: "When a column would have won at once, how often the model played it; below, the number of such moves.",  num: true, rank: true, cell: p => rateCell(p.took_immediate_win, p.chances_to_win)},
+  {key: "blocked_immediate_threat", label: "Blocked", tip: "When the opponent could win with its next disc (and the model could not win at once itself), how often the model blocked it; below, the number of such moves.",  num: true, rank: true, cell: p => rateCell(p.blocked_immediate_threat, p.threats_to_block)},
+  {key: "p_on_block", label: "P on block", num: true, rank: true,
+   tip: "The probability the model gave the blocking column(s) when it had to block; below, the chance level (the share of legal columns that block).",
    cell: p => fmt(p.p_on_block, v => `${v.toFixed(3)}<small>chance ${fmt(p.p_on_block_chance, c => c.toFixed(3))}</small>`)},
-  {key: "let_opponent_win_on_top", label: "Let win on top", num: true, rank: true, dir: 1, cell: p => fmt(p.let_opponent_win_on_top, v => pct(v))},
-  {key: "fallbacks", label: "Fallbacks", num: true, rank: true, dir: 1, cell: p => p.fallbacks},
-  {key: "avg_latency_ms", label: "Latency", num: true, rank: true, dir: 1, cell: p => fmt(p.avg_latency_ms, v => Math.round(v) + " ms")},
+  {key: "let_opponent_win_on_top", label: "Let win on top", tip: "Share of the model's moves after which the opponent could win by dropping a disc on top of the new one.",  num: true, rank: true, dir: 1, cell: p => fmt(p.let_opponent_win_on_top, v => pct(v))},
+  {key: "fallbacks", label: "Fallbacks", tip: "Moves played at random because the model's server returned an error.",  num: true, rank: true, dir: 1, cell: p => p.fallbacks},
+  {key: "avg_latency_ms", label: "Latency", tip: "Average time per model request.",  num: true, rank: true, dir: 1, cell: p => fmt(p.avg_latency_ms, v => Math.round(v) + " ms")},
 ];
 let SUM_TABLE = null;
 function summary(r) {
@@ -146,6 +143,7 @@ function summary(r) {
   const hasTs = rows.some(p => p.ts_score != null);
   SUM_TABLE = SortTable({table: "#sum", chips: r.league ? "#sumchips" : null, cols: SUM_COLS.filter(c => hasTs || c.key !== "ts_score"), sortKey: "score"});
   SUM_TABLE.render(rows);
+  $("#defs").innerHTML = defsList(SUM_COLS.filter(c => hasTs || c.key !== "ts_score"));
 }
 
 async function loadRun(run, args = {}) {
