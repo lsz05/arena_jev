@@ -14,8 +14,8 @@ runs/**/*.tmp
 runs/_shots/
 runs/*.log
 
-# JevBench item texts: only the 72 "original" items are MIT; the easy and hard tiers are not ours to redistribute.
-# Per-item results (task id, predicted label, probabilities) are kept; the requests with the item text are not.
+# JevBench raw request/response dumps (one file per item and model, repeating the item text that is in
+# data/jevbench-public/): not committed; each model's results.jsonl keeps its answers.
 runs/jevbench-public-*/*/raw/
 !runs/jevbench-public-*/*/results.jsonl
 

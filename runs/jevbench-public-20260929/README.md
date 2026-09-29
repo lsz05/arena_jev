@@ -15,8 +15,8 @@ Per-item results of the **231 public JevBench items** (easy 48, original 72, har
 ## Files
 
 `<model>/results.jsonl` one line per item: `task_id`, `family`, `split`, `predicted`, `probs` (label -> probability),
-`correct`, `valid`, `status`, `latency_s`, ... (no item text: only the 72 original items are MIT-licensed, the easy
-and hard tiers are not ours to redistribute; get the items from the JevBench repository).
+`correct`, `valid`, `status`, `latency_s`, ... The items themselves (state, question, expected answer) are in
+[`data/jevbench-public/`](../../data/jevbench-public/README.md) (MIT, copied from JevBench); `task_id` is their `id`.
 `<model>/summary.json` the harness summary (accuracy, Brier, ECE bins, per-family, latency).
 `<model>/manifest.json` run metadata (adapter, dataset hash, times).
 
