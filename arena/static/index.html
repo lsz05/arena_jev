@@ -9,7 +9,7 @@
 <body>
 <header>
   <h1>Jev Arena</h1>
-  <nav><a href="./" class="on">Home</a><a href="leaderboard/">Leaderboard</a><a href="bench/">Bench</a><a href="uno/">UNO</a></nav>
+  <nav><a href="./" class="on">Home</a><a href="leaderboard/">Leaderboard</a><a href="bench/">Bench</a><a href="uno/">UNO</a><a href="connect4/">Connect Four</a></nav>
   <span class="spacer"></span><button id="theme" type="button">◐ Theme</button>
 </header>
 <main>
@@ -22,6 +22,7 @@
     <a class="card-link" href="leaderboard/"><h2>Leaderboard</h2><p class="muted">Every model with its exact size, UNO rating and JevBench accuracy, sortable by any metric.</p><div class="big" id="c-models">–</div><div class="muted">models</div></a>
     <a class="card-link" href="bench/"><h2>JevBench</h2><p class="muted">The 231 public items (easy, original, hard) run locally with the official harness, ranked against the official field.</p><div class="big" id="c-bench">–</div><div class="muted">models evaluated</div></a>
     <a class="card-link" href="uno/"><h2>UNO tournament</h2><p class="muted">Swiss-style 4-player games with the Wild Draw Four challenge; replay any game step by step.</p><div class="big" id="c-games">–</div><div class="muted" id="c-games-note">games</div></a>
+    <a class="card-link" href="connect4/"><h2>Connect Four</h2><p class="muted">Two models on a 7×6 board, every opening with both colors; replay each game move by move with the probabilities the models gave.</p><div class="big" id="c-c4">–</div><div class="muted">games</div></a>
   </div>
 </main>
 <script src="static/board.js"></script>
@@ -32,6 +33,7 @@ fetch("api/summary").then(r => r.json()).then(s => {
   $("#c-games").textContent = s.games.toLocaleString("en-US");
   $("#c-games-note").textContent = s.in_progress ? `games so far · target ${s.target} per model · live` : "games";
   $("#c-bench").textContent = s.bench_models;
+  $("#c-c4").textContent = (s.c4_games ?? 0).toLocaleString("en-US");
   $("#sum").textContent = `Updated ${s.updated}.`;
 }).catch(() => {});
 </script>

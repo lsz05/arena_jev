@@ -1,4 +1,5 @@
-"""The arena website: /arenas/ (index), /arenas/uno/ (UNO viewer), /arenas/leaderboard/, /arenas/bench/.
+"""The arena website: /arenas/ (index), /arenas/uno/ (UNO viewer), /arenas/connect4/ (Connect Four matches and
+replays), /arenas/leaderboard/, /arenas/bench/.
 
     python -m arena site --uno-run runs/<dir> [--base /arenas] [--port 8200] [--allowed-host jev.takeshiba.dev]
 
@@ -47,7 +48,7 @@ class Site:
 
     def route(self, path: str) -> Response:
         b = self.base
-        if path in (b, f"{b}/uno", f"{b}/leaderboard", f"{b}/bench"):
+        if path in (b, f"{b}/uno", f"{b}/leaderboard", f"{b}/bench", f"{b}/connect4"):
             return 301, "", (path + "/").encode()
         if not path.startswith(b + "/"):
             return 404, "text/plain", b"not found"
@@ -61,6 +62,10 @@ class Site:
             if uno is None:
                 return 503, "text/plain", b"no UNO tournament yet"
             return uno.get(path[len("/uno"):])
+        if path == "/connect4/":
+            return self.static("connect4.html")
+        if path.startswith("/connect4/api/"):
+            return self.c4_api(path[len("/connect4/api/"):])
         if path == "/leaderboard/":
             return self.static("leaderboard.html")
         if path == "/leaderboard/api/leaderboard":
@@ -74,7 +79,30 @@ class Site:
             bench = benchdata.build()
             return as_json({"models": len(board["rows"]), "games": board["games"], "updated": board["updated"],
                             "in_progress": board["in_progress"], "target": board.get("target_games_per_model"),
-                            "bench_models": len(bench["models"])})
+                            "bench_models": len(bench["models"]),
+                            "c4_games": sum(sum(1 for _ in open(d / "games.jsonl")) for d in RUNS.glob("*_c4-*")
+                                            if (d / "games.jsonl").exists())})
+        return 404, "text/plain", b"not found"
+
+    @staticmethod
+    def c4_api(rest: str) -> Response:
+        """runs | run/<run>/games | run/<run>/game/<game id>; only names found in runs/ are accepted."""
+        from .connect4 import replay
+        if rest == "runs":
+            return as_json({"runs": replay.list_runs(RUNS)})
+        parts = rest.split("/")
+        if len(parts) >= 3 and parts[0] == "run":
+            known = {d.name: d for d in RUNS.glob("*_c4-*") if (d / "games.jsonl").exists()}
+            run_dir = known.get(parts[1])
+            if run_dir is None:
+                return 404, "text/plain", b"unknown run"
+            if parts[2:] == ["games"]:
+                return as_json({"games": replay.games(run_dir)})
+            if len(parts) == 4 and parts[2] == "game":
+                try:
+                    return as_json(replay.frames(run_dir, parts[3]))
+                except KeyError:
+                    return 404, "text/plain", b"unknown game"
         return 404, "text/plain", b"not found"
 
     @staticmethod

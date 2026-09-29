@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect Four · Jev Arena</title>
+<link rel="stylesheet" href="../static/base.css">
+<style>
+:root { --c4-board: #2c62b8; --c4-hole: #f4f3f0; --c4-first: #d7373d; --c4-second: #f0bd26; --c4-win: #0ca30c; --c4-warn: #c77800; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c4-board: #1f4a8f; --c4-hole: #121211; --c4-first: #e5484d; --c4-second: #f5c73a; --c4-win: #3fbf3f; --c4-warn: #e59b2a; } }
+:root[data-theme="dark"] { --c4-board: #1f4a8f; --c4-hole: #121211; --c4-first: #e5484d; --c4-second: #f5c73a; --c4-win: #3fbf3f; --c4-warn: #e59b2a; }
+.pickrow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+select { font: inherit; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); max-width: 100%; }
+.dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; vertical-align: -1px; margin-right: 5px; }
+.dot.first { background: var(--c4-first); } .dot.second { background: var(--c4-second); }
+#games tbody tr { cursor: pointer; } #games tbody tr:hover td { background: var(--surface-2); } #games tr.sel td { background: var(--surface-2); font-weight: 600; }
+.controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.controls input[type=range] { flex: 1; min-width: 140px; }
+.c4 { display: grid; grid-template-columns: minmax(0, 430px) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 860px) { .c4 { grid-template-columns: minmax(0, 1fr); } }
+.cols7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; padding: 0 8px; }
+.bars { height: 136px; align-items: end; }
+.bar { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; font-size: 11px; color: var(--text-secondary); }
+.bar i { display: block; width: 70%; background: var(--series-1-muted); border-radius: 3px 3px 0 0; min-height: 1px; }
+.bar.pick i { background: var(--series-1); } .bar.pick { color: var(--text-primary); font-weight: 700; }
+.bar.full { color: var(--text-muted); }
+.board { background: var(--c4-board); border-radius: 10px; padding: 8px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.hole { aspect-ratio: 1; border-radius: 50%; background: var(--c4-hole); position: relative; }
+.disc { position: absolute; inset: 0; border-radius: 50%; }
+.disc.first { background: var(--c4-first); } .disc.second { background: var(--c4-second); }
+.disc.ghost { opacity: .55; outline: 3px dashed var(--text-primary); outline-offset: -3px; }
+.disc.win { box-shadow: 0 0 0 3px #fff inset, 0 0 0 3px var(--c4-win); }
+.marks { margin-top: 6px; font-size: 12px; text-align: center; }
+.marks div { display: flex; flex-direction: column; align-items: center; gap: 1px; min-height: 36px; }
+.mk-win { color: var(--c4-win); font-weight: 700; } .mk-block { color: var(--c4-warn); font-weight: 700; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; margin-top: 10px; color: var(--text-secondary); }
+.info h3 { margin: 0 0 6px; font-size: 16px; }
+.flag { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 4px; padding: 1px 7px; margin: 2px 4px 2px 0; border: 1px solid var(--border); }
+.flag.bad { color: var(--c4-warn); border-color: var(--c4-warn); } .flag.good { color: var(--c4-win); border-color: var(--c4-win); }
+pre.req { background: var(--surface-2); border-radius: 6px; padding: 10px; font-size: 12px; white-space: pre-wrap; word-break: break-word; max-height: 420px; overflow: auto; }
+.moves { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 12px; }
+.moves button { font-size: 12px; padding: 2px 7px; border-radius: 5px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); cursor: pointer; }
+.moves button.on { outline: 2px solid var(--accent-ring); }
+.moves button.bad { border-color: var(--c4-warn); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Jev Arena</h1>
+  <nav><a href="../">Home</a><a href="../leaderboard/">Leaderboard</a><a href="../bench/">Bench</a><a href="../uno/">UNO</a><a href="./" class="on">Connect Four</a></nav>
+  <span class="spacer"></span><button id="theme" type="button">◐ Theme</button>
+</header>
+<main>
+  <section class="hero">
+    <h2>Connect Four</h2>
+    <p class="lead">Two models play each other on a 7×6 board. Every opening is played once with each model moving first.
+      A model sees the board from its own side (its discs are X) and chooses among the legal columns; the options say where
+      the disc lands, with no hints about wins or blocks.</p>
+    <div class="pickrow"><label for="run" class="muted">Match</label><select id="run"></select></div>
+    <div class="scroll-x"><table id="sum"></table></div>
+    <div class="note">Took win: share of the moves where a column would have won at once and the model played it. Blocked: share of the
+      moves where the opponent threatened to win at once (and the model could not win itself) and the model blocked it.
+      Let win on top: share of moves after which the opponent could win by playing on top of the new disc.</div>
+  </section>
+  <section>
+    <h2>Games</h2>
+    <div class="scroll-x" style="max-height: 320px; overflow-y: auto"><table id="games"></table></div>
+  </section>
+  <section id="replay">
+    <h2 id="rtitle">Replay</h2>
+    <div class="controls">
+      <button id="first" type="button" title="First move">⏮</button>
+      <button id="prev" type="button" title="Previous move (←)">◀</button>
+      <button id="play" type="button">▶ Play</button>
+      <button id="next" type="button" title="Next move (→)">▶</button>
+      <button id="last" type="button" title="Final position">⏭</button>
+      <input id="step" type="range" min="0" max="0" value="0" aria-label="Move">
+      <span id="stepl" class="muted"></span>
+      <label class="muted" for="speed">Step time</label>
+      <input id="speed" type="range" min="0.25" max="5" step="0.25" value="1" style="flex: 0 0 110px" aria-label="Seconds per move">
+      <span id="speedl" class="muted"></span>
+    </div>
+    <div class="c4">
+      <div>
+        <div id="bars" class="cols7 bars" aria-label="Probabilities per column"></div>
+        <div id="board" class="board" role="img" aria-label="Board"></div>
+        <div id="marks" class="cols7 marks"></div>
+        <div id="legend" class="legend"></div>
+      </div>
+      <div class="info">
+        <div id="info"></div>
+        <details id="reqbox" style="margin-top: 10px"><summary>Request sent to the model</summary><pre id="req" class="req"></pre></details>
+        <div id="moves" class="moves"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="tooltip" id="tip"></div>
+<script src="../static/board.js"></script>
+<script>
+initTheme();
+const S = {runs: [], run: null, games: [], data: null, i: 0, timer: null};
+const SIDE = ["first", "second"];
+const hashArgs = () => Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
+function setHash() {
+  const h = new URLSearchParams({run: S.run || "", ...(S.data ? {game: S.data.meta.game, ply: S.i} : {})});
+  history.replaceState(null, "", "#" + h.toString());
+}
+const when = run => run.replace(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2}).*/, "$1-$2-$3 $4:$5");
+
+async function loadRuns() {
+  S.runs = (await (await fetch("api/runs")).json()).runs;
+  const sel = $("#run");
+  if (!S.runs.length) { $("#sum").innerHTML = "<tbody><tr><td>No Connect Four match yet: run <code>python -m arena c4 A B</code>.</td></tr></tbody>"; return; }
+  sel.innerHTML = S.runs.map(r => `<option value="${esc(r.run)}">${esc(r.a)} vs ${esc(r.b)} · ${r.games} games · ${when(r.run)}</option>`).join("");
+  const want = hashArgs().run;
+  sel.value = S.runs.some(r => r.run === want) ? want : S.runs[0].run;
+  sel.onchange = () => loadRun(sel.value);
+  await loadRun(sel.value, hashArgs());
+}
+
+function summary(r) {
+  const wdl = x => `${x.wins}-${x.draws}-${x.losses}`;
+  const rate = (v, n) => v == null ? dash : `${pct(v)}<small>of ${n}</small>`;
+  $("#sum").innerHTML = `<thead><tr><th>Player</th><th class="num">W-D-L</th><th class="num">Score</th><th class="num">As first</th>
+    <th class="num">As second</th><th class="num">Took win</th><th class="num">Blocked</th><th class="num">Let win on top</th>
+    <th class="num">Fallbacks</th><th class="num">Latency</th></tr></thead><tbody>` +
+    Object.entries(r.players).map(([name, p]) => `<tr><td><b>${esc(name)}</b></td><td class="num">${wdl(p)}</td>
+      <td class="num">${fmt(p.score, v => pct(v))}</td><td class="num">${wdl(p.as_first)}</td><td class="num">${wdl(p.as_second)}</td>
+      <td class="num">${rate(p.took_immediate_win, p.chances_to_win)}</td><td class="num">${rate(p.blocked_immediate_threat, p.threats_to_block)}</td>
+      <td class="num">${fmt(p.let_opponent_win_on_top, v => pct(v))}</td><td class="num">${p.fallbacks}</td>
+      <td class="num">${fmt(p.avg_latency_ms, v => Math.round(v) + " ms")}</td></tr>`).join("") + "</tbody>";
+}
+
+async function loadRun(run, args = {}) {
+  S.run = run;
+  summary(S.runs.find(r => r.run === run));
+  S.games = (await (await fetch(`api/run/${encodeURIComponent(run)}/games`)).json()).games;
+  $("#games").innerHTML = `<thead><tr><th>Game</th><th>Opening</th><th>First</th><th>Second</th><th>Winner</th><th class="num">Moves</th></tr></thead><tbody>` +
+    S.games.map(g => `<tr data-g="${esc(g.game)}"><td>${esc(g.game)}</td><td>${g.opening.length ? g.opening.join(", ") : "none"}</td>
+      <td><span class="dot first"></span>${esc(g.players[0])}</td><td><span class="dot second"></span>${esc(g.players[1])}</td>
+      <td>${g.winner == null ? "draw" : `<span class="dot ${SIDE[g.winner_seat]}"></span>${esc(g.winner)}`}</td><td class="num">${g.plies}</td></tr>`).join("") + "</tbody>";
+  $("#games").querySelectorAll("tbody tr").forEach(tr => tr.onclick = () => { loadGame(tr.dataset.g); $("#replay").scrollIntoView({behavior: "smooth"}); });
+  const g = S.games.some(x => x.game === args.game) ? args.game : S.games[0]?.game;
+  if (g) await loadGame(g, +args.ply || 0);
+}
+
+async function loadGame(gid, ply = 0) {
+  stop();
+  S.data = await (await fetch(`api/run/${encodeURIComponent(S.run)}/game/${encodeURIComponent(gid)}`)).json();
+  const m = S.data.meta;
+  $("#games").querySelectorAll("tbody tr").forEach(tr => tr.classList.toggle("sel", tr.dataset.g === gid));
+  $("#rtitle").textContent = `Replay · ${gid} · ` + (m.winner == null ? "draw" : `${m.winner} wins`) + ` in ${m.plies} moves`;
+  $("#legend").innerHTML = m.players.map((p, s) => `<span><span class="dot ${SIDE[s]}"></span>${esc(p)} (${SIDE[s]})</span>`).join("");
+  $("#step").max = S.data.frames.length - 1;
+  $("#moves").innerHTML = S.data.frames.filter(f => !f.end).map((f, k) => {
+    const bad = f.diag && ((f.diag.could_win && !f.diag.took_win) || (f.diag.must_block && !f.diag.blocked));
+    return `<button type="button" class="${bad ? "bad" : ""}" data-k="${k}"><span class="dot ${SIDE[f.seat]}"></span>${k + 1}. ${f.action}${f.opening ? " (opening)" : ""}</button>`;
+  }).join("");
+  $("#moves").querySelectorAll("button").forEach(b => b.onclick = () => { stop(); show(+b.dataset.k); });
+  show(Math.min(ply, S.data.frames.length - 1));
+}
+
+function show(i) {
+  S.i = i;
+  const fr = S.data.frames[i], names = S.data.meta.players;
+  $("#step").value = i;
+  $("#stepl").textContent = fr.end ? "final position" : `move ${i + 1} / ${S.data.frames.length - 1}`;
+  const line = new Set((fr.line || []).map(([c, r]) => `${c},${r}`));
+  let cells = "";
+  for (let r = 6; r >= 1; r--) for (let c = 1; c <= 7; c++) {
+    const v = fr.board[c - 1][r - 1];
+    let disc = v == null ? "" : `<div class="disc ${SIDE[v]} ${line.has(`${c},${r}`) ? "win" : ""}"></div>`;
+    if (!fr.end && c === fr.action && r === fr.landing_row) disc = `<div class="disc ${SIDE[fr.seat]} ghost"></div>`;
+    cells += `<div class="hole">${disc}</div>`;
+  }
+  $("#board").innerHTML = cells;
+  const probs = {};
+  (fr.calls || []).forEach((call, k) => { if (k === 0 || !fr.knockout || k < fr.calls.length - 1) Object.assign(probs, call.probabilities); });
+  $("#bars").innerHTML = [1, 2, 3, 4, 5, 6, 7].map(c => {
+    const legal = (fr.legal || []).includes(c), p = probs[String(c)];
+    if (fr.end || p == null) return `<div class="bar ${legal ? "" : "full"}">${!fr.end && !legal ? "full" : ""}</div>`;
+    const pick = c === fr.action;
+    return `<div class="bar ${pick ? "pick" : ""}" data-tip="Column ${c}: ${pct(p)}${pick ? " (played)" : ""}">${Math.round(100 * p)}%<i style="height:${(110 * p).toFixed(1)}px"></i></div>`;
+  }).join("");
+  $("#marks").innerHTML = [1, 2, 3, 4, 5, 6, 7].map(c => {
+    const w = !fr.end && (fr.wins || []).includes(c), t = !fr.end && (fr.threats || []).includes(c);
+    return `<div><span>${c}</span>${w ? `<span class="mk-win" data-tip="Playing column ${c} wins at once">★ win</span>` : ""}${t ? `<span class="mk-block" data-tip="The opponent wins at once in column ${c} unless it is blocked">⚠ block</span>` : ""}</div>`;
+  }).join("");
+  $("#moves").querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.k === i));
+  $("#info").innerHTML = fr.end ? endInfo(fr, names) : moveInfo(fr);
+  $("#reqbox").hidden = !fr.request;
+  if (fr.request) $("#req").textContent = fr.request.state + "\n\n" + JSON.stringify(fr.request.questions, null, 1);
+  setHash();
+}
+
+function moveInfo(fr) {
+  const flags = [];
+  const d = fr.diag;
+  if (fr.opening) flags.push(`<span class="flag">opening move</span>`);
+  if (fr.forced) flags.push(`<span class="flag">forced: one legal column</span>`);
+  if (fr.fallback) flags.push(`<span class="flag bad" data-tip="${esc(fr.error || "")}">fallback: random column after an error</span>`);
+  if (d && d.could_win) flags.push(d.took_win ? `<span class="flag good">took the win</span>` : `<span class="flag bad">missed a win (${fr.wins.join(", ")})</span>`);
+  if (d && d.must_block) flags.push(d.blocked ? `<span class="flag good">blocked</span>` : `<span class="flag bad">did not block (${fr.threats.join(", ")})</span>`);
+  if (d && d.gave_win_on_top) flags.push(`<span class="flag bad">lets the opponent win on top</span>`);
+  if (fr.knockout) flags.push(`<span class="flag">knockout: ${fr.calls.length} calls (option cap)</span>`);
+  if (fr.request) flags.push(fr.matches_log ? `<span class="flag good">rebuilt request matches the log</span>` : `<span class="flag bad">rebuilt request differs from the log</span>`);
+  const last = (fr.calls || []).slice(-1)[0];
+  const p = last ? last.probabilities[String(fr.action)] : null;
+  return `<h3><span class="dot ${SIDE[fr.seat]}"></span>${esc(fr.player)} plays column ${fr.action}</h3>
+    <div class="muted">move ${fr.ply + 1} · ${SIDE[fr.seat]} player · the disc lands on row ${fr.landing_row}${p != null ? ` · p = ${pct(p)}` : ""}${last ? ` · ${Math.round(last.latency_ms)} ms` : ""}</div>
+    <div style="margin-top: 8px">${flags.join("")}</div>`;
+}
+
+function endInfo(fr, names) {
+  return fr.winner == null ? `<h3>Draw: the board is full</h3>`
+    : `<h3><span class="dot ${SIDE[fr.winner_seat]}"></span>${esc(fr.winner)} wins</h3><div class="muted">four in a row: ${fr.line.map(([c, r]) => `column ${c} row ${r}`).join(" · ")}</div>`;
+}
+
+function stop() { if (S.timer) { clearInterval(S.timer); S.timer = null; } $("#play").textContent = "▶ Play"; }
+function play() {
+  if (S.timer) return stop();
+  if (S.i >= S.data.frames.length - 1) show(0);
+  $("#play").textContent = "⏸ Pause";
+  S.timer = setInterval(() => { if (S.i >= S.data.frames.length - 1) stop(); else show(S.i + 1); }, 1000 * +$("#speed").value);
+}
+function speed() {
+  $("#speedl").textContent = `${(+$("#speed").value).toFixed(2).replace(/0$/, "")} s`;
+  try { localStorage.setItem("c4-step-seconds", $("#speed").value); } catch (e) {}
+  if (S.timer) { stop(); play(); }
+}
+try { const v = localStorage.getItem("c4-step-seconds"); if (v) $("#speed").value = v; } catch (e) {}
+$("#speed").oninput = speed; speed();
+$("#first").onclick = () => { stop(); show(0); };
+$("#last").onclick = () => { stop(); show(S.data.frames.length - 1); };
+$("#prev").onclick = () => { stop(); show(Math.max(0, S.i - 1)); };
+$("#next").onclick = () => { stop(); show(Math.min(S.data.frames.length - 1, S.i + 1)); };
+$("#play").onclick = play;
+$("#step").oninput = e => { stop(); show(+e.target.value); };
+document.addEventListener("keydown", e => {
+  if (!S.data || ["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName)) return;
+  if (e.key === "ArrowLeft") $("#prev").click(); else if (e.key === "ArrowRight") $("#next").click();
+});
+loadRuns().catch(e => { $("#sum").innerHTML = `<tbody><tr><td>Could not load the matches: ${esc(e.message)}</td></tr></tbody>`; });
+</script>
+</body>
+</html>

@@ -139,3 +139,34 @@ def test_match_files_summary_and_replay(tmp_path):
     assert s["players"]["heuristic"]["took_immediate_win"] == 1.0
     text = show(out, games[0]["game"])
     assert "ply 1:" in text and "opening move" in text
+
+
+def test_replay_frames_rebuild_the_requests(tmp_path):
+    from arena.connect4 import replay
+    server = serve(port=0, background=True)
+    try:
+        url = f"http://127.0.0.1:{server.server_address[1]}"
+        run = tmp_path / "20260101-000000_c4-mock-vs-heuristic"
+        run.mkdir()
+        decs, games = [], []
+        for i, op in enumerate(openings(7)[:3]):
+            players = [SystemOnePlayer("mock", SystemOneClient(url), max_options=3), HeuristicPlayer()]
+            games.append(play_game(players, op, 100 + i, f"G{i:02d}-ab", on_decision=decs.append))
+        (run / "games.jsonl").write_text("".join(json.dumps(g) + "\n" for g in games))
+        (run / "decisions.jsonl").write_text("".join(json.dumps(d) + "\n" for d in decs))
+        (run / "config.json").write_text(json.dumps({"a": "mock", "b": "heuristic", "openings": 7, "template": "B"}))
+        runs = replay.list_runs(tmp_path)
+        assert [r["run"] for r in runs] == [run.name] and runs[0]["games"] == 3
+        assert [g["game"] for g in replay.games(run)] == ["G00-ab", "G01-ab", "G02-ab"]
+        for g in games:
+            data = replay.frames(run, g["game"])
+            moves, end = data["frames"][:-1], data["frames"][-1]
+            assert [f["action"] for f in moves] == g["moves"] and end["winner"] == g["winner"]
+            asked = [f for f in moves if f.get("calls")]
+            assert asked and all(f["matches_log"] for f in asked)
+            assert all("Choose the column" in f["request"]["questions"]["move"]["instructions"] for f in asked)
+            assert all(f["opening"] == (f["ply"] < len(g["opening"])) for f in moves)
+        with pytest.raises(KeyError):
+            replay.frames(run, "nope")
+    finally:
+        server.shutdown()

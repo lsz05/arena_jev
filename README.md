@@ -70,6 +70,9 @@ python3 servers/launch.py start kev-0.8b decider-0.8b && python3 servers/launch.
   immediate win when one existed, blocked the opponent's immediate win, let the opponent win on top of its own disc.
 - Output: `runs/<time>_c4-<a>-vs-<b>/` with `games.jsonl`, `decisions.jsonl` (options, probabilities, latency per
   move) and `summary.md`.
+- Replay in the browser: `.venv/bin/python -m arena site` serves `/arenas/connect4/` with every match in `runs/`: the
+  summary, the games, and each game move by move (board, the probability of each column, the columns that would
+  win at once or had to be blocked, and the request sent, rebuilt from the game's seed).
 
 ## Layout
 
@@ -85,7 +88,7 @@ python3 servers/launch.py start kev-0.8b decider-0.8b && python3 servers/launch.
 | `arena/stats.py`, `leaderboard.py` | win rates with Wilson 95% intervals, points, diagnostics, the leaderboard |
 | `arena/connect4/` | Connect Four: engine, prompts, players, two-player matches, terminal replay |
 | `arena/replay.py`, `viz.py`, `viewer.html` | replays: re-simulate a game from its seed and logged actions, and rebuild the requests sent to the models |
-| `arena/site.py`, `arena/static/` | the site: home, leaderboard, JevBench results and the UNO viewer under `/arenas/` |
+| `arena/site.py`, `arena/static/` | the site: home, leaderboard, JevBench results, the UNO viewer and Connect Four replays under `/arenas/` |
 | `servers/` | model servers: launcher, adapters, one file per model, environment manifests |
 | `bench/` | model registry with measured sizes, JevBench runner, deployment reports, run packing |
 
