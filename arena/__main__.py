@@ -85,6 +85,18 @@ def main() -> None:
     lg.add_argument("--seed", type=int, default=20260929)
     lg.add_argument("--out", default="runs")
     lg.add_argument("--resume", metavar="RUN_DIR", help="continue a stopped league (its own settings are used)")
+    pz = sub.add_parser("c4-puzzles-make", help="generate Connect Four decision puzzles (one correct column each)")
+    pz.add_argument("--per-type", type=int, default=250)
+    pz.add_argument("--seed", type=int, default=20261001)
+    pz.add_argument("--out", default="data/c4-puzzles")
+    pz.add_argument("--workers", type=int, default=16)
+    pr = sub.add_parser("c4-puzzles-run", help="ask every model server every Connect Four puzzle in several option orders")
+    pr.add_argument("--models", help="comma-separated model names (default: every servers/models/*.toml that answers)")
+    pr.add_argument("--exclude", help="comma-separated model names to leave out")
+    pr.add_argument("--orders", type=int, default=3)
+    pr.add_argument("--per-model", type=int, default=4, help="requests in flight per model")
+    pr.add_argument("--out", default="runs")
+    pr.add_argument("--resume", metavar="RUN_DIR")
     c4s = sub.add_parser("c4-show", help="replay a Connect Four game in the terminal")
     c4s.add_argument("run_dir")
     c4s.add_argument("--game")
@@ -99,6 +111,15 @@ def main() -> None:
         split = lambda v: [x.strip() for x in v.split(",") if x.strip()] if v else None  # noqa: E731
         league_run(split(a.models), split(a.exclude), a.openings, a.template, a.policy, a.hint, a.pair_workers, a.seed,
                    a.out, a.resume)
+        return
+    if a.cmd == "c4-puzzles-make":
+        from .connect4.puzzles import make
+        print(json.dumps(make(a.per_type, a.seed, a.out, a.workers), indent=1))
+        return
+    if a.cmd == "c4-puzzles-run":
+        from .connect4.puzzle_run import run as puzzles_run
+        split = lambda v: [x.strip() for x in v.split(",") if x.strip()] if v else None  # noqa: E731
+        puzzles_run(split(a.models), split(a.exclude), a.orders, a.per_model, a.out, a.resume)
         return
     if a.cmd == "c4-show":
         from .connect4.match import show

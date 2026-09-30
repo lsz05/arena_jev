@@ -29,3 +29,4 @@ runs/jevbench-public-*/README-uno-comparison-local.md
 runs/jevbench-public-*/comparison.json
 runs/jevbench-public-*/*.run.log
 runs/jevbench-public-*/public_leaderboard.json
+arena/connect4/_c4solver*.so
