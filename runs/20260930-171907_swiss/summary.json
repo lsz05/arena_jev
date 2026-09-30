@@ -1,0 +1,1637 @@
+{
+ "games": 7152,
+ "aborted": 0,
+ "avg_turns": 62.664709172259506,
+ "players": {
+  "bosun-0.6b": {
+   "seat_games": 1028,
+   "wins": 249,
+   "win_rate": 0.24221789883268482,
+   "win_rate_ci95": [
+    0.21701886402579437,
+    0.2693364060079007
+   ],
+   "avg_points_won": 27.0,
+   "avg_points_left": 31.66634241245136,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.43907156673114117,
+     "n": 517
+    },
+    "challenged": {
+     "rate": 0.8413926499032882,
+     "n": 517
+    },
+    "color_is_most_held": {
+     "rate": 0.271505376344086,
+     "n": 744
+    },
+    "could_play": {
+     "rate": 0.7414871944121071,
+     "n": 13744
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13744
+    },
+    "guilty": {
+     "rate": 0.39264990328820115,
+     "n": 517
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1231
+    },
+    "wd4_bluff": {
+     "rate": 0.49902534113060426,
+     "n": 513
+    },
+    "wild_with_colored": {
+     "rate": 0.4706666666666667,
+     "n": 750
+    }
+   },
+   "model_calls": {
+    "decisions": 15505,
+    "forced": 8575,
+    "calls": 7925,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 606.983646687698,
+    "avg_input_tokens": 477.66372239747636,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "decider-0.8b": {
+   "seat_games": 1028,
+   "wins": 276,
+   "win_rate": 0.26848249027237353,
+   "win_rate_ci95": [
+    0.2422898849838805,
+    0.29639899904638156
+   ],
+   "avg_points_won": 34.55739299610895,
+   "avg_points_left": 30.30058365758755,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.5020161290322581,
+     "n": 496
+    },
+    "challenged": {
+     "rate": 0.5423387096774194,
+     "n": 496
+    },
+    "color_is_most_held": {
+     "rate": 0.5389507154213037,
+     "n": 629
+    },
+    "could_play": {
+     "rate": 0.7304269797352875,
+     "n": 13373
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13373
+    },
+    "guilty": {
+     "rate": 0.4717741935483871,
+     "n": 496
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1289
+    },
+    "wd4_bluff": {
+     "rate": 0.0,
+     "n": 448
+    },
+    "wild_with_colored": {
+     "rate": 0.18740399385560677,
+     "n": 651
+    }
+   },
+   "model_calls": {
+    "decisions": 15169,
+    "forced": 8731,
+    "calls": 7356,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 11.344127243066906,
+    "avg_input_tokens": 499.8157966286025,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "decision-eos-0.8b": {
+   "seat_games": 1000,
+   "wins": 214,
+   "win_rate": 0.214,
+   "win_rate_ci95": [
+    0.18969965956953844,
+    0.24048932642187698
+   ],
+   "avg_points_won": 23.994,
+   "avg_points_left": 30.243,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.5075268817204301,
+     "n": 465
+    },
+    "challenged": {
+     "rate": 0.6709677419354839,
+     "n": 465
+    },
+    "color_is_most_held": {
+     "rate": 0.7482419127988749,
+     "n": 711
+    },
+    "could_play": {
+     "rate": 0.7350737797956867,
+     "n": 13215
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13215
+    },
+    "guilty": {
+     "rate": 0.4236559139784946,
+     "n": 465
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1251
+    },
+    "wd4_bluff": {
+     "rate": 0.5969827586206896,
+     "n": 464
+    },
+    "wild_with_colored": {
+     "rate": 0.8832630098452883,
+     "n": 711
+    }
+   },
+   "model_calls": {
+    "decisions": 14941,
+    "forced": 8420,
+    "calls": 7485,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 1719.3296593186362,
+    "avg_input_tokens": 480.50273881095524,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "decision-kai": {
+   "seat_games": 1016,
+   "wins": 272,
+   "win_rate": 0.2677165354330709,
+   "win_rate_ci95": [
+    0.2414025965383681,
+    0.29578043266930504
+   ],
+   "avg_points_won": 31.140748031496063,
+   "avg_points_left": 28.85433070866142,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.4244306418219462,
+     "n": 483
+    },
+    "challenged": {
+     "rate": 1.0,
+     "n": 483
+    },
+    "color_is_most_held": {
+     "rate": 0.36712328767123287,
+     "n": 730
+    },
+    "could_play": {
+     "rate": 0.7350119904076738,
+     "n": 13344
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13344
+    },
+    "guilty": {
+     "rate": 0.4244306418219462,
+     "n": 483
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1271
+    },
+    "wd4_bluff": {
+     "rate": 0.43584521384928715,
+     "n": 491
+    },
+    "wild_with_colored": {
+     "rate": 0.6575342465753424,
+     "n": 730
+    }
+   },
+   "model_calls": {
+    "decisions": 15107,
+    "forced": 8528,
+    "calls": 7589,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 31.216339438661215,
+    "avg_input_tokens": 489.0151535116616,
+    "avg_history_rounds": 4.999736460666755
+   }
+  },
+  "decision-lex": {
+   "seat_games": 1048,
+   "wins": 283,
+   "win_rate": 0.2700381679389313,
+   "win_rate_ci95": [
+    0.24403349322897233,
+    0.2977226038867911
+   ],
+   "avg_points_won": 33.73950381679389,
+   "avg_points_left": 31.514312977099237,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.44989339019189767,
+     "n": 469
+    },
+    "challenged": {
+     "rate": 0.9850746268656716,
+     "n": 469
+    },
+    "color_is_most_held": {
+     "rate": 0.4917808219178082,
+     "n": 730
+    },
+    "could_play": {
+     "rate": 0.7411059698096033,
+     "n": 13183
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13183
+    },
+    "guilty": {
+     "rate": 0.44776119402985076,
+     "n": 469
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1180
+    },
+    "wd4_bluff": {
+     "rate": 0.40824742268041236,
+     "n": 485
+    },
+    "wild_with_colored": {
+     "rate": 0.5543478260869565,
+     "n": 736
+    }
+   },
+   "model_calls": {
+    "decisions": 14839,
+    "forced": 8339,
+    "calls": 7491,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 30.465465224936608,
+    "avg_input_tokens": 486.6083299959952,
+    "avg_history_rounds": 4.999466025897744
+   }
+  },
+  "gliner2.5-decide": {
+   "seat_games": 1064,
+   "wins": 239,
+   "win_rate": 0.22462406015037595,
+   "win_rate_ci95": [
+    0.2005636346718273,
+    0.2506658360661548
+   ],
+   "avg_points_won": 27.25375939849624,
+   "avg_points_left": 32.713345864661655,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.45384615384615384,
+     "n": 520
+    },
+    "challenged": {
+     "rate": 0.9769230769230769,
+     "n": 520
+    },
+    "color_is_most_held": {
+     "rate": 0.2971938775510204,
+     "n": 784
+    },
+    "could_play": {
+     "rate": 0.7250730079265749,
+     "n": 14382
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 14382
+    },
+    "guilty": {
+     "rate": 0.4461538461538462,
+     "n": 520
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1391
+    },
+    "wd4_bluff": {
+     "rate": 0.4660714285714286,
+     "n": 560
+    },
+    "wild_with_colored": {
+     "rate": 0.5661577608142494,
+     "n": 786
+    }
+   },
+   "model_calls": {
+    "decisions": 16307,
+    "forced": 9215,
+    "calls": 8200,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 21.28698780487796,
+    "avg_input_tokens": 337.27487804878047,
+    "avg_history_rounds": 3.2720731707317072
+   }
+  },
+  "intern-decision-0.8b": {
+   "seat_games": 1012,
+   "wins": 255,
+   "win_rate": 0.2519762845849802,
+   "win_rate_ci95": [
+    0.22619964855182473,
+    0.2796288191935403
+   ],
+   "avg_points_won": 29.613636363636363,
+   "avg_points_left": 31.5197628458498,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.391812865497076,
+     "n": 513
+    },
+    "challenged": {
+     "rate": 1.0,
+     "n": 513
+    },
+    "color_is_most_held": {
+     "rate": 0.8478260869565217,
+     "n": 736
+    },
+    "could_play": {
+     "rate": 0.735779948290721,
+     "n": 13924
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13924
+    },
+    "guilty": {
+     "rate": 0.391812865497076,
+     "n": 513
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1316
+    },
+    "wd4_bluff": {
+     "rate": 0.5103734439834025,
+     "n": 482
+    },
+    "wild_with_colored": {
+     "rate": 0.5639300134589502,
+     "n": 743
+    }
+   },
+   "model_calls": {
+    "decisions": 15762,
+    "forced": 8883,
+    "calls": 7909,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 1337.5319509419612,
+    "avg_input_tokens": 491.43646478695155,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "jev-style-0.8b": {
+   "seat_games": 1032,
+   "wins": 243,
+   "win_rate": 0.23546511627906977,
+   "win_rate_ci95": [
+    0.21058883131047246,
+    0.2623035491461534
+   ],
+   "avg_points_won": 28.066860465116278,
+   "avg_points_left": 29.123062015503876,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.5881226053639846,
+     "n": 522
+    },
+    "challenged": {
+     "rate": 0.2988505747126437,
+     "n": 522
+    },
+    "color_is_most_held": {
+     "rate": 0.5997652582159625,
+     "n": 852
+    },
+    "could_play": {
+     "rate": 0.7458080370049147,
+     "n": 13836
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13836
+    },
+    "guilty": {
+     "rate": 0.39655172413793105,
+     "n": 522
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1226
+    },
+    "wd4_bluff": {
+     "rate": 0.5364485981308411,
+     "n": 535
+    },
+    "wild_with_colored": {
+     "rate": 0.8345070422535211,
+     "n": 852
+    }
+   },
+   "model_calls": {
+    "decisions": 15593,
+    "forced": 8520,
+    "calls": 8195,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 51.76331909701013,
+    "avg_input_tokens": 595.3077486272117,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "jevembed-0.6b": {
+   "seat_games": 1012,
+   "wins": 271,
+   "win_rate": 0.26778656126482214,
+   "win_rate_ci95": [
+    0.2414200211070231,
+    0.29590942080596805
+   ],
+   "avg_points_won": 31.84881422924901,
+   "avg_points_left": 27.052371541501977,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.4435946462715105,
+     "n": 523
+    },
+    "challenged": {
+     "rate": 0.9388145315487572,
+     "n": 523
+    },
+    "color_is_most_held": {
+     "rate": 0.2866323907455013,
+     "n": 778
+    },
+    "could_play": {
+     "rate": 0.7322890708437166,
+     "n": 14045
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 14045
+    },
+    "guilty": {
+     "rate": 0.42447418738049714,
+     "n": 523
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1368
+    },
+    "wd4_bluff": {
+     "rate": 0.43609022556390975,
+     "n": 532
+    },
+    "wild_with_colored": {
+     "rate": 0.6111817026683609,
+     "n": 787
+    }
+   },
+   "model_calls": {
+    "decisions": 15943,
+    "forced": 9089,
+    "calls": 7927,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 918.155683108363,
+    "avg_input_tokens": 469.8627475715908,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "jpt-0.8b": {
+   "seat_games": 1008,
+   "wins": 240,
+   "win_rate": 0.23809523809523808,
+   "win_rate_ci95": [
+    0.2128270389715747,
+    0.265352154293458
+   ],
+   "avg_points_won": 30.136904761904763,
+   "avg_points_left": 29.61111111111111,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.4323770491803279,
+     "n": 488
+    },
+    "challenged": {
+     "rate": 0.9344262295081968,
+     "n": 488
+    },
+    "color_is_most_held": {
+     "rate": 0.7696404793608522,
+     "n": 751
+    },
+    "could_play": {
+     "rate": 0.7395771732702543,
+     "n": 13528
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13528
+    },
+    "guilty": {
+     "rate": 0.41598360655737704,
+     "n": 488
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1241
+    },
+    "wd4_bluff": {
+     "rate": 0.34375,
+     "n": 480
+    },
+    "wild_with_colored": {
+     "rate": 0.6421052631578947,
+     "n": 760
+    }
+   },
+   "model_calls": {
+    "decisions": 15264,
+    "forced": 8539,
+    "calls": 7741,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 1326.1193127502854,
+    "avg_input_tokens": 556.5189252034621,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "julia-1": {
+   "seat_games": 1000,
+   "wins": 239,
+   "win_rate": 0.239,
+   "win_rate_ci95": [
+    0.21359749233628916,
+    0.2664001487258067
+   ],
+   "avg_points_won": 28.283,
+   "avg_points_left": 34.722,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.5826923076923077,
+     "n": 520
+    },
+    "challenged": {
+     "rate": 0.08461538461538462,
+     "n": 520
+    },
+    "color_is_most_held": {
+     "rate": 0.3324607329842932,
+     "n": 764
+    },
+    "could_play": {
+     "rate": 0.7354776407666023,
+     "n": 13462
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13462
+    },
+    "guilty": {
+     "rate": 0.42115384615384616,
+     "n": 520
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1227
+    },
+    "wd4_bluff": {
+     "rate": 0.3888888888888889,
+     "n": 504
+    },
+    "wild_with_colored": {
+     "rate": 0.6348167539267016,
+     "n": 764
+    }
+   },
+   "model_calls": {
+    "decisions": 15216,
+    "forced": 8525,
+    "calls": 7711,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 1676.170678251846,
+    "avg_input_tokens": 484.2985345610167,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "kev-0.8b": {
+   "seat_games": 1044,
+   "wins": 276,
+   "win_rate": 0.26436781609195403,
+   "win_rate_ci95": [
+    0.2385157753569835,
+    0.29194760765815925
+   ],
+   "avg_points_won": 29.845785440613028,
+   "avg_points_left": 27.8639846743295,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.48125,
+     "n": 480
+    },
+    "challenged": {
+     "rate": 0.93125,
+     "n": 480
+    },
+    "color_is_most_held": {
+     "rate": 0.5349462365591398,
+     "n": 744
+    },
+    "could_play": {
+     "rate": 0.7332283239063507,
+     "n": 13967
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13967
+    },
+    "guilty": {
+     "rate": 0.4625,
+     "n": 480
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1319
+    },
+    "wd4_bluff": {
+     "rate": 0.3727454909819639,
+     "n": 499
+    },
+    "wild_with_colored": {
+     "rate": 0.5788770053475936,
+     "n": 748
+    }
+   },
+   "model_calls": {
+    "decisions": 15771,
+    "forced": 8990,
+    "calls": 7802,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 21.318021020251198,
+    "avg_input_tokens": 489.1943091514996,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "lavoir": {
+   "seat_games": 1000,
+   "wins": 228,
+   "win_rate": 0.228,
+   "win_rate_ci95": [
+    0.2030663348295291,
+    0.2550154980014674
+   ],
+   "avg_points_won": 27.062,
+   "avg_points_left": 28.673,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.6379310344827587,
+     "n": 464
+    },
+    "challenged": {
+     "rate": 0.46551724137931033,
+     "n": 464
+    },
+    "color_is_most_held": {
+     "rate": 0.4050802139037433,
+     "n": 748
+    },
+    "could_play": {
+     "rate": 0.741733486063383,
+     "n": 13095
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13095
+    },
+    "guilty": {
+     "rate": 0.41379310344827586,
+     "n": 464
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1163
+    },
+    "wd4_bluff": {
+     "rate": 0.4779874213836478,
+     "n": 477
+    },
+    "wild_with_colored": {
+     "rate": 0.7526737967914439,
+     "n": 748
+    }
+   },
+   "model_calls": {
+    "decisions": 14733,
+    "forced": 8168,
+    "calls": 7722,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 2140.8706682206584,
+    "avg_input_tokens": 443.3730898730899,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "laya-multilingual": {
+   "seat_games": 1004,
+   "wins": 221,
+   "win_rate": 0.2201195219123506,
+   "win_rate_ci95": [
+    0.1955839500345613,
+    0.24678874027709086
+   ],
+   "avg_points_won": 26.704183266932272,
+   "avg_points_left": 33.79780876494024,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.6088709677419355,
+     "n": 496
+    },
+    "challenged": {
+     "rate": 0.14112903225806453,
+     "n": 496
+    },
+    "color_is_most_held": {
+     "rate": 0.16643356643356644,
+     "n": 715
+    },
+    "could_play": {
+     "rate": 0.7416379181040947,
+     "n": 13334
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13334
+    },
+    "guilty": {
+     "rate": 0.3709677419354839,
+     "n": 496
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1210
+    },
+    "wd4_bluff": {
+     "rate": 0.36105476673427994,
+     "n": 493
+    },
+    "wild_with_colored": {
+     "rate": 0.35,
+     "n": 720
+    }
+   },
+   "model_calls": {
+    "decisions": 15051,
+    "forced": 8331,
+    "calls": 7914,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 2103.221518827391,
+    "avg_input_tokens": 488.62484205205965,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "lev-350m": {
+   "seat_games": 1044,
+   "wins": 267,
+   "win_rate": 0.2557471264367816,
+   "win_rate_ci95": [
+    0.23021101764998622,
+    0.2830741964510763
+   ],
+   "avg_points_won": 30.877394636015325,
+   "avg_points_left": 31.88984674329502,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.4474187380497132,
+     "n": 523
+    },
+    "challenged": {
+     "rate": 0.9866156787762906,
+     "n": 523
+    },
+    "color_is_most_held": {
+     "rate": 0.34328358208955223,
+     "n": 737
+    },
+    "could_play": {
+     "rate": 0.7241648343854175,
+     "n": 14099
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 14099
+    },
+    "guilty": {
+     "rate": 0.4340344168260038,
+     "n": 523
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1374
+    },
+    "wd4_bluff": {
+     "rate": 0.27976190476190477,
+     "n": 504
+    },
+    "wild_with_colored": {
+     "rate": 0.5317139001349528,
+     "n": 741
+    }
+   },
+   "model_calls": {
+    "decisions": 16005,
+    "forced": 9357,
+    "calls": 7711,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 18.69612242251324,
+    "avg_input_tokens": 496.91700168590324,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "lumma-fev-0.1b": {
+   "seat_games": 1028,
+   "wins": 266,
+   "win_rate": 0.2587548638132296,
+   "win_rate_ci95": [
+    0.23291558613701313,
+    0.28639047789452043
+   ],
+   "avg_points_won": 31.54863813229572,
+   "avg_points_left": 31.244163424124512,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.5614754098360656,
+     "n": 488
+    },
+    "challenged": {
+     "rate": 0.0430327868852459,
+     "n": 488
+    },
+    "color_is_most_held": {
+     "rate": 0.3601108033240997,
+     "n": 722
+    },
+    "could_play": {
+     "rate": 0.7345896569085809,
+     "n": 13903
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13903
+    },
+    "guilty": {
+     "rate": 0.4364754098360656,
+     "n": 488
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1333
+    },
+    "wd4_bluff": {
+     "rate": 0.168,
+     "n": 500
+    },
+    "wild_with_colored": {
+     "rate": 0.5048275862068966,
+     "n": 725
+    }
+   },
+   "model_calls": {
+    "decisions": 15735,
+    "forced": 8984,
+    "calls": 7774,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 20.530794957550825,
+    "avg_input_tokens": 480.42179058399796,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "lumma-fev-0.6b": {
+   "seat_games": 1008,
+   "wins": 257,
+   "win_rate": 0.25496031746031744,
+   "win_rate_ci95": [
+    0.2290194956560916,
+    0.2827617950123291
+   ],
+   "avg_points_won": 30.168650793650794,
+   "avg_points_left": 30.618055555555557,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.5402061855670103,
+     "n": 485
+    },
+    "challenged": {
+     "rate": 0.5195876288659794,
+     "n": 485
+    },
+    "color_is_most_held": {
+     "rate": 0.3194263363754889,
+     "n": 767
+    },
+    "could_play": {
+     "rate": 0.7317268491555038,
+     "n": 13736
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13736
+    },
+    "guilty": {
+     "rate": 0.4144329896907217,
+     "n": 485
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1310
+    },
+    "wd4_bluff": {
+     "rate": 0.4087301587301587,
+     "n": 504
+    },
+    "wild_with_colored": {
+     "rate": 0.7408854166666666,
+     "n": 768
+    }
+   },
+   "model_calls": {
+    "decisions": 15539,
+    "forced": 8846,
+    "calls": 7754,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 19.93951508898634,
+    "avg_input_tokens": 481.86561774567963,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "openjev-nli-0.8b": {
+   "seat_games": 1008,
+   "wins": 258,
+   "win_rate": 0.25595238095238093,
+   "win_rate_ci95": [
+    0.2299736669407316,
+    0.2837842176925943
+   ],
+   "avg_points_won": 29.70734126984127,
+   "avg_points_left": 30.03075396825397,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.4711729622266402,
+     "n": 503
+    },
+    "challenged": {
+     "rate": 0.9085487077534792,
+     "n": 503
+    },
+    "color_is_most_held": {
+     "rate": 0.6706192358366272,
+     "n": 759
+    },
+    "could_play": {
+     "rate": 0.7339769773486817,
+     "n": 13465
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13465
+    },
+    "guilty": {
+     "rate": 0.43538767395626243,
+     "n": 503
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1338
+    },
+    "wd4_bluff": {
+     "rate": 0.49298597194388777,
+     "n": 499
+    },
+    "wild_with_colored": {
+     "rate": 0.8063241106719368,
+     "n": 759
+    }
+   },
+   "model_calls": {
+    "decisions": 15313,
+    "forced": 8673,
+    "calls": 7688,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 2106.9362903225774,
+    "avg_input_tokens": 482.3446930280957,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "openthai-0.8b": {
+   "seat_games": 1016,
+   "wins": 235,
+   "win_rate": 0.2312992125984252,
+   "win_rate_ci95": [
+    0.20641211099702195,
+    0.2582106304169388
+   ],
+   "avg_points_won": 26.500984251968504,
+   "avg_points_left": 30.04527559055118,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.4541832669322709,
+     "n": 502
+    },
+    "challenged": {
+     "rate": 0.9840637450199203,
+     "n": 502
+    },
+    "color_is_most_held": {
+     "rate": 0.45817245817245816,
+     "n": 777
+    },
+    "could_play": {
+     "rate": 0.7366136034732272,
+     "n": 13820
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13820
+    },
+    "guilty": {
+     "rate": 0.450199203187251,
+     "n": 502
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1367
+    },
+    "wd4_bluff": {
+     "rate": 0.5711711711711712,
+     "n": 555
+    },
+    "wild_with_colored": {
+     "rate": 0.7361647361647362,
+     "n": 777
+    }
+   },
+   "model_calls": {
+    "decisions": 15702,
+    "forced": 8859,
+    "calls": 7926,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 696.9179157204113,
+    "avg_input_tokens": 500.1324753974262,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "qwen3.5-0.8b-decision": {
+   "seat_games": 1008,
+   "wins": 224,
+   "win_rate": 0.2222222222222222,
+   "win_rate_ci95": [
+    0.19763855512137773,
+    0.24891513470517213
+   ],
+   "avg_points_won": 26.308531746031747,
+   "avg_points_left": 24.927579365079364,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.45225225225225224,
+     "n": 555
+    },
+    "challenged": {
+     "rate": 1.0,
+     "n": 555
+    },
+    "color_is_most_held": {
+     "rate": 0.591861898890259,
+     "n": 811
+    },
+    "could_play": {
+     "rate": 0.7406990646318307,
+     "n": 14219
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 14219
+    },
+    "guilty": {
+     "rate": 0.45225225225225224,
+     "n": 555
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1297
+    },
+    "wd4_bluff": {
+     "rate": 0.576271186440678,
+     "n": 531
+    },
+    "wild_with_colored": {
+     "rate": 0.7199017199017199,
+     "n": 814
+    }
+   },
+   "model_calls": {
+    "decisions": 16079,
+    "forced": 8855,
+    "calls": 8302,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 1539.845242110333,
+    "avg_input_tokens": 493.9539869910865,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "rsi-jev-0.8b": {
+   "seat_games": 1016,
+   "wins": 239,
+   "win_rate": 0.23523622047244094,
+   "win_rate_ci95": [
+    0.21018257502760812,
+    0.26228452182351075
+   ],
+   "avg_points_won": 27.244094488188978,
+   "avg_points_left": 28.578740157480315,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.5492125984251969,
+     "n": 508
+    },
+    "challenged": {
+     "rate": 0.17716535433070865,
+     "n": 508
+    },
+    "color_is_most_held": {
+     "rate": 0.8104993597951344,
+     "n": 781
+    },
+    "could_play": {
+     "rate": 0.7577445954981057,
+     "n": 13461
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13461
+    },
+    "guilty": {
+     "rate": 0.39173228346456695,
+     "n": 508
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1172
+    },
+    "wd4_bluff": {
+     "rate": 0.5618661257606491,
+     "n": 493
+    },
+    "wild_with_colored": {
+     "rate": 0.7337579617834394,
+     "n": 785
+    }
+   },
+   "model_calls": {
+    "decisions": 15149,
+    "forced": 8135,
+    "calls": 8050,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 1293.7324720496927,
+    "avg_input_tokens": 493.44447204968947,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "simplejev-0.8b": {
+   "seat_games": 1020,
+   "wins": 245,
+   "win_rate": 0.24019607843137256,
+   "win_rate_ci95": [
+    0.21498457575710864,
+    0.26735722399003975
+   ],
+   "avg_points_won": 28.5,
+   "avg_points_left": 28.094117647058823,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.48096192384769537,
+     "n": 499
+    },
+    "challenged": {
+     "rate": 1.0,
+     "n": 499
+    },
+    "color_is_most_held": {
+     "rate": 0.5115646258503401,
+     "n": 735
+    },
+    "could_play": {
+     "rate": 0.7266661883922807,
+     "n": 13939
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13939
+    },
+    "guilty": {
+     "rate": 0.48096192384769537,
+     "n": 499
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1323
+    },
+    "wd4_bluff": {
+     "rate": 0.5717131474103586,
+     "n": 502
+    },
+    "wild_with_colored": {
+     "rate": 0.7591836734693878,
+     "n": 735
+    }
+   },
+   "model_calls": {
+    "decisions": 15772,
+    "forced": 9038,
+    "calls": 7743,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 61.211817125145544,
+    "avg_input_tokens": 1005.9311636316673,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "system-one-gemma": {
+   "seat_games": 1016,
+   "wins": 299,
+   "win_rate": 0.29429133858267714,
+   "win_rate_ci95": [
+    0.26708556597047317,
+    0.32304686243801695
+   ],
+   "avg_points_won": 37.58956692913386,
+   "avg_points_left": 24.868110236220474,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.3898989898989899,
+     "n": 495
+    },
+    "challenged": {
+     "rate": 0.997979797979798,
+     "n": 495
+    },
+    "color_is_most_held": {
+     "rate": 0.6418128654970761,
+     "n": 684
+    },
+    "could_play": {
+     "rate": 0.7446855299809412,
+     "n": 13642
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13642
+    },
+    "guilty": {
+     "rate": 0.39191919191919194,
+     "n": 495
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1220
+    },
+    "wd4_bluff": {
+     "rate": 0.35502958579881655,
+     "n": 507
+    },
+    "wild_with_colored": {
+     "rate": 0.3899280575539568,
+     "n": 695
+    }
+   },
+   "model_calls": {
+    "decisions": 15365,
+    "forced": 8555,
+    "calls": 7794,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 28.882794457274827,
+    "avg_input_tokens": 492.17205542725173,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "systemone-lite-0.5b": {
+   "seat_games": 1028,
+   "wins": 260,
+   "win_rate": 0.2529182879377432,
+   "win_rate_ci95": [
+    0.22729917253262738,
+    0.28037719949966905
+   ],
+   "avg_points_won": 28.73249027237354,
+   "avg_points_left": 32.12645914396887,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.5010141987829615,
+     "n": 493
+    },
+    "challenged": {
+     "rate": 0.5212981744421906,
+     "n": 493
+    },
+    "color_is_most_held": {
+     "rate": 0.47368421052631576,
+     "n": 779
+    },
+    "could_play": {
+     "rate": 0.7341238088310177,
+     "n": 13747
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13747
+    },
+    "guilty": {
+     "rate": 0.3793103448275862,
+     "n": 493
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1295
+    },
+    "wd4_bluff": {
+     "rate": 0.502970297029703,
+     "n": 505
+    },
+    "wild_with_colored": {
+     "rate": 0.72400513478819,
+     "n": 779
+    }
+   },
+   "model_calls": {
+    "decisions": 15544,
+    "forced": 8821,
+    "calls": 7757,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 308.1805208199036,
+    "avg_input_tokens": 504.017532551244,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "tasksource-jev-nano": {
+   "seat_games": 1012,
+   "wins": 256,
+   "win_rate": 0.25296442687747034,
+   "win_rate_ci95": [
+    0.2271495826019999,
+    0.28064769602884176
+   ],
+   "avg_points_won": 29.371541501976285,
+   "avg_points_left": 25.34881422924901,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.44142259414225943,
+     "n": 478
+    },
+    "challenged": {
+     "rate": 1.0,
+     "n": 478
+    },
+    "color_is_most_held": {
+     "rate": 0.4297635605006954,
+     "n": 719
+    },
+    "could_play": {
+     "rate": 0.7429885739723995,
+     "n": 13478
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13478
+    },
+    "guilty": {
+     "rate": 0.44142259414225943,
+     "n": 478
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1258
+    },
+    "wd4_bluff": {
+     "rate": 0.5891472868217055,
+     "n": 516
+    },
+    "wild_with_colored": {
+     "rate": 0.5923392612859097,
+     "n": 731
+    }
+   },
+   "model_calls": {
+    "decisions": 15223,
+    "forced": 8493,
+    "calls": 7750,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 29.989819354838716,
+    "avg_input_tokens": 449.8984516129032,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "tev1-0.8b": {
+   "seat_games": 1000,
+   "wins": 292,
+   "win_rate": 0.292,
+   "win_rate_ci95": [
+    0.2646572082575304,
+    0.3209347815544081
+   ],
+   "avg_points_won": 34.674,
+   "avg_points_left": 31.004,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.47058823529411764,
+     "n": 493
+    },
+    "challenged": {
+     "rate": 0.9817444219066938,
+     "n": 493
+    },
+    "color_is_most_held": {
+     "rate": 0.7662889518413598,
+     "n": 706
+    },
+    "could_play": {
+     "rate": 0.7370159111377964,
+     "n": 13324
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13324
+    },
+    "guilty": {
+     "rate": 0.45233265720081134,
+     "n": 493
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1208
+    },
+    "wd4_bluff": {
+     "rate": 0.24731182795698925,
+     "n": 465
+    },
+    "wild_with_colored": {
+     "rate": 0.49295774647887325,
+     "n": 710
+    }
+   },
+   "model_calls": {
+    "decisions": 15035,
+    "forced": 8476,
+    "calls": 7541,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 1333.447513592362,
+    "avg_input_tokens": 487.47699244132076,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "tiny-jev-0.6b": {
+   "seat_games": 1016,
+   "wins": 244,
+   "win_rate": 0.24015748031496062,
+   "win_rate_ci95": [
+    0.21490000610061633,
+    0.26737253504695013
+   ],
+   "avg_points_won": 28.806102362204726,
+   "avg_points_left": 28.578740157480315,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.6441351888667992,
+     "n": 503
+    },
+    "challenged": {
+     "rate": 0.3499005964214712,
+     "n": 503
+    },
+    "color_is_most_held": {
+     "rate": 0.5822454308093995,
+     "n": 766
+    },
+    "could_play": {
+     "rate": 0.747983721790603,
+     "n": 13515
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 13515
+    },
+    "guilty": {
+     "rate": 0.45129224652087474,
+     "n": 503
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1163
+    },
+    "wd4_bluff": {
+     "rate": 0.5196078431372549,
+     "n": 510
+    },
+    "wild_with_colored": {
+     "rate": 0.7027379400260756,
+     "n": 767
+    }
+   },
+   "model_calls": {
+    "decisions": 15190,
+    "forced": 8341,
+    "calls": 7865,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 570.2144055944053,
+    "avg_input_tokens": 472.885187539733,
+    "avg_history_rounds": 5.0
+   }
+  },
+  "von": {
+   "seat_games": 1092,
+   "wins": 304,
+   "win_rate": 0.2783882783882784,
+   "win_rate_ci95": [
+    0.2526163293005406,
+    0.30571399873227006
+   ],
+   "avg_points_won": 36.77564102564103,
+   "avg_points_left": 31.43864468864469,
+   "diagnostics": {
+    "challenge_right": {
+     "rate": 0.492619926199262,
+     "n": 542
+    },
+    "challenged": {
+     "rate": 0.9169741697416974,
+     "n": 542
+    },
+    "color_is_most_held": {
+     "rate": 0.4588688946015424,
+     "n": 778
+    },
+    "could_play": {
+     "rate": 0.7333745534487497,
+     "n": 14556
+    },
+    "drew_with_playable": {
+     "rate": 0.0,
+     "n": 14556
+    },
+    "guilty": {
+     "rate": 0.4575645756457565,
+     "n": 542
+    },
+    "kept_playable": {
+     "rate": 0.0,
+     "n": 1319
+    },
+    "wd4_bluff": {
+     "rate": 0.1743295019157088,
+     "n": 522
+    },
+    "wild_with_colored": {
+     "rate": 0.5449936628643853,
+     "n": 789
+    }
+   },
+   "model_calls": {
+    "decisions": 16427,
+    "forced": 9424,
+    "calls": 8067,
+    "fallback_rate": 0.0,
+    "avg_latency_ms": 15.599268625263395,
+    "avg_input_tokens": 294.8128176521631,
+    "avg_history_rounds": 5.0
+   }
+  }
+ },
+ "seat_win_rate": {
+  "P0": 0.25405480984340045,
+  "P1": 0.2525167785234899,
+  "P2": 0.25041946308724833,
+  "P3": 0.2430089485458613
+ }
+}

@@ -1,0 +1,515 @@
+{
+ "template_version": "uno-v1",
+ "run": {
+  "name": "swiss",
+  "target_games": 1000,
+  "seed": 20260929,
+  "template": "B",
+  "history_rounds": 5,
+  "policy": "argmax",
+  "wd4_challenge": true,
+  "shuffle_hand": true,
+  "must_play": true,
+  "jitter": 2.0,
+  "restart_after": 20,
+  "max_steps": 1000,
+  "max_lead": 40,
+  "models": [],
+  "exclude": [],
+  "num_players": 4,
+  "budget_tokenizer": "Qwen/Qwen3.5-0.8B-Base"
+ },
+ "servers": {
+  "bosun-0.6b": {
+   "base_url": "http://127.0.0.1:8125",
+   "models": {
+    "data": [
+     {
+      "id": "bosun-0.6b",
+      "params": 606131200,
+      "max_input_tokens": 32000,
+      "load_seconds": 36.7
+     }
+    ]
+   }
+  },
+  "decider-0.8b": {
+   "base_url": "http://127.0.0.1:8102",
+   "models": {
+    "models": [
+     {
+      "name": "decider-0.8b-v1",
+      "description": "decider: one-pass typed decisions with calibrated probabilities",
+      "release_date": "2026-09-19"
+     }
+    ]
+   }
+  },
+  "decision-eos-0.8b": {
+   "base_url": "http://127.0.0.1:8122",
+   "models": {
+    "data": [
+     {
+      "id": "decision-eos-0.8b",
+      "params": 753446208,
+      "max_input_tokens": 16300,
+      "load_seconds": 28.0
+     }
+    ]
+   }
+  },
+  "decision-kai": {
+   "base_url": "http://127.0.0.1:8131",
+   "models": {
+    "data": [
+     {
+      "id": "decision-kai",
+      "params": 571909635,
+      "max_input_tokens": 1024,
+      "load_seconds": 168.8
+     }
+    ]
+   }
+  },
+  "decision-lex": {
+   "base_url": "http://127.0.0.1:8132",
+   "models": {
+    "data": [
+     {
+      "id": "decision-lex",
+      "params": 571909635,
+      "max_input_tokens": 1024,
+      "load_seconds": 168.8
+     }
+    ]
+   }
+  },
+  "gliner2.5-decide": {
+   "base_url": "http://127.0.0.1:8134",
+   "models": {
+    "data": [
+     {
+      "id": "gliner2.5-decide",
+      "params": 486444053,
+      "max_input_tokens": 8192,
+      "load_seconds": 31.7
+     }
+    ]
+   }
+  },
+  "intern-decision-0.8b": {
+   "base_url": "http://127.0.0.1:8124",
+   "models": {
+    "data": [
+     {
+      "id": "intern-decision-0.8b",
+      "params": 852985920,
+      "max_input_tokens": 8000,
+      "load_seconds": 53.9
+     }
+    ]
+   }
+  },
+  "jev-style-0.8b": {
+   "base_url": "http://127.0.0.1:8103",
+   "models": {
+    "object": "list",
+    "data": [
+     {
+      "id": "jev-style-0.8b-decision-v3",
+      "context_tokens": 25600,
+      "head_max_tokens": 2048,
+      "backend": "torch-cuda"
+     }
+    ],
+    "models": [
+     {
+      "name": "jev-style-0.8b-decision-v3",
+      "release_date": "2026-09-24",
+      "description": "Jev-Style 0.8B Decision v3: local typed decisions (noul / choice / score)"
+     }
+    ]
+   }
+  },
+  "jevembed-0.6b": {
+   "base_url": "http://127.0.0.1:8126",
+   "models": {
+    "object": "list",
+    "data": [
+     {
+      "id": "jevembed-qwen3-embedding-0.6b",
+      "aliases": [
+       "JevEmbed-Qwen3-Embedding-0.6B",
+       "HIT-TMG/JevEmbed-Qwen3-Embedding-0.6B",
+       "jevembed-0.6b",
+       "local"
+      ]
+     }
+    ]
+   }
+  },
+  "jpt-0.8b": {
+   "base_url": "http://127.0.0.1:8121",
+   "models": {
+    "object": "list",
+    "data": [
+     {
+      "id": "/home/user02007/.cache/huggingface/hub/models--kirp--jpt-0.8b/snapshots/1431c0509bbc10772cd59964cc7af5835c8720d6",
+      "object": "model",
+      "owned_by": "llm2jev"
+     }
+    ]
+   }
+  },
+  "julia-1": {
+   "base_url": "http://127.0.0.1:8133",
+   "models": {
+    "data": [
+     {
+      "id": "julia-1",
+      "params": 144292867,
+      "max_input_tokens": 8192,
+      "load_seconds": 27.0
+     }
+    ]
+   }
+  },
+  "kev-0.8b": {
+   "base_url": "http://127.0.0.1:8101",
+   "models": {
+    "models": [
+     {
+      "name": "kev-latest",
+      "description": "Kev pointer head on Qwen/Qwen3.5-0.8B-Base, serving jaredpalmer/kev-0.8b at temperature 2.35",
+      "release_date": "2026-09-24",
+      "run": "jaredpalmer/kev-0.8b",
+      "base": "Qwen/Qwen3.5-0.8B-Base",
+      "lora": 16,
+      "device": "cuda",
+      "backend": "torch",
+      "dtype": "bfloat16",
+      "temperature": 2.3510958125672174,
+      "cuda_graphs": {
+       "captured": 4,
+       "kept": 4,
+       "pending": 0,
+       "failed": 0
+      },
+      "prefix_cache": {
+       "size": 4,
+       "min_state_tokens": 0,
+       "max_tokens": 65536,
+       "hits": 0,
+       "misses": 2,
+       "cached_states": 2,
+       "oom_retries": 0
+      },
+      "batches": {
+       "count": 2,
+       "requests": 2,
+       "queued": 0
+      }
+     },
+     {
+      "name": "jev-latest",
+      "description": "Kev pointer head on Qwen/Qwen3.5-0.8B-Base, serving jaredpalmer/kev-0.8b at temperature 2.35",
+      "release_date": "2026-09-24",
+      "run": "jaredpalmer/kev-0.8b",
+      "base": "Qwen/Qwen3.5-0.8B-Base",
+      "lora": 16,
+      "device": "cuda",
+      "backend": "torch",
+      "dtype": "bfloat16",
+      "temperature": 2.3510958125672174,
+      "cuda_graphs": {
+       "captured": 4,
+       "kept": 4,
+       "pending": 0,
+       "failed": 0
+      },
+      "prefix_cache": {
+       "size": 4,
+       "min_state_tokens": 0,
+       "max_tokens": 65536,
+       "hits": 0,
+       "misses": 2,
+       "cached_states": 2,
+       "oom_retries": 0
+      },
+      "batches": {
+       "count": 2,
+       "requests": 2,
+       "queued": 0
+      }
+     }
+    ]
+   }
+  },
+  "lavoir": {
+   "base_url": "http://127.0.0.1:8135",
+   "models": {
+    "data": [
+     {
+      "id": "lavoir",
+      "params": 421562379,
+      "max_input_tokens": 1024,
+      "load_seconds": 110.1
+     }
+    ]
+   }
+  },
+  "laya-multilingual": {
+   "base_url": "http://127.0.0.1:8136",
+   "models": {
+    "data": [
+     {
+      "id": "laya-multilingual",
+      "params": 321908995,
+      "max_input_tokens": 8192,
+      "load_seconds": 22.6
+     }
+    ]
+   }
+  },
+  "lev-350m": {
+   "base_url": "http://127.0.0.1:8144",
+   "models": {
+    "models": [
+     {
+      "id": "lev-latest",
+      "aliases": [
+       "jev-latest"
+      ],
+      "run": "/home/user02007/.cache/huggingface/hub/models--franckverrot--lev-350m/snapshots/ab08ad8b8f346994d983152917e114224f6adac7",
+      "base": "LiquidAI/LFM2.5-350M",
+      "temperature": 1.5157165665103978,
+      "temperature_source": "calibration.json"
+     }
+    ]
+   }
+  },
+  "lumma-fev-0.1b": {
+   "base_url": "http://127.0.0.1:8141",
+   "models": {
+    "models": [
+     {
+      "name": "lumma-fev-0.1b",
+      "description": "lumma-fev-0.1b: decision model on FrontiersMind/Nandi-Mini-150M (noul, choice and score questions)",
+      "release_date": "2026-09-25"
+     },
+     {
+      "name": "lumma-fev-latest",
+      "description": "lumma-fev-0.1b: decision model on FrontiersMind/Nandi-Mini-150M (noul, choice and score questions)",
+      "release_date": "2026-09-25"
+     },
+     {
+      "name": "jev-latest",
+      "description": "lumma-fev-0.1b: decision model on FrontiersMind/Nandi-Mini-150M (noul, choice and score questions)",
+      "release_date": "2026-09-25"
+     }
+    ]
+   }
+  },
+  "lumma-fev-0.6b": {
+   "base_url": "http://127.0.0.1:8142",
+   "models": {
+    "models": [
+     {
+      "name": "lumma-fev-0.6b",
+      "description": "lumma-fev-0.6b: decision model on FrontiersMind/Lumma-0.6B-Base (noul, choice and score questions)",
+      "release_date": "2026-09-25"
+     },
+     {
+      "name": "lumma-fev-latest",
+      "description": "lumma-fev-0.6b: decision model on FrontiersMind/Lumma-0.6B-Base (noul, choice and score questions)",
+      "release_date": "2026-09-25"
+     },
+     {
+      "name": "jev-latest",
+      "description": "lumma-fev-0.6b: decision model on FrontiersMind/Lumma-0.6B-Base (noul, choice and score questions)",
+      "release_date": "2026-09-25"
+     }
+    ]
+   }
+  },
+  "openjev-nli-0.8b": {
+   "base_url": "http://127.0.0.1:8115",
+   "models": {
+    "data": [
+     {
+      "id": "openjev-nli-0.8b",
+      "params": 852988992,
+      "max_input_tokens": null,
+      "load_seconds": 28.9
+     }
+    ]
+   }
+  },
+  "openthai-0.8b": {
+   "base_url": "http://127.0.0.1:8104",
+   "models": null
+  },
+  "qwen3.5-0.8b-decision": {
+   "base_url": "http://127.0.0.1:8113",
+   "models": {
+    "data": [
+     {
+      "id": "qwen3.5-0.8b-decision",
+      "params": 752393024,
+      "max_input_tokens": 2940,
+      "load_seconds": 27.5
+     }
+    ]
+   }
+  },
+  "rsi-jev-0.8b": {
+   "base_url": "http://127.0.0.1:8111",
+   "models": {
+    "object": "list",
+    "data": [
+     {
+      "id": "jev-latest",
+      "object": "model",
+      "owned_by": "rsi-jev"
+     },
+     {
+      "id": "rsi-jev-0.8b",
+      "object": "model",
+      "owned_by": "rsi-jev"
+     }
+    ],
+    "models": [
+     {
+      "name": "jev-latest",
+      "description": "RSI-Jev v2.1 typed decisions"
+     },
+     {
+      "name": "rsi-jev-0.8b",
+      "description": "RSI-Jev v2.1 typed decisions"
+     }
+    ]
+   }
+  },
+  "simplejev-0.8b": {
+   "base_url": "http://127.0.0.1:8116",
+   "models": {
+    "object": "list",
+    "data": [
+     {
+      "id": "simplejev-0.8b",
+      "object": "model",
+      "created": 0,
+      "owned_by": "simple-jev",
+      "x_max_choice_options": 255
+     }
+    ]
+   }
+  },
+  "system-one-gemma": {
+   "base_url": "http://127.0.0.1:8143",
+   "models": {
+    "data": [
+     {
+      "id": "system-one-gemma",
+      "params": 271896448,
+      "max_input_tokens": 8192,
+      "load_seconds": 18.9
+     }
+    ]
+   }
+  },
+  "systemone-lite-0.5b": {
+   "base_url": "http://127.0.0.1:8112",
+   "models": null
+  },
+  "tasksource-jev-nano": {
+   "base_url": "http://127.0.0.1:8146",
+   "models": {
+    "data": [
+     {
+      "id": "tasksource-jev-nano",
+      "params": 153832704,
+      "max_input_tokens": 8000,
+      "load_seconds": 26.8
+     }
+    ]
+   }
+  },
+  "tev1-0.8b": {
+   "base_url": "http://127.0.0.1:8123",
+   "models": {
+    "data": [
+     {
+      "id": "tev1-0.8b",
+      "params": 852985920,
+      "max_input_tokens": 32000,
+      "load_seconds": 28.8
+     }
+    ]
+   }
+  },
+  "tiny-jev-0.6b": {
+   "base_url": "http://127.0.0.1:8114",
+   "models": {
+    "data": [
+     {
+      "id": "tiny-jev-0.6b",
+      "params": 595778561,
+      "max_input_tokens": 4096,
+      "load_seconds": 26.3
+     }
+    ]
+   }
+  },
+  "von": {
+   "base_url": "http://127.0.0.1:8145",
+   "models": {
+    "models": [
+     {
+      "name": "von-latest",
+      "description": "Current Von System One decision model",
+      "release_date": "2026-09-23"
+     },
+     {
+      "name": "von-1.2.0",
+      "description": "Von 1.2 stable release (order-invariant option scoring)",
+      "release_date": "2026-09-23"
+     },
+     {
+      "name": "von-1.1.0",
+      "description": "Von 1.1 alias (resolves to current model)",
+      "release_date": "2026-09-21"
+     },
+     {
+      "name": "jev-latest",
+      "description": "TypeSafe Jev compatibility alias",
+      "release_date": "2026-09-21"
+     }
+    ],
+    "object": "list",
+    "data": [
+     {
+      "id": "von-latest",
+      "object": "model",
+      "owned_by": "von"
+     },
+     {
+      "id": "von-1.2.0",
+      "object": "model",
+      "owned_by": "von"
+     },
+     {
+      "id": "von-1.1.0",
+      "object": "model",
+      "owned_by": "von"
+     },
+     {
+      "id": "jev-latest",
+      "object": "model",
+      "owned_by": "von"
+     }
+    ]
+   }
+  }
+ }
+}

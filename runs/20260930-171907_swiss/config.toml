@@ -1,0 +1,159 @@
+# Swiss-style UNO tournament over every local model server in servers/models/ (python -m arena swiss configs/swiss.toml).
+# Start the servers first: python3 servers/launch.py start && python3 servers/launch.py wait
+[run]
+name = "swiss"
+target_games = 1000        # games per model
+seed = 20260929
+template = "B"             # option descriptions state effects and consequences
+history_rounds = 5         # trimmed, oldest round first, only above a model's own input limit
+policy = "argmax"
+wd4_challenge = true       # official Wild Draw Four challenge rule (bluffing allowed)
+shuffle_hand = true        # hand listed in a seeded random order at every decision
+must_play = true           # house rule (2026-09-29): a playable card must be played; draw only when nothing fits
+jitter = 2.0               # noise on the rating used for pairing, so tables vary
+restart_after = 20         # consecutive failed decisions before a server is restarted (then retired)
+max_steps = 1000           # decisions before a game is aborted (unrated). Stalled games (draw pile empty, everyone keeps
+                           # "drawing" instead of playing) otherwise ran to 5000; only ~1% of games end naturally above 1000
+max_lead = 40              # a model may be at most this many games ahead of the one furthest behind
+models = []                # empty: every servers/models/*.toml that answers
+exclude = []
+
+[[players]]
+name = "bosun-0.6b"
+type = "systemone"
+base_url = "http://127.0.0.1:8125"
+
+[[players]]
+name = "decider-0.8b"
+type = "systemone"
+base_url = "http://127.0.0.1:8102"
+
+[[players]]
+name = "decision-eos-0.8b"
+type = "systemone"
+base_url = "http://127.0.0.1:8122"
+
+[[players]]
+name = "decision-kai"
+type = "systemone"
+base_url = "http://127.0.0.1:8131"
+
+[[players]]
+name = "decision-lex"
+type = "systemone"
+base_url = "http://127.0.0.1:8132"
+
+[[players]]
+name = "gliner2.5-decide"
+type = "systemone"
+base_url = "http://127.0.0.1:8134"
+
+[[players]]
+name = "intern-decision-0.8b"
+type = "systemone"
+base_url = "http://127.0.0.1:8124"
+
+[[players]]
+name = "jev-style-0.8b"
+type = "systemone"
+base_url = "http://127.0.0.1:8103"
+
+[[players]]
+name = "jevembed-0.6b"
+type = "systemone"
+base_url = "http://127.0.0.1:8126"
+
+[[players]]
+name = "jpt-0.8b"
+type = "systemone"
+base_url = "http://127.0.0.1:8121"
+
+[[players]]
+name = "julia-1"
+type = "systemone"
+base_url = "http://127.0.0.1:8133"
+
+[[players]]
+name = "kev-0.8b"
+type = "systemone"
+base_url = "http://127.0.0.1:8101"
+
+[[players]]
+name = "lavoir"
+type = "systemone"
+base_url = "http://127.0.0.1:8135"
+
+[[players]]
+name = "laya-multilingual"
+type = "systemone"
+base_url = "http://127.0.0.1:8136"
+
+[[players]]
+name = "lev-350m"
+type = "systemone"
+base_url = "http://127.0.0.1:8144"
+
+[[players]]
+name = "lumma-fev-0.1b"
+type = "systemone"
+base_url = "http://127.0.0.1:8141"
+
+[[players]]
+name = "lumma-fev-0.6b"
+type = "systemone"
+base_url = "http://127.0.0.1:8142"
+
+[[players]]
+name = "openjev-nli-0.8b"
+type = "systemone"
+base_url = "http://127.0.0.1:8115"
+
+[[players]]
+name = "openthai-0.8b"
+type = "systemone"
+base_url = "http://127.0.0.1:8104"
+
+[[players]]
+name = "qwen3.5-0.8b-decision"
+type = "systemone"
+base_url = "http://127.0.0.1:8113"
+
+[[players]]
+name = "rsi-jev-0.8b"
+type = "systemone"
+base_url = "http://127.0.0.1:8111"
+
+[[players]]
+name = "simplejev-0.8b"
+type = "systemone"
+base_url = "http://127.0.0.1:8116"
+
+[[players]]
+name = "system-one-gemma"
+type = "systemone"
+base_url = "http://127.0.0.1:8143"
+
+[[players]]
+name = "systemone-lite-0.5b"
+type = "systemone"
+base_url = "http://127.0.0.1:8112"
+
+[[players]]
+name = "tasksource-jev-nano"
+type = "systemone"
+base_url = "http://127.0.0.1:8146"
+
+[[players]]
+name = "tev1-0.8b"
+type = "systemone"
+base_url = "http://127.0.0.1:8123"
+
+[[players]]
+name = "tiny-jev-0.6b"
+type = "systemone"
+base_url = "http://127.0.0.1:8114"
+
+[[players]]
+name = "von"
+type = "systemone"
+base_url = "http://127.0.0.1:8145"
