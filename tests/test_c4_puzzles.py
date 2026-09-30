@@ -43,6 +43,7 @@ def test_the_puzzle_set():
     items = load_puzzles()
     assert len(items) == 1000 and len({i["id"] for i in items}) == 1000
     assert len({canonical(game(i["moves"])) for i in items}) == 1000
+    assert all(len(i["labels"]) >= 2 for i in items)  # no forced moves
     for t in ("win", "block", "fork", "solver"):
         cols = [int(i["expected"]) for i in items if i["family"] == t]
         assert len(cols) == 250 and max(cols.count(c) for c in range(1, 8)) - min(cols.count(c) for c in range(1, 8)) <= 2

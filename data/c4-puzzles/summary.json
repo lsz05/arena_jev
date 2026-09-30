@@ -3,7 +3,7 @@
   "items": 250,
   "tier": "easy",
   "rule": "One column wins at once; the opponent has no immediate win.",
-  "candidates": 44602,
+  "candidates": 64428,
   "by_answer_column": [
    36,
    36,
@@ -18,7 +18,7 @@
   "items": 250,
   "tier": "medium",
   "rule": "The opponent can win at one column next turn and the mover cannot win at once: only the block does not lose at once.",
-  "candidates": 53684,
+  "candidates": 78223,
   "by_answer_column": [
    36,
    36,
@@ -33,7 +33,7 @@
   "items": 250,
   "tier": "hard",
   "rule": "No immediate win or threat; exactly one move leaves threats the opponent cannot all stop, and it is the only winning move.",
-  "candidates": 505,
+  "candidates": 675,
   "by_answer_column": [
    36,
    36,
@@ -48,7 +48,7 @@
   "items": 250,
   "tier": "hard",
   "rule": "No immediate win, threat or two-move win; exactly one move keeps the result (the only winning move, or the only move that does not lose), by the solver.",
-  "candidates": 5204,
+  "candidates": 7032,
   "by_answer_column": [
    36,
    36,

@@ -127,7 +127,7 @@ const COLS = [
   {key: "column_max", group: O, label: "Column bias", num: true, rank: true, dir: 1, cell: r => fmt(r.column_max, v => `${pct(v)}<small>column ${r.column_favourite}</small>`),
    tip: "Share of its answers in the column it picks most, on puzzles with 7 options; the correct column is spread evenly, so 14% means no preference."},
   ...TYPES.map(t => ({key: `${t}_accuracy`, group: T, label: t[0].toUpperCase() + t.slice(1), num: true, rank: true,
-    cell: r => fmt(r[`${t}_accuracy`], v => `${pct(v)}<small>chance ${fmt(chance(t), c => pct(c))}</small>`),
+    cell: r => fmt(r[`${t}_accuracy`], v => pct(v)),
     tip: {win: "Accuracy on the 250 win puzzles: one column wins at once.",
           block: "Accuracy on the 250 block puzzles: the opponent wins next turn unless its column is blocked.",
           fork: "Accuracy on the 250 fork puzzles: one move wins in two moves (the opponent cannot stop every threat), and it is the only winning move.",
@@ -140,8 +140,12 @@ async function loadSummary() {
   $("#meta").textContent = SUMMARY.run ? `${n} models · ${SUMMARY.puzzles} puzzles × ${SUMMARY.orders} option orders · ${SUMMARY.state === "running" ? "running, " : ""}updated ${SUMMARY.updated}`
     : `${SUMMARY.puzzles} puzzles; no model has answered them yet`;
   $("#live").hidden = SUMMARY.state !== "running";
-  if (!TABLE) TABLE = SortTable({table: "#board", chips: "#chips", cols: COLS, sortKey: "accuracy",
-    groupTips: {[O]: "Scores over all 1000 puzzles.", [T]: "Accuracy per puzzle type; below each, the chance level (random guessing)."}});
+  if (!TABLE) {
+    for (const c of COLS) if (c.group === T && chance(c.key.split("_")[0]) != null)
+      c.tip += ` Chance (random guessing): ${pct(chance(c.key.split("_")[0]))}.`;
+    TABLE = SortTable({table: "#board", chips: "#chips", cols: COLS, sortKey: "accuracy",
+      groupTips: {[O]: "Scores over all 1000 puzzles.", [T]: "Accuracy per puzzle type; the chance level of each type is in its definition and in the Baselines table."}});
+  }
   TABLE.render(SUMMARY.models);
   $("#defs").innerHTML = defsList(COLS);
   const b = SUMMARY.baselines || {};

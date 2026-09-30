@@ -8,11 +8,13 @@
 | `win.jsonl` | win | easy | 250 | wins at once; the opponent has no immediate win |
 | `block.jsonl` | block | medium | 250 | blocks the opponent's only immediate win (the mover cannot win at once; the block does not lose on top) |
 | `fork.jsonl` | fork | hard | 250 | wins in two moves: the opponent cannot stop every threat, and the solver confirms it is the only winning move |
-| `solver.jsonl` | solver | hard | 250 | none of the above; by a perfect solver it is the only move that keeps the result (155 keep a win, 95 a draw) |
+| `solver.jsonl` | solver | hard | 250 | none of the above; by a perfect solver it is the only move that keeps the result (183 keep a win, 67 a draw) |
 
 - Positions come from random games in which players avoid completing four when they can, so threats pile up.
 - No two puzzles are copies or left-right mirrors of each other.
-- In every type the correct column is spread evenly over the seven columns (35 or 36 each), and win / block are split
+- Every puzzle has at least two legal columns (a forced move is no decision); 101 have exactly two, most have seven.
+  Chance (1 / legal columns) is 20.4% over the set.
+- In every type the correct column is spread evenly over the seven columns (34 to 36 each), and win / block are split
   evenly between horizontal, vertical and diagonal fours.
 - Every answer is verified by the Connect Four engine, and fork / solver answers also by the C solver
   (`arena/connect4/solver.c`, checked against a brute-force search).

@@ -11,7 +11,7 @@ Types (the mover is always "you"; the answer is one column):
     solver  hard    none of the above; the solver finds exactly one move that keeps the result (the only winning move,
                     or the only move that does not lose)
 
-Positions come from random games (players avoid completing four when they can, so threats pile up). A position and
+A puzzle needs at least two legal columns (a forced move is no decision). Positions come from random games (players avoid completing four when they can, so threats pile up). A position and
 its left-right mirror count as the same puzzle, so no two puzzles are mirrors or copies of each other. Each type is
 balanced over the answer column (and win / block over the direction of the four).
 """
@@ -38,6 +38,7 @@ TYPES = {
                        "move, or the only move that does not lose), by the solver."),
 }
 MIN_PLY_SOLVER = 10  # earlier positions take the solver from a second to minutes
+MIN_LEGAL = 2  # a position with one legal column is a forced move, not a decision
 
 
 def wins(g: Connect4Game, p: int) -> list[int]:
@@ -78,7 +79,7 @@ def canonical(g: Connect4Game) -> str:
 def classify(g: Connect4Game, analyze_share: float = 1.0, rng: random.Random | None = None) -> tuple[str, int, dict] | None:
     """(type, answer column 0-based, detail) when the position is a puzzle, else None. The solver (fork and solver
     types) runs on a share `analyze_share` of the quiet positions only, to save time."""
-    if g.over:
+    if g.over or len(g.legal()) < MIN_LEGAL:
         return None
     me, opp = g.to_move, 1 - g.to_move
     w, t = wins(g, me), wins(g, opp)
