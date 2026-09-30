@@ -93,7 +93,8 @@ python3 servers/launch.py start kev-0.8b decider-0.8b && python3 servers/launch.
   preference for a position; accuracy is reported per order, over the orders and from the averaged probabilities,
   with the probability on the answer, Brier, calibration, consistency across orders and position / column bias.
 - Output: `runs/<time>_c4-puzzles/<model>/results.jsonl` and `summary.json`; the site shows them at
-  `/arenas/c4puzzles/` with a puzzle browser.
+  `/arenas/c4puzzles/` with a puzzle browser. The results are committed as `results.jsonl.xz`
+  (`python3 bench/pack_runs.py pack|unpack runs/<run>`).
 
 ## Layout
 
