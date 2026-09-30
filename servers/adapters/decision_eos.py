@@ -14,11 +14,15 @@ exactly as it would the original object (its own canonical JSON).
 from __future__ import annotations
 
 import json
+import os
 import sys
+from pathlib import Path
+
+_CACHE = Path(os.environ.get("HF_HUB_CACHE", Path.home() / ".cache" / "huggingface" / "hub"))
 
 NAME = "decision-eos-0.8b"
-SNAPSHOT = ("/home/intuser/.cache/huggingface/hub/models--llm-semantic-router--Decision-1.0-Eos-0.8B/snapshots/"
-            "3c2d632609ceb66f3a13bbc5f77f3ab8cdeebcdd")
+SNAPSHOT = str(_CACHE / "models--llm-semantic-router--Decision-1.0-Eos-0.8B/snapshots"
+             / "3c2d632609ceb66f3a13bbc5f77f3ab8cdeebcdd")
 LIMIT = 16384                 # the package's max complete input (state + question + candidates + formatting)
 MAX_INPUT_TOKENS = 16300      # pre-check on the raw request text; the package's exact check runs after it
 

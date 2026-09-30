@@ -13,11 +13,15 @@ exactly as it would the original object (its own indented JSON).
 from __future__ import annotations
 
 import json
+import os
 import sys
+from pathlib import Path
+
+_CACHE = Path(os.environ.get("HF_HUB_CACHE", Path.home() / ".cache" / "huggingface" / "hub"))
 
 NAME = "intern-decision-0.8b"
-SNAPSHOT = ("/home/intuser/.cache/huggingface/hub/models--internlm--Intern-Decision-0.8B/snapshots/"
-            "85a0cc5a99d67ea8d56dfe98115689212867171d")
+SNAPSHOT = str(_CACHE / "models--internlm--Intern-Decision-0.8B/snapshots"
+             / "85a0cc5a99d67ea8d56dfe98115689212867171d")
 LIMIT = 8192                  # DecisionEngine(max_length=8192): whole rendered prompt incl. system prompt/schema
 MAX_INPUT_TOKENS = 8000       # pre-check on the raw request text; the module's exact check runs after it
 

@@ -16,10 +16,14 @@ prompt compiler serializes them as it would the original object.
 from __future__ import annotations
 
 import json
+import os
+from pathlib import Path
+
+_CACHE = Path(os.environ.get("HF_HUB_CACHE", Path.home() / ".cache" / "huggingface" / "hub"))
 
 NAME = "bosun-0.6b"
-SNAPSHOT = ("/home/intuser/.cache/huggingface/hub/models--Hanno-Labs--bosun-v3.1-0.6b/snapshots/"
-            "1d8b6f9611f9b64b514ce8b57cd86398fbc31a3b")
+SNAPSHOT = str(_CACHE / "models--Hanno-Labs--bosun-v3.1-0.6b/snapshots"
+             / "1d8b6f9611f9b64b514ce8b57cd86398fbc31a3b")
 MAX_INPUT_TOKENS = 32000      # raw request text; Qwen3-0.6B takes 40,960 positions, the prompt adds ~10 tokens/option
 
 _model = None

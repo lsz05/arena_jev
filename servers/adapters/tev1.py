@@ -17,12 +17,16 @@ bf16, vision tower included as published).
 from __future__ import annotations
 
 import json
+import os
 import sys
+from pathlib import Path
+
+_CACHE = Path(os.environ.get("HF_HUB_CACHE", Path.home() / ".cache" / "huggingface" / "hub"))
 
 NAME = "tev1-0.8b"
-SNAPSHOT = ("/home/intuser/.cache/huggingface/hub/models--togethercomputer--Tev1-0.8B-experimental/snapshots/"
-            "6bb2dff14b38fea90ddb14d870166ccaf77374e9")
-REPO = "/home/intuser/li/dev/arena_jev/servers/src/tev1"
+SNAPSHOT = str(_CACHE / "models--togethercomputer--Tev1-0.8B-experimental/snapshots"
+             / "6bb2dff14b38fea90ddb14d870166ccaf77374e9")
+REPO = str(Path(__file__).resolve().parent.parent / "src" / "tev1")
 MAX_INPUT_TOKENS = 32000
 LABELS = "ABCDEFGHIJKLMNOPQRSTUVWX"
 
