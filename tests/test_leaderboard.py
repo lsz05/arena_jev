@@ -87,3 +87,22 @@ def test_site_board_merges_connect4_with_and_without_uno_run(tmp_path, monkeypat
     (row,) = board["rows"]
     assert board["games"] == 3 and board["c4"]["state"] == "running"
     assert (row["ts_score"], row["c4_wins"], row["c4_ts_score"]) == (20.0, 5, 21.5)
+
+
+def test_ratings_assume_a_fixed_skill():
+    """tau = 0: sigma keeps shrinking with more games instead of settling (the default settles near 0.7)."""
+    import random
+
+    from arena.leaderboard import rating_env
+    assert rating_env().tau == 0 and rating_env(draw_probability=0.05).tau == 0
+    rng = random.Random(0)
+    names = [f"m{i}" for i in range(8)]
+    games = []
+    for _ in range(1500):
+        seats = rng.sample(names, 4)
+        pts = [rng.randint(1, 60) for _ in seats]
+        w = rng.randrange(4)
+        pts[w] = 0
+        games.append(game(seats, w, pts))
+    ratings, _, _ = trueskill_ratings(games)
+    assert max(r.sigma for r in ratings.values()) < 0.3

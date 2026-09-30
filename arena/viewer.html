@@ -442,7 +442,7 @@ function renderResults(run) {
 const DEFS = {
   params: ["Size", "Parameters held by the model's server after its own load code, counted at load time (every tensor once). Hover a size for the exact count."],
   games: ["Games", "UNO games played; the bar shows progress toward the target per model."],
-  ts_score: ["TrueSkill", "Conservative rating μ − 3σ from 4-player games: the winner ranks first, the others by points left in hand."],
+  ts_score: ["TrueSkill", "Conservative rating μ − 3σ from 4-player games: the winner ranks first, the others by points left in hand; each model's skill is taken as fixed."],
   win_rate: ["Win rate", "Share of games won; below, the 95% Wilson interval."],
   avg_points_won: ["Pts won", "Average points scored per game: the winner takes the sum of the other hands, everyone else scores 0."],
   avg_points_left: ["Pts left", "Average points still in hand when a game ends (0 for the winner; lower is better)."],

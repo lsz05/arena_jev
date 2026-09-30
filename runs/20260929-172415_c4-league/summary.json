@@ -45,9 +45,9 @@
     "5": 336,
     "6": 313
    },
-   "ts_mu": 23.72,
-   "ts_sigma": 0.787,
-   "ts_score": 21.359
+   "ts_mu": 23.276,
+   "ts_sigma": 0.395,
+   "ts_score": 22.09
   },
   "kev-0.8b": {
    "games": 378,
@@ -87,9 +87,9 @@
     "5": 367,
     "6": 580
    },
-   "ts_mu": 24.697,
-   "ts_sigma": 0.784,
-   "ts_score": 22.345
+   "ts_mu": 24.366,
+   "ts_sigma": 0.387,
+   "ts_score": 23.205
   },
   "bosun-0.6b": {
    "games": 378,
@@ -129,9 +129,9 @@
     "5": 360,
     "6": 346
    },
-   "ts_mu": 24.028,
-   "ts_sigma": 0.789,
-   "ts_score": 21.662
+   "ts_mu": 24.609,
+   "ts_sigma": 0.39,
+   "ts_score": 23.441
   },
   "decider-0.8b": {
    "games": 378,
@@ -171,9 +171,9 @@
     "5": 429,
     "6": 371
    },
-   "ts_mu": 22.832,
-   "ts_sigma": 0.8,
-   "ts_score": 20.433
+   "ts_mu": 23.137,
+   "ts_sigma": 0.394,
+   "ts_score": 21.956
   },
   "tiny-jev-0.6b": {
    "games": 378,
@@ -213,9 +213,9 @@
     "5": 298,
     "6": 251
    },
-   "ts_mu": 28.93,
-   "ts_sigma": 0.829,
-   "ts_score": 26.443
+   "ts_mu": 29.566,
+   "ts_sigma": 0.441,
+   "ts_score": 28.243
   },
   "von": {
    "games": 378,
@@ -255,9 +255,9 @@
     "5": 254,
     "6": 303
    },
-   "ts_mu": 23.921,
-   "ts_sigma": 0.786,
-   "ts_score": 21.562
+   "ts_mu": 23.498,
+   "ts_sigma": 0.389,
+   "ts_score": 22.331
   },
   "jevembed-0.6b": {
    "games": 378,
@@ -297,9 +297,9 @@
     "5": 217,
     "6": 288
    },
-   "ts_mu": 27.118,
-   "ts_sigma": 0.792,
-   "ts_score": 24.741
+   "ts_mu": 27.445,
+   "ts_sigma": 0.402,
+   "ts_score": 26.238
   },
   "jpt-0.8b": {
    "games": 378,
@@ -339,9 +339,9 @@
     "5": 418,
     "6": 275
    },
-   "ts_mu": 26.204,
-   "ts_sigma": 0.786,
-   "ts_score": 23.845
+   "ts_mu": 25.372,
+   "ts_sigma": 0.385,
+   "ts_score": 24.218
   },
   "decision-eos-0.8b": {
    "games": 378,
@@ -381,9 +381,9 @@
     "5": 107,
     "6": 94
    },
-   "ts_mu": 25.413,
-   "ts_sigma": 0.786,
-   "ts_score": 23.054
+   "ts_mu": 24.683,
+   "ts_sigma": 0.388,
+   "ts_score": 23.52
   },
   "decision-kai": {
    "games": 378,
@@ -423,9 +423,9 @@
     "5": 303,
     "6": 412
    },
-   "ts_mu": 24.664,
-   "ts_sigma": 0.787,
-   "ts_score": 22.301
+   "ts_mu": 24.073,
+   "ts_sigma": 0.39,
+   "ts_score": 22.902
   },
   "openthai-0.8b": {
    "games": 378,
@@ -465,9 +465,9 @@
     "5": 278,
     "6": 257
    },
-   "ts_mu": 23.72,
-   "ts_sigma": 0.786,
-   "ts_score": 21.362
+   "ts_mu": 23.898,
+   "ts_sigma": 0.389,
+   "ts_score": 22.731
   },
   "qwen3.5-0.8b-decision": {
    "games": 378,
@@ -507,9 +507,9 @@
     "5": 185,
     "6": 148
    },
-   "ts_mu": 24.672,
-   "ts_sigma": 0.791,
-   "ts_score": 22.297
+   "ts_mu": 24.489,
+   "ts_sigma": 0.388,
+   "ts_score": 23.326
   },
   "lev-350m": {
    "games": 378,
@@ -549,9 +549,9 @@
     "5": 345,
     "6": 483
    },
-   "ts_mu": 25.351,
-   "ts_sigma": 0.787,
-   "ts_score": 22.988
+   "ts_mu": 25.588,
+   "ts_sigma": 0.391,
+   "ts_score": 24.416
   },
   "lumma-fev-0.1b": {
    "games": 378,
@@ -591,9 +591,9 @@
     "5": 16,
     "6": 2
    },
-   "ts_mu": 24.125,
-   "ts_sigma": 0.794,
-   "ts_score": 21.743
+   "ts_mu": 23.148,
+   "ts_sigma": 0.393,
+   "ts_score": 21.968
   },
   "decision-lex": {
    "games": 378,
@@ -633,9 +633,9 @@
     "5": 439,
     "6": 710
    },
-   "ts_mu": 24.91,
-   "ts_sigma": 0.787,
-   "ts_score": 22.549
+   "ts_mu": 24.147,
+   "ts_sigma": 0.386,
+   "ts_score": 22.989
   },
   "gliner2.5-decide": {
    "games": 378,
@@ -675,9 +675,9 @@
     "5": 427,
     "6": 575
    },
-   "ts_mu": 25.13,
-   "ts_sigma": 0.788,
-   "ts_score": 22.767
+   "ts_mu": 25.801,
+   "ts_sigma": 0.391,
+   "ts_score": 24.627
   },
   "lumma-fev-0.6b": {
    "games": 378,
@@ -717,9 +717,9 @@
     "5": 372,
     "6": 309
    },
-   "ts_mu": 23.734,
-   "ts_sigma": 0.787,
-   "ts_score": 21.374
+   "ts_mu": 23.322,
+   "ts_sigma": 0.395,
+   "ts_score": 22.138
   },
   "openjev-nli-0.8b": {
    "games": 378,
@@ -759,9 +759,9 @@
     "5": 355,
     "6": 347
    },
-   "ts_mu": 26.512,
-   "ts_sigma": 0.791,
-   "ts_score": 24.138
+   "ts_mu": 25.891,
+   "ts_sigma": 0.388,
+   "ts_score": 24.727
   },
   "lavoir": {
    "games": 378,
@@ -793,9 +793,9 @@
    "fallbacks": 0,
    "avg_latency_ms": 1149.2,
    "pick_position_7": {},
-   "ts_mu": 24.04,
-   "ts_sigma": 0.788,
-   "ts_score": 21.675
+   "ts_mu": 24.129,
+   "ts_sigma": 0.389,
+   "ts_score": 22.961
   },
   "laya-multilingual": {
    "games": 378,
@@ -827,9 +827,9 @@
    "fallbacks": 0,
    "avg_latency_ms": 795.1,
    "pick_position_7": {},
-   "ts_mu": 25.753,
-   "ts_sigma": 0.788,
-   "ts_score": 23.391
+   "ts_mu": 25.766,
+   "ts_sigma": 0.391,
+   "ts_score": 24.594
   },
   "intern-decision-0.8b": {
    "games": 378,
@@ -869,9 +869,9 @@
     "5": 52,
     "6": 55
    },
-   "ts_mu": 23.744,
-   "ts_sigma": 0.787,
-   "ts_score": 21.382
+   "ts_mu": 24.306,
+   "ts_sigma": 0.388,
+   "ts_score": 23.143
   },
   "jev-style-0.8b": {
    "games": 378,
@@ -911,9 +911,9 @@
     "5": 182,
     "6": 201
    },
-   "ts_mu": 28.067,
-   "ts_sigma": 0.811,
-   "ts_score": 25.634
+   "ts_mu": 27.471,
+   "ts_sigma": 0.392,
+   "ts_score": 26.295
   },
   "system-one-gemma": {
    "games": 378,
@@ -953,9 +953,9 @@
     "5": 321,
     "6": 318
    },
-   "ts_mu": 22.816,
-   "ts_sigma": 0.789,
-   "ts_score": 20.45
+   "ts_mu": 23.582,
+   "ts_sigma": 0.383,
+   "ts_score": 22.432
   },
   "systemone-lite-0.5b": {
    "games": 378,
@@ -993,9 +993,9 @@
     "5": 550,
     "6": 1356
    },
-   "ts_mu": 24.902,
-   "ts_sigma": 0.784,
-   "ts_score": 22.55
+   "ts_mu": 25.042,
+   "ts_sigma": 0.387,
+   "ts_score": 23.88
   },
   "tasksource-jev-nano": {
    "games": 378,
@@ -1035,9 +1035,9 @@
     "5": 340,
     "6": 365
    },
-   "ts_mu": 25.126,
-   "ts_sigma": 0.79,
-   "ts_score": 22.756
+   "ts_mu": 25.792,
+   "ts_sigma": 0.388,
+   "ts_score": 24.628
   },
   "tev1-0.8b": {
    "games": 378,
@@ -1077,9 +1077,9 @@
     "5": 60,
     "6": 6
    },
-   "ts_mu": 23.758,
-   "ts_sigma": 0.79,
-   "ts_score": 21.389
+   "ts_mu": 24.296,
+   "ts_sigma": 0.387,
+   "ts_score": 23.136
   },
   "rsi-jev-0.8b": {
    "games": 378,
@@ -1119,9 +1119,9 @@
     "5": 122,
     "6": 160
    },
-   "ts_mu": 25.989,
-   "ts_sigma": 0.79,
-   "ts_score": 23.619
+   "ts_mu": 26.139,
+   "ts_sigma": 0.39,
+   "ts_score": 24.97
   },
   "simplejev-0.8b": {
    "games": 378,
@@ -1161,9 +1161,9 @@
     "5": 112,
     "6": 209
    },
-   "ts_mu": 22.782,
-   "ts_sigma": 0.804,
-   "ts_score": 20.37
+   "ts_mu": 23.008,
+   "ts_sigma": 0.39,
+   "ts_score": 21.837
   }
  },
  "status": {

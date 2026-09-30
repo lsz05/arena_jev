@@ -59,7 +59,7 @@ const TIPS = {
   jb_acc: "Share of the 231 public JevBench items answered correctly.",
   jb_hard: "Accuracy on the 111 hard public JevBench items.",
   games: "UNO games played; the bar shows progress toward the target per model.",
-  ts_score: "UNO TrueSkill: conservative rating μ − 3σ from 4-player games (the winner ranks first, the others by points left in hand); below, μ and σ.",
+  ts_score: "UNO TrueSkill: conservative rating μ − 3σ from 4-player games (the winner ranks first, the others by points left in hand), with each model's skill taken as fixed; below, μ and σ.",
   win_rate: "Share of UNO games won; below, the 95% Wilson interval.",
   avg_points_won: "Average points scored per UNO game: the winner takes the sum of the other hands, everyone else scores 0.",
   avg_points_left: "Average points still in hand when a UNO game ends (0 for the winner; lower is better).",
@@ -68,7 +68,7 @@ const TIPS = {
   challenge_right: "Share of its decisions on a Wild Draw Four played against it (challenge or accept) that matched the truth.",
   latency_ms: "Average time per model request during UNO.",
   c4_score: "Connect Four league points: win 1, draw 0.5, loss 0, averaged over its games; below, wins-draws-losses.",
-  c4_ts_score: "Connect Four TrueSkill: conservative rating μ − 3σ from the league games, a draw counting as a tie; below, μ and σ.",
+  c4_ts_score: "Connect Four TrueSkill: conservative rating μ − 3σ from the league games, a draw counting as a tie and each model's skill taken as fixed; below, μ and σ.",
   c4_took_win: "When a column would have won at once, how often the model played it; below, the number of such moves.",
   c4_blocked: "When the opponent could win with its next disc (and the model could not win at once itself), how often the model blocked it; below, the number of such moves.",
 };

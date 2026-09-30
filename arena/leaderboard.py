@@ -36,10 +36,21 @@ def load_registry(path: Path = REGISTRY) -> dict[str, dict]:
     return {m["name"]: m for m in json.loads(path.read_text())["models"]}
 
 
+def rating_env(**kwargs) -> trueskill.TrueSkill:
+    """The TrueSkill environment for every rating here: tau = 0, i.e. a model's skill does not drift between games.
+
+    TrueSkill's default adds uncertainty back after each game (tau = 25/300), for players who improve or decline.
+    That keeps sigma from shrinking (it settled at 0.67) and makes a rating follow roughly the last 65 games only. With
+    models of nearly equal strength the ranking then depended on the order of the games: the same 7152 UNO games in
+    another order gave a Spearman correlation of 0.26 between the two rankings. A model is fixed, so tau = 0: every
+    game counts the same, sigma keeps shrinking, and reordered games agree (0.96 on that run)."""
+    return trueskill.TrueSkill(tau=0.0, **kwargs)
+
+
 def trueskill_ratings(games: list[dict]) -> tuple[dict[str, trueskill.Rating], dict[str, list[str]], int]:
     """Ratings after all games, each model's opponents (one entry per game), and how many games were skipped
     because a name occupied several seats (gauntlet copies), which a free-for-all update cannot express."""
-    env = trueskill.TrueSkill()
+    env = rating_env()
     ratings: dict[str, trueskill.Rating] = defaultdict(env.create_rating)
     opponents: dict[str, list[str]] = defaultdict(list)
     skipped = 0

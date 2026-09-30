@@ -24,8 +24,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
-import trueskill
-
+from ..leaderboard import rating_env
 from ..swiss import _answers, model_specs
 from .match import make_player, openings, play_game, summarize
 
@@ -47,7 +46,7 @@ class League:
         self.cond = threading.Condition(self.lock)
         self.status_lock = threading.Lock()
         self.summarized = 0.0
-        self.env = trueskill.TrueSkill(draw_probability=0.05)
+        self.env = rating_env(draw_probability=0.05)
         self.ratings = {n: self.env.create_rating() for n in names}
         self.games = 0
         self.started = time.time()
@@ -118,12 +117,7 @@ class League:
                 f.write(line)
 
     def _rate(self, g: dict) -> None:
-        a, b = g["players"]
-        if a not in self.ratings or b not in self.ratings:
-            return
-        ranks = [0, 0] if g["winner_seat"] is None else ([0, 1] if g["winner_seat"] == 0 else [1, 0])
-        (ra,), (rb,) = self.env.rate([(self.ratings[a],), (self.ratings[b],)], ranks=ranks)
-        self.ratings[a], self.ratings[b] = ra, rb
+        rate_game(self.env, self.ratings, g)
 
     # ---- output -------------------------------------------------------------------------------------
 
@@ -138,14 +132,7 @@ class League:
             if not status["games"] or (state == "running" and time.time() - self.summarized < 30):
                 return
             self.summarized = time.time()
-            summary = summarize(self.out)  # also writes summary.json / summary.md
-            for name, p in summary["players"].items():
-                r = ratings.get(name)
-                if r is not None:
-                    p.update(ts_mu=round(r.mu, 3), ts_sigma=round(r.sigma, 3), ts_score=round(r.mu - 3 * r.sigma, 3))
-            summary["status"] = status
-            _atomic(self.out / "summary.json", summary)
-            (self.out / "standings.md").write_text(standings(summary))
+            write_summary(self.out, ratings, status)
 
     def run(self) -> None:
         self.write_status()  # before taking the lock below
@@ -169,6 +156,39 @@ class League:
                 self.cond.wait(timeout=30)
         self.write_status("done")
         print(standings(json.loads((self.out / "summary.json").read_text())), flush=True)
+
+
+def rate_game(env, ratings: dict, g: dict) -> None:
+    a, b = g["players"]
+    if a not in ratings or b not in ratings:
+        return
+    ranks = [0, 0] if g["winner_seat"] is None else ([0, 1] if g["winner_seat"] == 0 else [1, 0])
+    (ra,), (rb,) = env.rate([(ratings[a],), (ratings[b],)], ranks=ranks)
+    ratings[a], ratings[b] = ra, rb
+
+
+def write_summary(out: Path, ratings: dict, status: dict) -> dict:
+    """summary.json (the match summary plus each model's TrueSkill and the league status) and standings.md."""
+    summary = summarize(out)  # also writes summary.json / summary.md
+    for name, p in summary["players"].items():
+        r = ratings.get(name)
+        if r is not None:
+            p.update(ts_mu=round(r.mu, 3), ts_sigma=round(r.sigma, 3), ts_score=round(r.mu - 3 * r.sigma, 3))
+    summary["status"] = status
+    _atomic(out / "summary.json", summary)
+    (out / "standings.md").write_text(standings(summary))
+    return summary
+
+
+def rebuild(out: str | Path) -> dict:
+    """Recompute a league's ratings and summary from its recorded games (`python -m arena stats <run>`)."""
+    out = Path(out)
+    games = [json.loads(line) for line in open(out / "games.jsonl") if line.strip()]
+    env = rating_env(draw_probability=0.05)
+    ratings = {n: env.create_rating() for g in games for n in g["players"]}
+    for g in games:
+        rate_game(env, ratings, g)
+    return write_summary(out, ratings, json.loads((out / "status.json").read_text()))
 
 
 def standings(summary: dict) -> str:

@@ -32,7 +32,6 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
-import trueskill
 
 from . import leaderboard, stats, tokens
 from .match import play_game
@@ -93,7 +92,7 @@ class Tournament:
     def __init__(self, cfg: dict, out: Path, players: dict[str, SystemOnePlayer]):
         self.cfg, self.run, self.out = cfg, cfg["run"], out
         self.players = players
-        self.env = trueskill.TrueSkill()
+        self.env = leaderboard.rating_env()  # tau = 0: a model's skill does not drift
         self.ratings = {n: self.env.create_rating() for n in players}
         self.opponents: dict[str, list[str]] = defaultdict(list)
         self.games_played = Counter()

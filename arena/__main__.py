@@ -111,6 +111,11 @@ def main() -> None:
         from .swiss import run as swiss_run
         swiss_run(a.config, a.out, resume=a.resume)
     elif a.cmd == "stats":
+        config = Path(a.run_dir, "config.json")
+        if config.exists() and json.loads(config.read_text()).get("league"):  # a Connect Four league
+            from .connect4 import league
+            print(league.standings(league.rebuild(a.run_dir)))
+            return
         from . import stats
         summary = stats.summarize(a.run_dir)
         Path(a.run_dir, "summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False))
