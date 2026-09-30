@@ -12,7 +12,7 @@ main { max-width: 1600px; } /* room for the whole table on wide screens; narrowe
 <body>
 <header>
   <h1>Jev Arena</h1>
-  <nav><a href="../">Home</a><a href="./" class="on">Leaderboard</a><a href="../bench/">Bench</a><a href="../uno/">UNO</a><a href="../connect4/">Connect Four</a></nav>
+  <nav><a href="../">Home</a><a href="./" class="on">Leaderboard</a><a href="../bench/">JevBench</a><a href="../uno/">UNO</a><a href="../connect4/">Connect Four</a></nav>
   <span class="spacer"></span><button id="theme" type="button">◐ Theme</button>
 </header>
 <main>
@@ -48,7 +48,7 @@ const COLS = [
   {key: "wd4_bluff", group: U, label: "Bluff", num: true, rank: true, dir: 1, cell: r => fmt(r.wd4_bluff, v => pct(v))},
   {key: "challenge_right", group: U, label: "Challenge ✓", num: true, rank: true, cell: r => fmt(r.challenge_right, v => pct(v))},
   {key: "latency_ms", group: U, label: "Latency", num: true, rank: true, dir: 1, cell: r => fmt(r.latency_ms, v => Math.round(v) + " ms")},
-  {key: "c4_score", group: C, label: "Points", num: true, rank: true, title: "per game: win 1, draw 0.5 (wins-draws-losses below)", cell: r => fmt(r.c4_score, v => `${pct(v)}<small>${r.c4_wins}-${r.c4_draws}-${r.c4_losses}</small>`)},
+  {key: "c4_score", group: C, label: "Win rate", num: true, rank: true, title: "per game: win 1, draw 0.5 (wins-draws-losses below)", cell: r => fmt(r.c4_score, v => `${pct(v)}<small>${r.c4_wins}-${r.c4_draws}-${r.c4_losses}</small>`)},
   {key: "c4_ts_score", group: C, label: "TrueSkill", num: true, rank: true, title: "μ − 3σ", cell: r => fmt(r.c4_ts_score, v => `${v.toFixed(1)}<small>μ ${r.c4_ts_mu.toFixed(1)} ± ${r.c4_ts_sigma.toFixed(1)}</small>`)},
   {key: "c4_took_win", group: C, label: "Took win", num: true, rank: true, title: "played a winning column when it had one", cell: r => fmt(r.c4_took_win, v => `${pct(v)}<small>of ${r.c4_win_chances}</small>`)},
   {key: "c4_blocked", group: C, label: "Blocked", num: true, rank: true, title: "blocked the opponent's immediate win when it had to", cell: r => fmt(r.c4_blocked, v => `${pct(v)}<small>of ${r.c4_threats}</small>`)},
@@ -67,7 +67,7 @@ const TIPS = {
   wd4_bluff: "Share of its Wild Draw Fours played while holding a card of the current color (lower is more honest).",
   challenge_right: "Share of its decisions on a Wild Draw Four played against it (challenge or accept) that matched the truth.",
   latency_ms: "Average time per model request during UNO.",
-  c4_score: "Connect Four league points: win 1, draw 0.5, loss 0, averaged over its games; below, wins-draws-losses.",
+  c4_score: "Share of Connect Four league games won, a draw counting as half a win; below, wins-draws-losses.",
   c4_ts_score: "Connect Four TrueSkill: conservative rating μ − 3σ from the league games, a draw counting as a tie and each model's skill taken as fixed; below, μ and σ.",
   c4_took_win: "When a column would have won at once, how often the model played it; below, the number of such moves.",
   c4_blocked: "When the opponent could win with its next disc (and the model could not win at once itself), how often the model blocked it; below, the number of such moves.",
@@ -85,8 +85,8 @@ async function load() {
   TARGET = b.target_games_per_model;
   if (!table) {
     const has = k => b.rows.some(r => r[k] != null);
-    table = SortTable({table: "#board", chips: "#chips", cols: COLS, sortKey: has("ts_score") ? "ts_score" : has("jb_acc") ? "jb_acc" : "params",
-                       sortDir: has("ts_score") || has("jb_acc") ? -1 : 1, groupTips: GROUP_TIPS});
+    table = SortTable({table: "#board", chips: "#chips", cols: COLS, sortKey: has("jb_acc") ? "jb_acc" : has("win_rate") ? "win_rate" : "params",
+                       sortDir: has("jb_acc") || has("win_rate") ? -1 : 1, groupTips: GROUP_TIPS});
     $("#defs").innerHTML = defsList(COLS, [["⚠", "A caveat on this model's result; hover the mark to read it."],
                                            ["–", "No result yet for this metric; such models are listed last when ranking by it."]]);
   }

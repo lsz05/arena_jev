@@ -249,7 +249,7 @@ pre { white-space: pre-wrap; word-break: break-word; background: var(--surface-2
 <body>
 <header>
   <h1>Jev Arena</h1>
-  <nav class="sitenav"><a href="../">Home</a><a href="../leaderboard/">Leaderboard</a><a href="../bench/">Bench</a><a href="./" class="on">UNO</a><a href="../connect4/">Connect Four</a></nav>
+  <nav class="sitenav"><a href="../">Home</a><a href="../leaderboard/">Leaderboard</a><a href="../bench/">JevBench</a><a href="./" class="on">UNO</a><a href="../connect4/">Connect Four</a></nav>
   <span class="meta" id="runmeta">loading…</span>
   <button id="theme" type="button" title="Toggle light / dark">◐ Theme</button>
 </header>
@@ -479,7 +479,7 @@ async function loadLeaderboard() {
   try { LB = await api("/api/leaderboard"); } catch (e) { $("#lbmeta").textContent = "leaderboard unavailable: " + e.message; return; }
   if (!lbSort) {
     const has = k => LB.rows.some(r => r[k] != null);
-    const key = ["ts_score", "jb_acc", "params"].find(has) || "params";
+    const key = ["win_rate", "ts_score", "jb_acc", "params"].find(has) || "params";
     lbSort = {key, dir: LB_METRICS.find(m => m.key === key).dir};
   }
   renderLeaderboard();
