@@ -110,14 +110,16 @@ function SortTable(opts) {
     h += "</thead><tbody>";
     // per metric: its best value in red bold on a pink ground, the rest of its top 3 on pink (ties share a place;
     // "best" follows the metric's own direction, not the current sort). hl: false leaves a column plain, and so does
-    // a column whose values are all the same.
+    // a column whose values are all the same or in which most rows would be marked (they tie at the top).
     const place = {};
     for (const c of opts.cols.filter(c => c.rank && c.hl !== false)) {
       const get = r => c.value ? c.value(r) : r[c.key];
       const vals = rows.map(get).filter(v => v != null && !Number.isNaN(v));
       if (new Set(vals).size < 2) continue;  // every value the same (e.g. no fallbacks at all): nothing to point out
       const better = (c.dir ?? -1) < 0 ? (a, b) => a > b : (a, b) => a < b;
-      place[c.key] = r => { const v = get(r); return v == null ? 0 : 1 + vals.filter(x => better(x, v)).length; };
+      const rankOf = v => 1 + vals.filter(x => better(x, v)).length;
+      if (vals.filter(v => rankOf(v) <= 3).length > vals.length / 2) continue;  // most rows tie at the top: no signal
+      place[c.key] = r => { const v = get(r); return v == null ? 0 : rankOf(v); };
     }
     const hl = (c, r) => { const k = place[c.key] ? place[c.key](r) : 0; return k === 1 ? "hl1" : k > 1 && k <= 3 ? "hl3" : ""; };
     let rank = 0;

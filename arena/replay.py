@@ -131,22 +131,42 @@ def _prompt(game: UnoGame, decision, d: dict, spec: dict, run: dict, seed: int, 
     else:
         q = render.move_question(obs, decision, template, rng)
         questions.append(q)
-        pick = next((c["pick"] for c in d["calls"] if c["question"] == "move"), None)
-        card = render.move_to_card(decision, pick) if pick else None
+        moves = [c["pick"] for c in d["calls"] if c["question"] == "move"]
+        # the last call decides (knockout: the final); a single option is taken without asking (a forced play)
+        final = moves[-1] if moves else (next(iter(q.options)) if len(q.options) == 1 else None)
+        card = render.move_to_card(decision, final) if final else None
         if card is not None and card.is_wild:
             questions.append(render.color_question(obs, decision, card, template, rng))
-    sent = [q for q in questions if len(q.options) > 1]
-    requests = []
-    for q, call in zip(sent, d["calls"]):
+    by_name = {q.name: q for q in questions}
+    # One request per logged call. A question with more options than the model takes was asked as a knockout: groups
+    # of the shuffled options in order, then the group winners; each call is rebuilt with exactly its own options.
+    requests, matches = [], True
+    for call in d["calls"]:
+        q = by_name.get(call["question"])
+        if q is None or any(o not in q.options for o in call["options"]):
+            matches = False
+            continue
+        shortened = call.get("compacted") or {}  # options shortened for a model with a per-option length cap
         rounds = call.get("history_rounds", default_rounds)
-        if call.get("compacted"):  # options shortened for a model with a per-option length cap
-            q = render.Question(q.name, q.instructions, {k: call["compacted"].get(k, v) for k, v in q.options.items()})
         requests.append({"name": q.name, "state": render.render_state(obs, decision, rounds), "history_rounds": rounds,
-                         "prompt_tokens": call.get("prompt_tokens"), **q.to_json()})
+                         "prompt_tokens": call.get("prompt_tokens"), "type": "choice", "instructions": q.instructions,
+                         "criteria": {o: shortened.get(o, q.options[o]) for o in call["options"]}})
+    knockout = False
+    for name, q in by_name.items():
+        calls = [c["options"] for c in d["calls"] if c["question"] == name]
+        expected = list(q.options)
+        if len(calls) == 1:
+            matches = matches and calls[0] == expected
+        elif calls:  # groups (a group of one option is not asked), then the winners
+            knockout = True
+            rest = iter(expected)
+            in_order = all(o in rest for c in calls[:-1] for o in c)
+            matches = matches and in_order and set(calls[-1]) <= set(expected)
     return {
         "state": requests[0]["state"] if requests else render.render_state(obs, decision, default_rounds),
         "requests": requests,
-        "matches_log": [c["options"] for c in d["calls"]] == [list(q.options) for q in sent],
+        "matches_log": matches,
+        "knockout": knockout,
     }
 
 

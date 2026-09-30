@@ -524,11 +524,13 @@ function renderLeaderboard() {
   // per metric: the best value red and bold on pink, the rest of the top 3 on pink (the metric's own direction)
   const DIR = Object.fromEntries(LB_METRICS.map(m => [m.key, m.dir]));
   const vals = k => rows.map(r => r[k]).filter(v => v != null);
-  const PLACES = Object.fromEntries(Object.keys(DIR).filter(k => k !== "params" && k !== "games" && new Set(vals(k)).size > 1)
-    .map(k => [k, vals(k)]));  // a column whose values are all the same has nothing to point out
+  const rankIn = (k, v, all) => 1 + all.filter(x => DIR[k] < 0 ? x > v : x < v).length;
+  // no marks in a column whose values are all the same, or where most rows would be marked (they tie at the top)
+  const PLACES = Object.fromEntries(Object.keys(DIR).filter(k => k !== "params" && k !== "games").map(k => [k, vals(k)])
+    .filter(([k, all]) => new Set(all).size > 1 && all.filter(v => rankIn(k, v, all) <= 3).length <= all.length / 2));
   const hl = (k, r) => {
     if (!PLACES[k] || r[k] == null) return "";
-    const n = 1 + PLACES[k].filter(x => DIR[k] < 0 ? x > r[k] : x < r[k]).length;
+    const n = rankIn(k, r[k], PLACES[k]);
     return n === 1 ? "hl1" : n <= 3 ? "hl3" : "";
   };
   let rank = 0;
@@ -790,7 +792,7 @@ function renderDecision(f) {
   const questions = (f.prompt && (f.prompt.requests || f.prompt.questions)) || [];
   if (f.calls && f.calls.length) {
     for (const call of f.calls) {
-      const q = questions.find(q => q.name === call.question && Object.keys(q.criteria).length === call.options.length);
+      const q = questions.find(q => q.name === call.question && Object.keys(q.criteria).length === call.options.length && call.options.every(o => o in q.criteria));
       const hist = call.history_rounds != null ? ` · history ${call.history_rounds} round${call.history_rounds === 1 ? "" : "s"}` : "";
       const budget = call.prompt_tokens != null ? ` (${call.prompt_tokens} budget tokens)` : "";
       html += `<div class="question"><div class="qhead">Question “${esc(call.question)}” · ${call.options.length} options in the order shown to the model${hist}${budget} · ${call.latency_ms} ms · ${call.input_tokens ?? "?"} tokens at the server</div>`;
@@ -811,7 +813,8 @@ function renderDecision(f) {
   if (f.prompt) {
     const reqs = f.prompt.requests || (f.prompt.questions || []).map(q => ({...q, state: f.prompt.state}));
     const body = reqs.map(q => `<pre>${esc(q.state)}</pre><pre>${esc(JSON.stringify({[q.name]: {type: q.type, instructions: q.instructions, criteria: q.criteria}}, null, 2))}</pre>`).join("");
-    html += `<details><summary>Request${reqs.length > 1 ? "s" : ""} sent to the model${f.prompt.matches_log ? "" : " (rebuilt order differs from the log!)"}</summary>${body}</details>`;
+    const ko = f.prompt.knockout ? ` (${reqs.length}: more options than the model takes at once, so groups first, then the group winners)` : "";
+    html += `<details><summary>Request${reqs.length > 1 ? "s" : ""} sent to the model${ko}${f.prompt.matches_log ? "" : " (rebuilt order differs from the log!)"}</summary>${body}</details>`;
   }
   el.innerHTML = html;
 }
