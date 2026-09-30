@@ -1,5 +1,6 @@
 """The arena website: /arenas/ (index), /arenas/uno/ (UNO viewer), /arenas/connect4/ (Connect Four matches and
-replays), /arenas/leaderboard/, /arenas/bench/ and /arenas/bench/items/ (the 231 JevBench items with every model's answer).
+replays), /arenas/c4puzzles/ (Connect Four decision puzzles), /arenas/leaderboard/, /arenas/bench/ and
+/arenas/bench/items/ (the 231 JevBench items with every model's answer).
 
     python -m arena site --uno-run runs/<dir> [--base /arenas] [--port 8200] [--allowed-host jev.takeshiba.dev]
 
@@ -49,7 +50,7 @@ class Site:
 
     def route(self, path: str) -> Response:
         b = self.base
-        if path in (b, f"{b}/uno", f"{b}/leaderboard", f"{b}/bench", f"{b}/connect4", f"{b}/bench/items"):
+        if path in (b, f"{b}/uno", f"{b}/leaderboard", f"{b}/bench", f"{b}/connect4", f"{b}/bench/items", f"{b}/c4puzzles"):
             return 301, "", (path + "/").encode()
         if not path.startswith(b + "/"):
             return 404, "text/plain", b"not found"
@@ -65,6 +66,21 @@ class Site:
             return uno.get(path[len("/uno"):])
         if path == "/connect4/":
             return self.static("connect4.html")
+        if path == "/c4puzzles/":
+            return self.static("c4puzzles.html")
+        if path.startswith("/c4puzzles/api/"):
+            from .connect4 import puzzle_site
+            rest = path[len("/c4puzzles/api/"):]
+            if rest == "summary":
+                return as_json(puzzle_site.summary())
+            if rest == "items":
+                return as_json(puzzle_site.items())
+            if rest.startswith("item/"):
+                try:
+                    return as_json(puzzle_site.item(rest[len("item/"):]))
+                except KeyError:
+                    return 404, "text/plain", b"unknown puzzle"
+            return 404, "text/plain", b"not found"
         if path.startswith("/connect4/api/"):
             return self.c4_api(path[len("/connect4/api/"):])
         if path == "/leaderboard/":
@@ -85,13 +101,15 @@ class Site:
             except KeyError:
                 return 404, "text/plain", b"unknown item"
         if path == "/api/summary":  # for the index page
+            from .connect4.puzzle_run import load_puzzles
             board = self.board()
             bench = benchdata.build()
             return as_json({"models": len(board["rows"]), "games": board["games"], "updated": board["updated"],
                             "in_progress": board["in_progress"], "target": board.get("target_games_per_model"),
                             "bench_models": len(bench["models"]),
                             "c4_games": sum(sum(1 for _ in open(d / "games.jsonl")) for d in RUNS.glob("*_c4-*")
-                                            if (d / "games.jsonl").exists())})
+                                            if (d / "games.jsonl").exists()),
+                            "c4_puzzles": len(load_puzzles())})
         return 404, "text/plain", b"not found"
 
     @staticmethod

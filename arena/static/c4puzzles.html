@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C4 Puzzles · Jev Arena</title>
+<link rel="stylesheet" href="../static/base.css">
+<style>
+:root { --c4-board: #2c62b8; --c4-hole: #f4f3f0; --c4-first: #d7373d; --c4-second: #f0bd26; --ok: #0a7d0a; --ok-bg: #e4f4e4; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c4-board: #1f4a8f; --c4-hole: #121211; --c4-first: #e5484d; --c4-second: #f5c73a; --ok: #5fd35f; --ok-bg: #173a1a; } }
+:root[data-theme="dark"] { --c4-board: #1f4a8f; --c4-hole: #121211; --c4-first: #e5484d; --c4-second: #f5c73a; --ok: #5fd35f; --ok-bg: #173a1a; }
+main { max-width: 1600px; }
+.pickrow { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; }
+.pickrow label { color: var(--text-muted); font-size: 13px; }
+select, input[type=search] { font: inherit; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); }
+.ib { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .ib { grid-template-columns: minmax(0, 1fr); } .list { max-height: 320px !important; } }
+.list { max-height: calc(100vh - 140px); overflow-y: auto; display: grid; gap: 5px; padding-right: 4px; }
+.it { text-align: left; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); padding: 7px 10px; cursor: pointer; font: inherit; display: grid; gap: 2px; }
+.it:hover { background: var(--surface-2); } .it.sel { outline: 2px solid var(--accent-ring); background: var(--surface-2); }
+.it .id { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text-secondary); }
+.it .meta { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; }
+.tag { display: inline-block; font-size: 11px; border-radius: 4px; padding: 0 6px; border: 1px solid var(--border); color: var(--text-secondary); }
+.solved { display: inline-block; width: 56px; height: 5px; background: var(--grid); border-radius: 3px; overflow: hidden; vertical-align: middle; }
+.solved i { display: block; height: 100%; background: var(--series-1); }
+.pz { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 1100px) { .pz { grid-template-columns: minmax(0, 1fr); } }
+.cols7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; padding: 0 8px; }
+.bars { height: 120px; align-items: end; }
+.bar { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; font-size: 11px; color: var(--text-secondary); }
+.bar i { display: block; width: 70%; background: var(--series-1-muted); border-radius: 3px 3px 0 0; min-height: 1px; }
+.bar.ok i { background: var(--ok); } .bar.ok { color: var(--ok); font-weight: 700; }
+.board { background: var(--c4-board); border-radius: 10px; padding: 8px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.hole { aspect-ratio: 1; border-radius: 50%; background: var(--c4-hole); position: relative; }
+.disc { position: absolute; inset: 0; border-radius: 50%; }
+.disc.first { background: var(--c4-first); } .disc.second { background: var(--c4-second); }
+.disc.ghost { opacity: .6; outline: 3px dashed var(--ok); outline-offset: -3px; }
+.disc.ghost::after { content: "✓"; position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; color: #fff; text-shadow: 0 0 3px #000; }
+.hole.line { box-shadow: 0 0 0 3px #fff inset, 0 0 0 3px var(--ok); }
+.marks { margin-top: 6px; font-size: 12px; text-align: center; }
+.marks div { display: flex; flex-direction: column; align-items: center; min-height: 32px; }
+.o-win { color: var(--ok); font-weight: 700; } .o-draw { color: var(--text-secondary); } .o-loss { color: var(--text-muted); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; margin-top: 8px; color: var(--text-secondary); }
+.dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; vertical-align: -1px; margin-right: 5px; }
+.dot.first { background: var(--c4-first); } .dot.second { background: var(--c4-second); }
+.expl { background: var(--ok-bg); border-radius: 6px; padding: 8px 10px; font-size: 13.5px; }
+.detail h3 { margin: 0 0 6px; font: 600 15px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.detail h4 { margin: 16px 0 6px; font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+pre.req { background: var(--surface-2); border-radius: 6px; padding: 10px; font-size: 12px; white-space: pre-wrap; word-break: break-word; max-height: 360px; overflow: auto; }
+.oc { display: inline-block; min-width: 42px; font-size: 12px; font-weight: 700; }
+.oc.y { color: var(--ok); } .oc.n { color: var(--text-muted); }
+.pbar { display: inline-block; width: 80px; height: 6px; background: var(--grid); border-radius: 3px; overflow: hidden; vertical-align: middle; margin-right: 6px; }
+.pbar i { display: block; height: 100%; background: var(--series-1); }
+.navbtns { display: flex; gap: 6px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Jev Arena</h1>
+  <nav><a href="../">Home</a><a href="../leaderboard/">Leaderboard</a><a href="../bench/">JevBench</a><a href="../uno/">UNO</a><a href="../connect4/">Connect Four</a><a href="./" class="on">C4 Puzzles</a></nav>
+  <span class="spacer"></span><button id="theme" type="button">◐ Theme</button>
+</header>
+<main>
+  <section class="hero">
+    <h2>Connect Four puzzles <span class="live" id="live" hidden>live</span></h2>
+    <p class="lead">1000 Connect Four positions with exactly one correct column, each asked as one decision, the way a Jev
+      model is used: 250 each of <b>win</b> (one column wins at once), <b>block</b> (the opponent wins next turn unless
+      blocked), <b>fork</b> (one move wins in two moves, the only winning move) and <b>solver</b> (the only move that keeps
+      the result, by a perfect solver). No two puzzles are copies or mirrors of each other, and the correct column is
+      spread evenly over the seven columns. Every puzzle is asked in three option orders, with the correct column at a
+      different position each time, so a model's preference for a position cancels out.</p>
+    <p class="muted" id="meta">loading…</p>
+    <div class="chips" id="chips"></div>
+    <div class="scroll-x"><table id="board" class="sortable"></table></div>
+    <div id="defs"></div>
+  </section>
+  <section>
+    <h2>Baselines</h2>
+    <div class="scroll-x"><table id="base"></table></div>
+    <div class="note">Random: the expected accuracy of a uniform guess (1 / legal columns; late positions have few columns left).
+      Always centre: the legal column closest to the middle. Rule-based: wins if it can, blocks an immediate threat,
+      avoids letting the opponent win on top, otherwise prefers central columns.</div>
+  </section>
+  <section>
+    <h2>Puzzles</h2>
+    <div class="pickrow" style="margin-bottom: 10px">
+      <label for="f-type">Type</label><select id="f-type"><option value="">all</option><option>win</option><option>block</option><option>fork</option><option>solver</option></select>
+      <label for="f-col">Answer</label><select id="f-col"><option value="">any column</option>${[1,2,3,4,5,6,7].map(c => `<option>${c}</option>`)}</select>
+      <label for="f-sort">Sort</label><select id="f-sort"><option value="id">puzzle id</option><option value="hard">fewest right</option><option value="easy">most right</option><option value="p">lowest P(correct)</option></select>
+      <input id="f-q" type="search" placeholder="Search id" aria-label="Search">
+      <span id="count" class="muted"></span>
+    </div>
+    <div class="ib">
+      <div class="list" id="list"></div>
+      <div class="detail" id="detail"><p class="muted">Pick a puzzle.</p></div>
+    </div>
+  </section>
+</main>
+<div class="tooltip" id="tip"></div>
+<script src="../static/board.js"></script>
+<script>
+initTheme();
+const TYPES = ["win", "block", "fork", "solver"];
+const O = "Overall", T = "By type";
+let SUMMARY = null, TABLE = null, ITEMS = [], SHOWN = [], CUR = null, timer = null;
+const chance = t => SUMMARY?.baselines?.random?.by_type?.[t]?.accuracy;
+const COLS = [
+  {key: "display", label: "Model", cell: modelCell},
+  {key: "params", label: "Size", num: true, rank: true, dir: 1, hl: false, cell: sizeCell,
+   tip: "Parameters held by the model's server after its own load code, counted at load time. Hover a size for the exact count."},
+  {key: "accuracy", group: O, label: "Accuracy", num: true, rank: true, cell: r => fmt(r.accuracy, v => pct(v)),
+   tip: "Share of right answers over all puzzles and all three option orders (the main score)."},
+  {key: "accuracy_first_order", group: O, label: "1st order", num: true, rank: true, cell: r => fmt(r.accuracy_first_order, v => pct(v)),
+   tip: "Accuracy when each puzzle is asked once, in its first option order only."},
+  {key: "accuracy_avg_probs", group: O, label: "Avg probs", num: true, rank: true, cell: r => fmt(r.accuracy_avg_probs, v => pct(v)),
+   tip: "Accuracy of the column with the highest probability averaged over the three orders."},
+  {key: "p_correct", group: O, label: "P(correct)", num: true, rank: true, cell: r => fmt(r.p_correct, v => v.toFixed(3)),
+   tip: "Average probability the model gave the correct column."},
+  {key: "brier", group: O, label: "Brier", num: true, rank: true, dir: 1, cell: r => fmt(r.brier, v => v.toFixed(3)),
+   tip: "Multi-class Brier score: mean squared distance between the probabilities and the correct answer (lower is better)."},
+  {key: "ece", group: O, label: "ECE", num: true, rank: true, dir: 1, cell: r => fmt(r.ece, v => v.toFixed(3)),
+   tip: "Expected calibration error of the top answer: how far its probability is from how often it is right (lower is better)."},
+  {key: "consistency", group: O, label: "Consistency", num: true, rank: true, cell: r => fmt(r.consistency, v => pct(v)),
+   tip: "Share of puzzles where the model picked the same column in all three option orders."},
+  {key: "position_max", group: O, label: "Position bias", num: true, rank: true, dir: 1, cell: r => fmt(r.position_max, v => `${pct(v)}<small>first ${pct(r.position_first)}</small>`),
+   tip: "Share of its answers at the position (1st to 7th option) it picks most, on puzzles with 7 options; 14% means no preference. Below: how often it picks the first option."},
+  {key: "column_max", group: O, label: "Column bias", num: true, rank: true, dir: 1, cell: r => fmt(r.column_max, v => `${pct(v)}<small>column ${r.column_favourite}</small>`),
+   tip: "Share of its answers in the column it picks most, on puzzles with 7 options; the correct column is spread evenly, so 14% means no preference."},
+  ...TYPES.map(t => ({key: `${t}_accuracy`, group: T, label: t[0].toUpperCase() + t.slice(1), num: true, rank: true,
+    cell: r => fmt(r[`${t}_accuracy`], v => `${pct(v)}<small>chance ${fmt(chance(t), c => pct(c))}</small>`),
+    tip: {win: "Accuracy on the 250 win puzzles: one column wins at once.",
+          block: "Accuracy on the 250 block puzzles: the opponent wins next turn unless its column is blocked.",
+          fork: "Accuracy on the 250 fork puzzles: one move wins in two moves (the opponent cannot stop every threat), and it is the only winning move.",
+          solver: "Accuracy on the 250 solver puzzles: no immediate tactic; a perfect solver finds exactly one move that keeps the result."}[t]})),
+];
+
+async function loadSummary() {
+  SUMMARY = await (await fetch("api/summary")).json();
+  const n = SUMMARY.models.length;
+  $("#meta").textContent = SUMMARY.run ? `${n} models · ${SUMMARY.puzzles} puzzles × ${SUMMARY.orders} option orders · ${SUMMARY.state === "running" ? "running, " : ""}updated ${SUMMARY.updated}`
+    : `${SUMMARY.puzzles} puzzles; no model has answered them yet`;
+  $("#live").hidden = SUMMARY.state !== "running";
+  if (!TABLE) TABLE = SortTable({table: "#board", chips: "#chips", cols: COLS, sortKey: "accuracy",
+    groupTips: {[O]: "Scores over all 1000 puzzles.", [T]: "Accuracy per puzzle type; below each, the chance level (random guessing)."}});
+  TABLE.render(SUMMARY.models);
+  $("#defs").innerHTML = defsList(COLS);
+  const b = SUMMARY.baselines || {};
+  const label = {random: "Random guess", centre: "Always centre", heuristic: "Rule-based"};
+  $("#base").innerHTML = `<thead><tr><th>Baseline</th><th class="num">Accuracy</th>${TYPES.map(t => `<th class="num">${t}</th>`).join("")}</tr></thead><tbody>` +
+    Object.entries(b).map(([k, v]) => `<tr><td>${label[k] || esc(k)}</td><td class="num">${pct(v.accuracy)}</td>${TYPES.map(t => `<td class="num">${fmt(v.by_type?.[t]?.accuracy, x => pct(x))}</td>`).join("")}</tr>`).join("") + "</tbody>";
+  if (SUMMARY.state === "running" && !timer) timer = setInterval(() => { loadSummary(); loadItems(false); }, 30000);
+  if (SUMMARY.state !== "running" && timer) { clearInterval(timer); timer = null; }
+}
+
+async function loadItems(first = true) {
+  ITEMS = (await (await fetch("api/items")).json()).items;
+  renderList();
+  if (first) {
+    const want = new URLSearchParams(location.hash.slice(1)).get("puzzle");
+    show(ITEMS.some(i => i.id === want) ? want : SHOWN[0]?.id);
+  }
+}
+
+function renderList() {
+  const type = $("#f-type").value, col = $("#f-col").value, q = $("#f-q").value.trim().toLowerCase(), sort = $("#f-sort").value;
+  let rows = ITEMS.filter(i => (!type || i.family === type) && (!col || i.expected === col) && (!q || i.id.includes(q)));
+  const share = i => i.answers ? i.right / i.answers : 0;
+  if (sort === "hard") rows.sort((a, b) => share(a) - share(b) || a.id.localeCompare(b.id));
+  else if (sort === "easy") rows.sort((a, b) => share(b) - share(a) || a.id.localeCompare(b.id));
+  else if (sort === "p") rows.sort((a, b) => (a.p_correct ?? 1) - (b.p_correct ?? 1) || a.id.localeCompare(b.id));
+  else rows.sort((a, b) => a.id.localeCompare(b.id));
+  SHOWN = rows;
+  $("#count").textContent = `${rows.length} of ${ITEMS.length} puzzles`;
+  $("#list").innerHTML = rows.map(i => `<button type="button" class="it ${i.id === CUR ? "sel" : ""}" data-id="${esc(i.id)}">
+      <span class="id">${esc(i.id)}</span>
+      <span class="meta"><span class="tag">${i.family}</span><span>answer: column ${i.expected}</span><span>${i.legal} columns</span>
+        ${i.answers ? `<span data-tip="${i.right} of ${i.answers} answers right (${i.models} models × orders)">${Math.round(100 * share(i))}% right <span class="solved"><i style="width:${(100 * share(i)).toFixed(0)}%"></i></span></span>` : ""}</span>
+    </button>`).join("");
+  $("#list").querySelectorAll(".it").forEach(b => b.onclick = () => show(b.dataset.id));
+}
+
+function explain(p) {
+  const d = p.detail, col = p.expected, cells = (d.line || []).map(([c, r]) => `(${c},${r})`).join(" ");
+  if (p.family === "win") return `Column ${col} completes a ${d.direction} four for the mover: ${cells}.`;
+  if (p.family === "block") return `The opponent completes a ${d.direction} four at column ${col} unless the mover blocks it there: ${cells}. Every other move loses at once.`;
+  if (p.family === "fork") {
+    const replies = Object.entries(d.replies || {}).map(([r, w]) => `${r}→${w.join("/")}`).join(", ");
+    return `Column ${col} wins in two moves: after it the mover threatens ${d.threats.length ? "column " + d.threats.join(" and ") : "a win"}, and whatever the opponent replies, a winning column is left (reply → winning column: ${replies}). It is the only winning move.`;
+  }
+  const others = Object.entries(d.outcome || {}).filter(([c]) => c !== col).map(([c, o]) => `${c}: ${o}`).join(", ");
+  return `By the solver, column ${col} is the only move that keeps the ${d.result} (${d.result === "win" ? "the only winning move" : "the only move that does not lose"}). Other columns: ${others}.`;
+}
+
+async function show(id) {
+  if (!id) return;
+  CUR = id;
+  history.replaceState(null, "", "#puzzle=" + encodeURIComponent(id));
+  $("#list").querySelectorAll(".it").forEach(b => b.classList.toggle("sel", b.dataset.id === id));
+  const d = await (await fetch("api/item/" + encodeURIComponent(id))).json();
+  const p = d.puzzle, moves = [...p.moves].map(Number);
+  const cols = [[], [], [], [], [], [], []];
+  moves.forEach((c, i) => cols[c - 1].push(i % 2));
+  const mover = moves.length % 2, side = ["first", "second"];
+  const ans = Number(p.expected), landing = cols[ans - 1].length + 1;
+  const line = new Set((p.detail.line || []).map(([c, r]) => `${c},${r}`));
+  let holes = "";
+  for (let r = 6; r >= 1; r--) for (let c = 1; c <= 7; c++) {
+    const v = cols[c - 1][r - 1];
+    let disc = v == null ? "" : `<div class="disc ${side[v]}"></div>`;
+    if (c === ans && r === landing) disc = `<div class="disc ${side[mover]} ghost"></div>`;
+    holes += `<div class="hole ${line.has(`${c},${r}`) ? "line" : ""}">${disc}</div>`;
+  }
+  const total = d.answers || 0;
+  const bars = [1, 2, 3, 4, 5, 6, 7].map(c => {
+    const legal = p.labels.includes(String(c)), n = d.picks[String(c)] || 0, share = total ? n / total : 0;
+    if (!legal) return `<div class="bar">full</div>`;
+    return `<div class="bar ${String(c) === p.expected ? "ok" : ""}" data-tip="Column ${c}: ${n} of ${total} answers">${total ? Math.round(100 * share) + "%" : ""}<i style="height:${(90 * share).toFixed(1)}px"></i></div>`;
+  }).join("");
+  const outcome = p.detail.outcome || {};
+  const marks = [1, 2, 3, 4, 5, 6, 7].map(c => `<div><span>${c}</span>${outcome[c] ? `<span class="o-${outcome[c]}">${outcome[c]}</span>` : ""}</div>`).join("");
+  const right = d.models.reduce((s, m) => s + m.orders.filter(o => o.correct).length, 0);
+  const i = SHOWN.findIndex(x => x.id === id);
+  const req = p.state + "\n\n" + JSON.stringify({move: {type: "choice", instructions: p.question.instructions,
+    criteria: Object.fromEntries(d.orders[0].map(k => [k, p.question.criteria[k]]))}}, null, 1) +
+    `\n\nOption orders asked: ${d.orders.map((o, k) => `${k + 1}) ${o.join(" ")}`).join("   ")}`;
+  $("#detail").innerHTML = `
+    <div class="navbtns"><button type="button" id="prevb" ${i > 0 ? "" : "disabled"}>◀ Previous</button><button type="button" id="nextb" ${i >= 0 && i < SHOWN.length - 1 ? "" : "disabled"}>Next ▶</button></div>
+    <h3>${esc(p.id)}</h3>
+    <div><span class="tag">${p.family}</span> <span class="tag">${p.tier}</span>
+      <span class="muted" style="font-size: 13px">· move ${p.ply + 1}, the ${p.mover} player (${p.mover === "first" ? "red" : "yellow"}) to move · ${total ? `${right} of ${total} answers right` : "no answers yet"}</span></div>
+    <div class="pz" style="margin-top: 12px">
+      <div>
+        <div class="cols7 bars" aria-label="Share of the models' answers per column">${bars}</div>
+        <div class="board" role="img" aria-label="Board">${holes}</div>
+        <div class="cols7 marks">${marks}</div>
+        <div class="legend"><span><span class="dot ${side[mover]}"></span>to move ("you", X in the prompt)</span><span><span class="dot ${side[1 - mover]}"></span>opponent</span><span>✓ the correct move</span></div>
+      </div>
+      <div>
+        <div class="expl">${esc(explain(p))}</div>
+        <h4>Answers</h4>
+        ${d.models.length ? `<div class="scroll-x"><table><thead><tr><th>Model</th><th data-tip="Column picked in each option order; the small number is the position it had in that order">Orders 1 · 2 · 3</th><th data-tip="Mean probability given to the correct column over the orders">P(correct)</th></tr></thead><tbody>` +
+          d.models.map(m => `<tr><td>${esc(m.display)}</td><td>${m.orders.map(o => `<span class="oc ${o.correct ? "y" : "n"}" data-tip="order ${o.order + 1}: column ${o.pick}, shown at position ${o.position}${o.p_correct != null ? `, P(correct) ${pct(o.p_correct)}` : ""}">${o.correct ? "✓" : "✗"}${o.pick}<small>·${o.position}</small></span>`).join("")}</td>
+            <td>${m.p_correct == null ? dash : `<span class="pbar"><i style="width:${(100 * m.p_correct).toFixed(1)}%"></i></span>${pct(m.p_correct)}`}</td></tr>`).join("") + "</tbody></table></div>"
+          : `<p class="muted">No model has answered this puzzle yet.</p>`}
+        <details style="margin-top: 10px"><summary>Request sent to the models</summary><pre class="req">${esc(req)}</pre></details>
+      </div>
+    </div>`;
+  $("#prevb").onclick = () => show(SHOWN[i - 1].id);
+  $("#nextb").onclick = () => show(SHOWN[i + 1].id);
+}
+
+$("#f-col").innerHTML = `<option value="">any column</option>` + [1, 2, 3, 4, 5, 6, 7].map(c => `<option>${c}</option>`).join("");
+["#f-type", "#f-col", "#f-sort"].forEach(s => $(s).onchange = renderList);
+$("#f-q").oninput = renderList;
+loadSummary().catch(e => { $("#meta").textContent = "Could not load the scores: " + e.message; });
+loadItems().catch(e => { $("#detail").textContent = "Could not load the puzzles: " + e.message; });
+</script>
+</body>
+</html>

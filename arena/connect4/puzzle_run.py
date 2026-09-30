@@ -184,7 +184,7 @@ def score(rows: list[dict], puzzles: dict[str, dict]) -> dict:
 def baselines(puzzles: list[dict]) -> dict:
     """Random guessing, always the most central column, and the rule-based heuristic (wins, blocks, centre)."""
     out = {}
-    chance = lambda its: sum(1 / len(i["labels"]) for i in its) / len(its)  # noqa: E731
+    chance = lambda its: sum(1 / len(i["labels"]) for i in its) / len(its) if its else None  # noqa: E731
     central = lambda i: min(i["labels"], key=lambda c: (abs(int(c) - 4), int(c)))  # noqa: E731
     h = HeuristicPlayer()
 
@@ -197,7 +197,8 @@ def baselines(puzzles: list[dict]) -> dict:
                "by_type": {}}
         for t in TYPES:
             its = [i for i in puzzles if i["family"] == t]
-            row["by_type"][t] = {"accuracy": chance(its) if fn is None else sum(fn(i) == i["expected"] for i in its) / len(its)}
+            row["by_type"][t] = {"accuracy": chance(its) if fn is None else
+                                 (sum(fn(i) == i["expected"] for i in its) / len(its) if its else None)}
         out[name] = row
     return out
 

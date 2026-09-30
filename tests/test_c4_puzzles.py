@@ -73,3 +73,29 @@ def test_baselines():
     # chance is 1 / (legal columns): about 0.25 overall, since late positions have few columns left
     assert 0.1 < b["random"]["accuracy"] < 0.35 and b["centre"]["accuracy"] < 0.4
     assert b["heuristic"]["by_type"]["win"]["accuracy"] == 1.0 and b["heuristic"]["by_type"]["block"]["accuracy"] == 1.0
+
+
+def test_site_data_from_a_run(tmp_path):
+    from arena.connect4 import puzzle_site
+    from arena.connect4.puzzle_run import write_summary
+    items = load_puzzles()[:20]
+    run = tmp_path / "20260101-000000_c4-puzzles"
+    (run / "m1").mkdir(parents=True)
+    (run / "config.json").write_text(json.dumps({"orders": 3}))
+    rows = []
+    for it in items:
+        for k, names in enumerate(orders(it)):
+            pick = it["expected"] if k < 2 else names[0]
+            probs = {n: (0.7 if n == pick else 0.3 / (len(names) - 1)) for n in names}
+            rows.append({"item": it["id"], "family": it["family"], "order": k, "options": names, "pick": pick,
+                         "correct": pick == it["expected"], "probs": probs, "p_correct": probs[it["expected"]], "calls": 1,
+                         "knockout": False, "with_moves": True, "latency_ms": 1.0, "error": None})
+    (run / "m1" / "results.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    write_summary(run, items, final=True)
+    s = puzzle_site.summary(tmp_path)
+    assert s["run"] == run.name and s["state"] == "done" and [m["name"] for m in s["models"]] == ["m1"]
+    assert 0.66 <= s["models"][0]["accuracy"] <= 1 and s["models"][0]["win_accuracy"] is not None
+    listed = {i["id"]: i for i in puzzle_site.items(tmp_path)["items"]}
+    assert listed[items[0]["id"]]["answers"] == 3
+    d = puzzle_site.item(items[0]["id"], tmp_path)
+    assert len(d["models"][0]["orders"]) == 3 and d["answers"] == 3 and sum(d["picks"].values()) == 3
