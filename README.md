@@ -5,7 +5,8 @@ other, so their abilities can be compared by results. The current game is 4-play
 
 A survey of the models is in [`docs/jev_models.md`](docs/jev_models.md); JevBench public-item results for 28 small
 open models are in [`runs/jevbench-public-20260929/`](runs/jevbench-public-20260929/README.md), and the items
-themselves in [`data/jevbench-public/`](data/jevbench-public/README.md).
+themselves in [`data/jevbench-public/`](data/jevbench-public/README.md). The site's `/arenas/bench/items/` page shows every item (state, question,
+options, correct answer) with the answer and the probability each model gave.
 
 ## Quick start
 

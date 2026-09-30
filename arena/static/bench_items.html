@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JevBench items · Jev Arena</title>
+<link rel="stylesheet" href="../../static/base.css">
+<style>
+:root { --ok-bg: #e4f4e4; --ok-fg: #0a7d0a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ok-bg: #173a1a; --ok-fg: #5fd35f; } }
+:root[data-theme="dark"] { --ok-bg: #173a1a; --ok-fg: #5fd35f; }
+.pickrow { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; }
+.pickrow label { color: var(--text-muted); font-size: 13px; }
+select, input[type=search] { font: inherit; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); }
+input[type=search] { min-width: 220px; }
+.ib { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .ib { grid-template-columns: minmax(0, 1fr); } .list { max-height: 360px !important; } }
+.list { max-height: calc(100vh - 150px); overflow-y: auto; display: grid; gap: 6px; padding-right: 4px; }
+.it { text-align: left; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-1); color: var(--text-primary); padding: 8px 10px; cursor: pointer; font: inherit; display: grid; gap: 3px; }
+.it:hover { background: var(--surface-2); }
+.it.sel { outline: 2px solid var(--accent-ring); background: var(--surface-2); }
+.it .id { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text-secondary); }
+.it .q { font-size: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.it .meta { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text-muted); }
+.solved { display: inline-block; width: 60px; height: 5px; background: var(--grid); border-radius: 3px; overflow: hidden; vertical-align: middle; }
+.solved i { display: block; height: 100%; background: var(--series-1); }
+.tag { display: inline-block; font-size: 11px; border-radius: 4px; padding: 0 6px; border: 1px solid var(--border); color: var(--text-secondary); }
+.detail { position: sticky; top: 12px; }
+.detail h3 { margin: 0 0 6px; font: 600 15px ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
+.detail h4 { margin: 16px 0 6px; font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+pre.state { background: var(--surface-2); border-radius: 6px; padding: 10px; font-size: 12.5px; white-space: pre-wrap; word-break: break-word; max-height: 360px; overflow: auto; margin: 0; }
+.opts { display: grid; gap: 4px; }
+.opt { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); }
+.opt.ok { background: var(--ok-bg); border-color: var(--ok-fg); }
+.opt code { font-size: 12px; font-weight: 600; }
+.opt .n { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.opt .ans { color: var(--ok-fg); font-weight: 700; font-size: 12px; }
+.navbtns { display: flex; gap: 6px; margin-bottom: 10px; }
+.mt td { vertical-align: middle; }
+.yes { color: var(--ok-fg); font-weight: 700; } .no { color: var(--text-muted); }
+.pbar { display: inline-block; width: 90px; height: 6px; background: var(--grid); border-radius: 3px; overflow: hidden; vertical-align: middle; margin-right: 6px; }
+.pbar i { display: block; height: 100%; background: var(--series-1); }
+.sib a { margin-right: 8px; font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Jev Arena</h1>
+  <nav><a href="../../">Home</a><a href="../../leaderboard/">Leaderboard</a><a href="../" class="on">JevBench</a><a href="../../uno/">UNO</a><a href="../../connect4/">Connect Four</a></nav>
+  <span class="spacer"></span><button id="theme" type="button">◐ Theme</button>
+</header>
+<main>
+  <section class="hero">
+    <h2>JevBench · the 231 public items</h2>
+    <p class="lead">Every public item of <a href="https://github.com/fstandhartinger/jevbench" target="_blank" rel="noopener">JevBench</a>
+      (MIT, commit 9ec6f15): a state, one typed question about it, and the correct answer, with the answer each model here gave.
+      Back to the <a href="../">JevBench results</a>.</p>
+    <div class="pickrow">
+      <label for="f-tier">Tier</label><select id="f-tier"><option value="">all</option><option>easy</option><option>original</option><option>hard</option></select>
+      <label for="f-family">Family</label><select id="f-family"><option value="">all</option></select>
+      <label for="f-type">Question</label><select id="f-type"><option value="">all</option><option value="choice">choice</option><option value="noul">yes / no</option><option value="score">score</option></select>
+      <label for="f-sort">Sort</label><select id="f-sort"><option value="id">item id</option><option value="hard">fewest models right</option><option value="easy">most models right</option><option value="p">lowest P(correct)</option></select>
+      <input id="f-q" type="search" placeholder="Search id, question or state" aria-label="Search">
+      <span id="count" class="muted"></span>
+    </div>
+  </section>
+  <div class="ib">
+    <section style="padding: 10px"><div class="list" id="list"></div></section>
+    <section class="detail" id="detail"><p class="muted">Pick an item on the left.</p></section>
+  </div>
+</main>
+<div class="tooltip" id="tip"></div>
+<script src="../../static/board.js"></script>
+<script>
+initTheme();
+const TYPE = {choice: "choice", noul: "yes / no", score: "score"};
+let ITEMS = [], MODELS = 0, SHOWN = [], CUR = null;
+
+function filtered() {
+  const tier = $("#f-tier").value, fam = $("#f-family").value, type = $("#f-type").value, q = $("#f-q").value.trim().toLowerCase();
+  let rows = ITEMS.filter(it => (!tier || it.tier === tier) && (!fam || it.family === fam) && (!type || it.type === type) &&
+    (!q || (it.id + " " + it.instructions + " " + it.state_preview).toLowerCase().includes(q)));
+  const sort = $("#f-sort").value;
+  const share = it => it.models ? it.correct / it.models : 0;
+  if (sort === "hard") rows.sort((a, b) => share(a) - share(b) || a.id.localeCompare(b.id));
+  else if (sort === "easy") rows.sort((a, b) => share(b) - share(a) || a.id.localeCompare(b.id));
+  else if (sort === "p") rows.sort((a, b) => (a.p_expected ?? 1) - (b.p_expected ?? 1) || a.id.localeCompare(b.id));
+  else rows.sort((a, b) => a.id.localeCompare(b.id));
+  return rows;
+}
+
+function renderList() {
+  SHOWN = filtered();
+  $("#count").textContent = `${SHOWN.length} of ${ITEMS.length} items`;
+  $("#list").innerHTML = SHOWN.map(it => `<button type="button" class="it ${it.id === CUR ? "sel" : ""}" data-id="${esc(it.id)}">
+      <span class="id">${esc(it.id)}</span>
+      <span class="q">${esc(it.instructions)}</span>
+      <span class="meta"><span class="tag">${it.tier}</span><span class="tag">${TYPE[it.type]}</span><span>${esc(it.family.replace(/_/g, " "))}</span>
+        <span data-tip="${it.correct} of ${it.models} models answered correctly">${it.correct}/${it.models} right <span class="solved"><i style="width:${(100 * it.correct / Math.max(1, it.models)).toFixed(0)}%"></i></span></span></span>
+    </button>`).join("");
+  $("#list").querySelectorAll(".it").forEach(b => b.onclick = () => show(b.dataset.id));
+}
+
+async function show(id) {
+  CUR = id;
+  history.replaceState(null, "", "#item=" + encodeURIComponent(id));
+  $("#list").querySelectorAll(".it").forEach(b => b.classList.toggle("sel", b.dataset.id === id));
+  const d = await (await fetch("../api/item/" + encodeURIComponent(id))).json();
+  const it = d.item, q = it.question;
+  const state = typeof it.state === "string" ? it.state : JSON.stringify(it.state, null, 2);
+  const picks = {};
+  d.models.forEach(m => { if (m.predicted != null) picks[m.predicted] = (picks[m.predicted] || 0) + 1; });
+  const right = d.models.filter(m => m.correct).length;
+  const i = SHOWN.findIndex(x => x.id === id);
+  $("#detail").innerHTML = `
+    <div class="navbtns"><button type="button" id="prevb" ${i > 0 ? "" : "disabled"}>◀ Previous</button><button type="button" id="nextb" ${i >= 0 && i < SHOWN.length - 1 ? "" : "disabled"}>Next ▶</button></div>
+    <h3>${esc(it.id)}</h3>
+    <div><span class="tag">${it.tier}</span> <span class="tag">${TYPE[q.type]}</span> <span class="tag">${esc(it.family.replace(/_/g, " "))}</span>
+      <span class="muted" style="font-size: 13px">· ${right} of ${d.models.length} models right</span></div>
+    ${d.siblings.length ? `<div class="sib" style="margin-top: 6px"><span class="muted" style="font-size: 12px">Paraphrases of the same scenario: </span>${d.siblings.map(s => `<a href="#item=${esc(s)}" data-id="${esc(s)}">${esc(s)}</a>`).join("")}</div>` : ""}
+    <h4>State</h4><pre class="state">${esc(state)}</pre>
+    <h4>Question</h4><div>${esc(q.instructions || "")}</div>
+    <h4>${q.type === "score" ? "Levels" : "Options"}</h4>
+    <div class="opts">${d.options.map(([label, text]) => `<div class="opt ${label === d.expected ? "ok" : ""}"><code>${esc(label)}</code><span>${esc(text)}${label === d.expected ? ` <span class="ans">✓ correct answer</span>` : ""}</span><span class="n" data-tip="Models whose top answer was this option">${picks[label] || 0} model${picks[label] === 1 ? "" : "s"}</span></div>`).join("")}</div>
+    <h4>Answers</h4>
+    <div class="scroll-x"><table class="mt"><thead><tr><th>Model</th><th>Answer</th><th></th><th data-tip="Probability the model gave the correct answer">P(correct)</th></tr></thead><tbody>
+      ${d.models.map(m => `<tr><td>${esc(m.display)}</td>
+        <td>${m.predicted != null ? `<code>${esc(m.predicted)}</code>` : `<span class="muted" data-tip="${esc(m.error || m.status || "")}">no answer</span>`}</td>
+        <td>${m.correct ? `<span class="yes">✓</span>` : `<span class="no">✗</span>`}</td>
+        <td>${m.p_expected == null ? dash : `<span class="pbar"><i style="width:${(100 * m.p_expected).toFixed(1)}%"></i></span>${pct(m.p_expected)}`}</td></tr>`).join("")}
+    </tbody></table></div>
+    <h4>Provenance</h4><div class="muted" style="font-size: 13px">${esc(it.provenance?.source || "")}; ${esc(it.provenance?.label_basis || "")}; license ${esc(it.provenance?.license || "")}.</div>`;
+  $("#detail").querySelectorAll(".sib a").forEach(a => a.onclick = e => { e.preventDefault(); show(a.dataset.id); });
+  $("#prevb").onclick = () => show(SHOWN[i - 1].id);
+  $("#nextb").onclick = () => show(SHOWN[i + 1].id);
+}
+
+async function load() {
+  const d = await (await fetch("../api/items")).json();
+  ITEMS = d.items; MODELS = d.models;
+  const fams = [...new Set(ITEMS.map(it => it.family))].sort();
+  $("#f-family").innerHTML = `<option value="">all</option>` + fams.map(f => `<option value="${esc(f)}">${esc(f.replace(/_/g, " "))}</option>`).join("");
+  ["#f-tier", "#f-family", "#f-type", "#f-sort"].forEach(s => $(s).onchange = renderList);
+  $("#f-q").oninput = renderList;
+  renderList();
+  const want = new URLSearchParams(location.hash.slice(1)).get("item");
+  show(ITEMS.some(it => it.id === want) ? want : SHOWN[0]?.id);
+}
+load().catch(e => { $("#detail").textContent = "Could not load the items: " + e.message; });
+</script>
+</body>
+</html>

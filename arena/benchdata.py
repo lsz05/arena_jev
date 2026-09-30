@@ -18,6 +18,7 @@ from .leaderboard import load_registry
 ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "runs"
 OFFICIAL = ROOT / "third_party" / "jevbench" / "results" / "v1.2" / "jevbench-v1.2-per-task.json"
+ITEMS = ROOT / "data" / "jevbench-public"  # the 231 public items (MIT), easy / original / hard
 
 
 def _tier(task_id: str) -> str:
@@ -82,6 +83,8 @@ def build(runs: Path = RUNS) -> dict:
             continue
         if not tasks and (model_dir.parent / "public_all.jsonl").exists():
             tasks = {json.loads(line)["id"]: json.loads(line) for line in open(model_dir.parent / "public_all.jsonl")}
+        if not tasks:
+            tasks = load_items()
         name = model_dir.name
         reg = registry.get(name, {})
         models[name] = {"name": name, "display": reg.get("display", name), "repo": reg.get("repo"), "caveat": reg.get("caveat"),
@@ -93,3 +96,83 @@ def build(runs: Path = RUNS) -> dict:
         m["overall_rank"] = everyone.index(m["acc"]) + 1
     return {"models": list(models.values()), "official": context, "field_size": len(everyone),
             "items": {"easy": 48, "original": 72, "hard": 111, "total": 231}}
+
+
+# ---- the items themselves, for the item browser ----------------------------------------------------
+
+
+def load_items(root: Path = ITEMS) -> dict[str, dict]:
+    items = {}
+    for tier in ("easy", "original", "hard"):
+        path = root / f"{tier}.jsonl"
+        if path.exists():
+            for line in open(path):
+                item = json.loads(line)
+                items[item["id"]] = {**item, "tier": tier}
+    return items
+
+
+_ANSWERS: dict = {"sig": None, "data": {}}
+
+
+def model_answers(runs: Path = RUNS) -> dict[str, dict[str, dict]]:
+    """task id -> model name -> {predicted, probs, correct, status, error}, from every runs/jevbench-*/<model>/."""
+    files = sorted(runs.glob("jevbench-*/*/results.jsonl"))
+    sig = tuple((str(f), f.stat().st_mtime) for f in files)
+    if sig != _ANSWERS["sig"]:
+        data: dict[str, dict[str, dict]] = defaultdict(dict)
+        for f in files:
+            for line in open(f):
+                r = json.loads(line)
+                data[r["task_id"]][f.parent.name] = {k: r.get(k) for k in ("predicted", "probs", "correct", "status", "error")}
+        _ANSWERS.update(sig=sig, data=dict(data))
+    return _ANSWERS["data"]
+
+
+def options(item: dict) -> list[list[str]]:
+    """[option label, description] in the order the item lists them; the label is what a model answers."""
+    q = item["question"]
+    crit = q.get("criteria")
+    if q["type"] == "noul":
+        crit = crit or {}
+        return [["yes", crit.get("true") or "Yes."], ["no", crit.get("false") or "No."]]
+    if q["type"] == "score":
+        return [[str(i), level if isinstance(level, str) else json.dumps(level)] for i, level in enumerate(crit or [])]
+    if isinstance(crit, dict):
+        return [[k, v if isinstance(v, str) else json.dumps(v, ensure_ascii=False)] for k, v in crit.items()]
+    return [[str(label), ""] for label in item.get("labels") or []]
+
+
+def _p_expected(answer: dict, expected: str) -> float | None:
+    probs = answer.get("probs") or {}
+    return float(probs[expected]) if expected in probs else None
+
+
+def item_list(runs: Path = RUNS, items_root: Path = ITEMS) -> dict:
+    items, answers = load_items(items_root), model_answers(runs)
+    rows = []
+    for item_id, it in items.items():
+        got = answers.get(item_id, {})
+        expected = str(it["expected"])
+        ps = [p for p in (_p_expected(a, expected) for a in got.values()) if p is not None]
+        state = it["state"] if isinstance(it["state"], str) else json.dumps(it["state"], ensure_ascii=False)
+        rows.append({"id": item_id, "tier": it["tier"], "family": it["family"], "group": it.get("group"),
+                     "type": it["question"]["type"], "instructions": it["question"].get("instructions") or "",
+                     "state_preview": state[:200], "models": len(got), "correct": sum(bool(a.get("correct")) for a in got.values()),
+                     "p_expected": round(sum(ps) / len(ps), 3) if ps else None})
+    return {"items": rows, "models": len({m for a in answers.values() for m in a})}
+
+
+def item_detail(item_id: str, runs: Path = RUNS, items_root: Path = ITEMS) -> dict:
+    items = load_items(items_root)
+    item = items[item_id]  # KeyError: unknown item
+    registry = load_registry()
+    expected = str(item["expected"])
+    got = model_answers(runs).get(item_id, {})
+    models = sorted(({"name": name, "display": registry.get(name, {}).get("display", name), "caveat": registry.get(name, {}).get("caveat"),
+                      "predicted": a.get("predicted"), "correct": bool(a.get("correct")), "p_expected": _p_expected(a, expected),
+                      "status": a.get("status"), "error": a.get("error")} for name, a in got.items()),
+                    key=lambda m: (-(m["p_expected"] if m["p_expected"] is not None else -1), m["display"]))
+    siblings = sorted(k for k, v in items.items() if item.get("group") and v.get("group") == item["group"] and k != item_id)
+    return {"item": {k: item[k] for k in ("id", "tier", "family", "group", "split", "state", "question", "labels", "provenance")},
+            "expected": expected, "options": options(item), "siblings": siblings, "models": models}

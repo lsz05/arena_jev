@@ -1,5 +1,5 @@
 """The arena website: /arenas/ (index), /arenas/uno/ (UNO viewer), /arenas/connect4/ (Connect Four matches and
-replays), /arenas/leaderboard/, /arenas/bench/.
+replays), /arenas/leaderboard/, /arenas/bench/ and /arenas/bench/items/ (the 231 JevBench items with every model's answer).
 
     python -m arena site --uno-run runs/<dir> [--base /arenas] [--port 8200] [--allowed-host jev.takeshiba.dev]
 
@@ -49,7 +49,7 @@ class Site:
 
     def route(self, path: str) -> Response:
         b = self.base
-        if path in (b, f"{b}/uno", f"{b}/leaderboard", f"{b}/bench", f"{b}/connect4"):
+        if path in (b, f"{b}/uno", f"{b}/leaderboard", f"{b}/bench", f"{b}/connect4", f"{b}/bench/items"):
             return 301, "", (path + "/").encode()
         if not path.startswith(b + "/"):
             return 404, "text/plain", b"not found"
@@ -75,6 +75,15 @@ class Site:
             return self.static("bench.html")
         if path == "/bench/api/bench":
             return as_json(benchdata.build())
+        if path == "/bench/items/":
+            return self.static("bench_items.html")
+        if path == "/bench/api/items":
+            return as_json(benchdata.item_list())
+        if path.startswith("/bench/api/item/"):
+            try:
+                return as_json(benchdata.item_detail(path[len("/bench/api/item/"):]))
+            except KeyError:
+                return 404, "text/plain", b"unknown item"
         if path == "/api/summary":  # for the index page
             board = self.board()
             bench = benchdata.build()
