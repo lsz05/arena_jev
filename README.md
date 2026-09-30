@@ -79,6 +79,22 @@ python3 servers/launch.py start kev-0.8b decider-0.8b && python3 servers/launch.
   summary, the games, and each game move by move (board, the probability of each column, the columns that would
   win at once or had to be blocked, and the request sent, rebuilt from the game's seed).
 
+## Connect Four puzzles: single decisions with one correct answer
+
+```bash
+.venv/bin/python -m arena c4-puzzles-make            # data/c4-puzzles/: 1000 puzzles, verified by the engine and the solver
+.venv/bin/python -m arena c4-puzzles-run             # every running model server, each puzzle in 3 option orders
+```
+
+- Four types, 250 puzzles each: win (easy), block (medium), fork and solver (hard); see
+  [`data/c4-puzzles/README.md`](data/c4-puzzles/README.md).
+- A puzzle is asked like a Jev decision: the board as the state, the legal columns as options. The options are
+  rotated so the correct column sits at a different position in each of the three orders, which cancels a model's
+  preference for a position; accuracy is reported per order, over the orders and from the averaged probabilities,
+  with the probability on the answer, Brier, calibration, consistency across orders and position / column bias.
+- Output: `runs/<time>_c4-puzzles/<model>/results.jsonl` and `summary.json`; the site shows them at
+  `/arenas/c4puzzles/` with a puzzle browser.
+
 ## Layout
 
 | File | Purpose |
@@ -91,7 +107,7 @@ python3 servers/launch.py start kev-0.8b decider-0.8b && python3 servers/launch.
 | `arena/match.py`, `tournament.py` | one game, fixed schedules with seat rotations, parallel execution, logging |
 | `arena/swiss.py` | Swiss tournament over all model servers, rated with TrueSkill (resume, hold, maximum lead) |
 | `arena/stats.py`, `leaderboard.py` | win rates with Wilson 95% intervals, points, diagnostics, the leaderboard |
-| `arena/connect4/` | Connect Four: engine, prompts, players, two-player matches, terminal replay |
+| `arena/connect4/` | Connect Four: engine, prompts, players, two-player matches and leagues, solver, decision puzzles |
 | `arena/replay.py`, `viz.py`, `viewer.html` | replays: re-simulate a game from its seed and logged actions, and rebuild the requests sent to the models |
 | `arena/site.py`, `arena/static/` | the site: home, leaderboard, JevBench results, the UNO viewer and Connect Four replays under `/arenas/` |
 | `servers/` | model servers: launcher, adapters, one file per model, environment manifests |
